@@ -10,10 +10,10 @@ import { Alert, Box, Tab, Tabs } from "@mui/material";
 import { useGetClientsQuery } from "api/clientsApi";
 import { useGetReportTotalClientBuyQuery } from "api/reportApi";
 import { useGetConfigQuery } from "api/configApi";
-import TableListClients from "./TableListClient";
 import TotalClientsCards from "./TotalClientsCards";
-import TableListClientsActive from "./TableListClientActive";
-import TableListClientsInactive from "./TableListClientInactive";
+import TableListClients from "components/OUTables/Clients/All/TableListClient";
+import TableListClientsActive from "components/OUTables/Clients/Active/TableListClientActive";
+import TableListClientsInactive from "components/OUTables/Clients/Inactive/TableListClientInactive";
 import Config from "./Config";
 
 function ListClients() {
@@ -27,6 +27,7 @@ function ListClients() {
     isLoading: l2,
     isError: e2,
   } = useGetReportTotalClientBuyQuery();
+
   const { data: dataConfig, isLoading: l3, isError: e3 } = useGetConfigQuery();
 
   const [page, setPage] = useState(0);

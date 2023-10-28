@@ -12,14 +12,19 @@ import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import { formatPrice } from "utils/formaPrice";
 import { formatQuantity } from "utils/quantityFormat";
-import MenuProductsLots from "./MenuDeliveryTruck";
+import MenuClients from "../Menu/MenuClients";
 
 function TableListClientsInactive({ clients }) {
   const [controller] = useMaterialUIController();
   const { darkMode } = controller;
 
   const sortClients = clients
-    .filter((client) => client.name !== "consumidor " && client.name !== "Caleb" && !client.active)
+    .filter(
+      (client) =>
+        client.name !== "consumidor " &&
+        client.name !== "Caleb" &&
+        !client.active
+    )
     .sort((a, b) => b.totalProfits - a.totalProfits);
 
   const navigate = useNavigate();
@@ -115,7 +120,11 @@ function TableListClientsInactive({ clients }) {
       headerClassName: "super-app-theme--header",
 
       renderCell: ({ row: { clientId } }) => (
-        <IconButton size="large" color="inherit" onClick={(e) => handleOpenMenu(clientId, e)}>
+        <IconButton
+          size="large"
+          color="inherit"
+          onClick={(e) => handleOpenMenu(clientId, e)}
+        >
           <MoreVertIcon />
         </IconButton>
       ),
@@ -178,7 +187,11 @@ function TableListClientsInactive({ clients }) {
         </Box>
       </Box>
 
-      <MenuProductsLots open={open} handleCloseMenu={handleCloseMenu} menuId={menuId} />
+      <MenuClients
+        open={open}
+        handleCloseMenu={handleCloseMenu}
+        menuId={menuId}
+      />
     </>
   );
 }

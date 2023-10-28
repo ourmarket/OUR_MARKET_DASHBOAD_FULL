@@ -1,7 +1,11 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
 import { LoadingButton } from "@mui/lab";
 import { Alert, Box, TextField } from "@mui/material";
-import { useSetConfigActiveClientMutation, usePutConfigMutation } from "api/configApi";
+import {
+  useSetConfigActiveClientMutation,
+  usePutConfigMutation,
+} from "api/configApi";
 import MDTypography from "components/MDTypography";
 import { useFormik } from "formik";
 import Swal from "sweetalert2";
@@ -31,7 +35,7 @@ function Config({ config }) {
 
   const formik = useFormik({
     initialValues: {
-      inactiveDays: config.inactiveDays,
+      inactiveDays: config?.inactiveDays,
     },
     onSubmit: async (values) => {
       const res = await editConfig({ ...values }).unwrap();
@@ -54,7 +58,11 @@ function Config({ config }) {
         autoComplete="off"
         noValidate
         onSubmit={formik.handleSubmit}
-        sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
       >
         <MDTypography variant="body2">
           Cantidad de días sin compras para que un cliente sea considerado{" "}
@@ -97,7 +105,9 @@ function Config({ config }) {
           </LoadingButton>
         </Box>
       </Box>
-      {(e1 || e2) && <Alert severity="error">Ha ocurrido, configuración no guardada</Alert>}
+      {(e1 || e2) && (
+        <Alert severity="error">Ha ocurrido, configuración no guardada</Alert>
+      )}
     </Box>
   );
 }

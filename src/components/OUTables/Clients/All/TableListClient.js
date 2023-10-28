@@ -11,7 +11,7 @@ import colors from "assets/theme-dark/base/colors";
 import { useMaterialUIController } from "context";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
-import MenuProductsLots from "./MenuDeliveryTruck";
+import MenuClients from "../Menu/MenuClients";
 
 function TableListClients({ clients }) {
   const [controller] = useMaterialUIController();
@@ -114,24 +114,6 @@ function TableListClients({ clients }) {
       flex: 1,
       headerClassName: "super-app-theme--header",
     },
-    /* {
-      field: "contactMeans",
-      headerName: "Ingresa por",
-      flex: 1,
-      headerClassName: "super-app-theme--header",
-    },
-    {
-      field: "campaignName",
-      headerName: "En campaña",
-      flex: 1,
-      headerClassName: "super-app-theme--header",
-    },
-    {
-      field: "points",
-      headerName: "Puntos",
-      flex: 1,
-      headerClassName: "super-app-theme--header",
-    }, */
 
     {
       field: "accessLevel",
@@ -154,14 +136,6 @@ function TableListClients({ clients }) {
     <>
       <Box m="20px" sx={{ overflowX: "scroll" }}>
         <Stack direction="row" alignItems="center" mb={5}>
-          {/* <MDButton
-            sx={{ marginRight: "10px" }}
-            color="dark"
-            variant="gradient"
-            onClick={() => navigate("/clientes/nuevo")}
-          >
-            Nuevo cliente
-          </MDButton> */}
           <MDButton
             color="info"
             variant="gradient"
@@ -223,7 +197,7 @@ function TableListClients({ clients }) {
         </Box>
       </Box>
 
-      <MenuProductsLots
+      <MenuClients
         open={open}
         handleCloseMenu={handleCloseMenu}
         menuId={menuId}

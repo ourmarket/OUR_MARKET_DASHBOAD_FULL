@@ -372,9 +372,9 @@ function TableUnpaidOrders() {
                 ? dateToLocalDate(order.deliveryDate)
                 : "No entregada",
               client: `${order.shippingAddress.name} ${order.shippingAddress.lastName}`,
-              address: order.shippingAddress.address,
-              zone: order?.deliveryZone?.name,
-              deliveryTruck: order?.deliveryTruck?.truckId,
+              address: order?.shippingAddress?.address || "Venta Local",
+              zone: order?.deliveryZone?.name || "n/a",
+              deliveryTruck: order?.deliveryTruck?.truckId || "n/a",
               cash: order?.payment?.cash || 0,
               transfer: order?.payment?.transfer || 0,
               debt: order?.payment?.debt || 0,

@@ -8,7 +8,7 @@ import Swal from "sweetalert2";
 import { useEffect } from "react";
 import { useDeleteClientSimpleMutation } from "api/clientsApi";
 
-function MenuDeliveryTruck({ open, handleCloseMenu, menuId }) {
+function MenuClients({ open, handleCloseMenu, menuId }) {
   const navigate = useNavigate();
 
   const [deleteClient, { isError, isSuccess }] =
@@ -89,4 +89,4 @@ function MenuDeliveryTruck({ open, handleCloseMenu, menuId }) {
   );
 }
 
-export default MenuDeliveryTruck;
+export default MenuClients;
