@@ -17,12 +17,11 @@ import {
   useGetTotalIndividualProductLast30DaysQuery,
 } from "api/reportApi";
 import DataProduct from "./productData/DataProduct";
-import ProductEdit from "./dataEdit/ProductEdit";
-import TableStock from "./stockEdit/TableStock";
-import ProductsLotsCreate from "./stockAdd/ProductsLotsCreate";
-
-import OfertEdit from "pages/products/ofert/ofert-edit/OfertEdit";
-import OfertCreate from "pages/products/ofert/ofert-create/OfertCreate";
+import AddOfertForm from "components/OUForms/Ofert/add-ofert/AddOfert";
+import EditOfertForm from "components/OUForms/Ofert/edit-ofert/EditOfert";
+import EditProductoForm from "components/OUForms/Product/edit-product/EditProduct";
+import AddStock from "components/OUForms/Stock/Add-Stock/AddStock";
+import TableStock from "./stockList/TableStock";
 
 function ProductDetail() {
   const { id } = useParams();
@@ -32,13 +31,29 @@ function ProductDetail() {
     setPage(newValue);
   };
 
-  const { data: categoryData, isLoading: l1, error: e1 } = useGetCategoriesQuery();
-  const { data: productById, isLoading: l2, error: e2 } = useGetProductQuery(id);
+  const {
+    data: categoryData,
+    isLoading: l1,
+    error: e1,
+  } = useGetCategoriesQuery();
+  const {
+    data: productById,
+    isLoading: l2,
+    error: e2,
+  } = useGetProductQuery(id);
 
-  const { data: ListSuppliers, isLoading: l3, isError: e3 } = useGetSuppliersQuery();
+  const {
+    data: ListSuppliers,
+    isLoading: l3,
+    isError: e3,
+  } = useGetSuppliersQuery();
   // oferta
 
-  const { data: ofertById, isLoading: l4, error: e4 } = useGetProductOfertQuery(id);
+  const {
+    data: ofertById,
+    isLoading: l4,
+    error: e4,
+  } = useGetProductOfertQuery(id);
 
   const {
     data: totalProductSell,
@@ -86,7 +101,7 @@ function ProductDetail() {
             >
               <Tabs value={page} onChange={handleChange} centered>
                 <Tab label="Datos del producto" />
-                <Tab label="Editar datos" />
+                <Tab label="Editar producto" />
                 <Tab label="Editar oferta" />
                 <Tab label="Agregar Stock" />
                 <Tab label="Lista de stock" />
@@ -100,16 +115,23 @@ function ProductDetail() {
                 }}
               >
                 {(l2 || l4 || l5 || l6) && <Loading />}
-                {(e2 || e4 || e5 || e6) && <Alert severity="error">Ha ocurrido un error</Alert>}
-                {productById && ofertById && totalProductSell && totalProductSellLast30Days && (
-                  <DataProduct
-                    productById={productById}
-                    ofertById={ofertById.data.ofert}
-                    totalProductSell={totalProductSell.data.report}
-                    totalProductSellLast30Days={totalProductSellLast30Days.data.report}
-                    totalProductSellByMonth={totalProductSell.data.byMonth}
-                  />
+                {(e2 || e4 || e5 || e6) && (
+                  <Alert severity="error">Ha ocurrido un error</Alert>
                 )}
+                {productById &&
+                  ofertById &&
+                  totalProductSell &&
+                  totalProductSellLast30Days && (
+                    <DataProduct
+                      productById={productById}
+                      ofertById={ofertById.data.ofert}
+                      totalProductSell={totalProductSell.data.report}
+                      totalProductSellLast30Days={
+                        totalProductSellLast30Days.data.report
+                      }
+                      totalProductSellByMonth={totalProductSell.data.byMonth}
+                    />
+                  )}
               </Card>
             )}
             {page === 1 && (
@@ -119,9 +141,14 @@ function ProductDetail() {
                 }}
               >
                 {(l1 || l2) && <Loading />}
-                {(e1 || e2) && <Alert severity="error">Ha ocurrido un error</Alert>}
+                {(e1 || e2) && (
+                  <Alert severity="error">Ha ocurrido un error</Alert>
+                )}
                 {categoryData && productById && (
-                  <ProductEdit listCategories={categoryData} productById={productById} />
+                  <EditProductoForm
+                    listCategories={categoryData}
+                    productById={productById}
+                  />
                 )}
               </Card>
             )}
@@ -134,9 +161,9 @@ function ProductDetail() {
                 {l4 && <Loading />}
                 {e4 && <Alert severity="error">Ha ocurrido un error</Alert>}
                 {ofertById?.data?.ofert ? (
-                  <OfertEdit ofertById={ofertById} />
+                  <EditOfertForm ofertById={ofertById} />
                 ) : (
-                  <OfertCreate warning />
+                  <AddOfertForm warning />
                 )}
               </Card>
             )}
@@ -158,9 +185,14 @@ function ProductDetail() {
                 }}
               >
                 {(l2 || l3) && <Loading />}
-                {(l2 || e3) && <Alert severity="error">Ha ocurrido un error</Alert>}
+                {(l2 || e3) && (
+                  <Alert severity="error">Ha ocurrido un error</Alert>
+                )}
                 {ListSuppliers && productById && (
-                  <ProductsLotsCreate ListSuppliers={ListSuppliers} productById={productById} />
+                  <AddStock
+                    ListSuppliers={ListSuppliers}
+                    productById={productById}
+                  />
                 )}
               </Card>
             )}

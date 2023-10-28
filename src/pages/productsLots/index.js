@@ -11,10 +11,10 @@ import { useState } from "react";
 import { useGetProductsQuery } from "api/productApi";
 import { useGetTotalStockQuery } from "api/reportApi";
 import { useGetSuppliersQuery } from "api/supplierApi";
-import TableListTotalStock from "./list-total-stock/Table";
-import TableListAvailableStock from "./list-available-stock/Table";
-import TableListProductsLots from "./list-productsLots/TableListProductsLots";
-import ProductsLotsCreate from "./create-productsLots/ProductsLotsCreate";
+import AddStock from "components/OUForms/Stock/Add-Stock/AddStock";
+import StockAvailableTable from "components/OUTables/Stocks/Available/StockAvailableTable";
+import StockTotalTable from "components/OUTables/Stocks/Total/StockTotalsTable";
+import StockAllTable from "components/OUTables/Stocks/All/StockAllTable";
 
 function StockMain() {
   const [page, setPage] = useState(0);
@@ -69,7 +69,7 @@ function StockMain() {
               <Tabs value={page} onChange={handleChange} centered>
                 <Tab label="Stock disponible" />
                 <Tab label="Stock total" />
-                <Tab label="Historia de compras" />
+                <Tab label="Historial de compras" />
                 <Tab label="Agregar stock" />
               </Tabs>
             </Box>
@@ -81,7 +81,7 @@ function StockMain() {
               >
                 {l1 && <Loading />}
                 {e1 && <Alert severity="error">Ha ocurrido un error</Alert>}
-                {stock && <TableListAvailableStock products={stock.products} />}
+                {stock && <StockAvailableTable products={stock.products} />}
               </Card>
             )}
             {page === 1 && (
@@ -93,7 +93,7 @@ function StockMain() {
                 {l2 && <Loading />}
                 {e2 && <Alert severity="error">Ha ocurrido un error</Alert>}
                 {stock && (
-                  <TableListTotalStock actualStock={actualStock.data.report} />
+                  <StockTotalTable actualStock={actualStock.data.report} />
                 )}
               </Card>
             )}
@@ -105,7 +105,7 @@ function StockMain() {
               >
                 {l1 && <Loading />}
                 {e1 && <Alert severity="error">Ha ocurrido un error</Alert>}
-                {stock && <TableListProductsLots products={stock.products} />}
+                {stock && <StockAllTable products={stock.products} />}
               </Card>
             )}
             {page === 3 && (
@@ -119,7 +119,7 @@ function StockMain() {
                   <Alert severity="error">Ha ocurrido un error</Alert>
                 )}
                 {stock && ListSuppliers && (
-                  <ProductsLotsCreate
+                  <AddStock
                     listProducts={stock}
                     ListSuppliers={ListSuppliers}
                   />

@@ -31,7 +31,15 @@ function UserEdit({ listRoles, user: editUser }) {
       role: editUser?.role || "",
       verified: editUser?.verified || "",
     },
-    onSubmit: async ({ name, lastName, email, password, phone, role, verified }) => {
+    onSubmit: async ({
+      name,
+      lastName,
+      email,
+      password,
+      phone,
+      role,
+      verified,
+    }) => {
       const editUserValues = {
         name,
         lastName,
@@ -42,7 +50,10 @@ function UserEdit({ listRoles, user: editUser }) {
         verified,
       };
 
-      const { data } = await editUserMutation({ id, ...editUserValues }).unwrap();
+      const { data } = await editUserMutation({
+        id,
+        ...editUserValues,
+      }).unwrap();
       if (data) {
         Swal.fire({
           position: "center",
@@ -150,7 +161,7 @@ function UserEdit({ listRoles, user: editUser }) {
                       value={option._id}
                       selected={formik.values.role === option._id}
                     >
-                      {option.role}
+                      {option.es}
                     </MenuItem>
                   ))}
                 </TextField>
@@ -166,10 +177,16 @@ function UserEdit({ listRoles, user: editUser }) {
                   helperText={formik.errors.verified}
                   onChange={formik.handleChange}
                 >
-                  <MenuItem value={true} selected={formik.values.verified === true}>
+                  <MenuItem
+                    value={true}
+                    selected={formik.values.verified === true}
+                  >
                     Si
                   </MenuItem>
-                  <MenuItem value={false} selected={formik.values.verified === false}>
+                  <MenuItem
+                    value={false}
+                    selected={formik.values.verified === false}
+                  >
                     No
                   </MenuItem>
                 </TextField>
@@ -200,7 +217,9 @@ function UserEdit({ listRoles, user: editUser }) {
                   Cancelar
                 </MDButton>
                 {isError && (
-                  <Alert severity="error">Ha ocurrido un error, usuario no editado</Alert>
+                  <Alert severity="error">
+                    Ha ocurrido un error, usuario no editado
+                  </Alert>
                 )}
               </MDBox>
 

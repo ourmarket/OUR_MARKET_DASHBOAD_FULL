@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
@@ -23,8 +23,14 @@ import {
   setMiniSidenav,
   setOpenConfigurator,
 } from "context";
+import { logOut } from "reduxToolkit/authSlice";
+import { useDispatch } from "react-redux";
+import { apiSlice } from "api/apiSlice";
+import { useNavigate } from "react-router-dom/dist";
 
 function DashboardNavbar({ absolute, light, isMini }) {
+  const dispatch1 = useDispatch();
+  const navigate = useNavigate();
   const [navbarType, setNavbarType] = useState();
   const [controller, dispatch] = useMaterialUIController();
   const { miniSidenav, transparentNavbar, openConfigurator, darkMode } =
@@ -41,27 +47,53 @@ function DashboardNavbar({ absolute, light, isMini }) {
   const handleConfiguratorOpen = () =>
     setOpenConfigurator(dispatch, !openConfigurator);
   const handleCloseMenu = () => setOpenMenu(false);
+  const handleOpenMenu = (event) => setOpenMenu(event.currentTarget);
 
   const renderMenu = () => (
     <Menu
       anchorEl={openMenu}
       anchorReference={null}
-      anchorOrigin={{
-        vertical: "bottom",
-        horizontal: "left",
-      }}
+      transformOrigin={{ horizontal: "right", vertical: "top" }}
+      anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       open={Boolean(openMenu)}
       onClose={handleCloseMenu}
       sx={{ mt: 2 }}
+      PaperProps={{
+        elevation: 0,
+        sx: {
+          overflow: "visible",
+          filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+          mt: 1.5,
+          "& .MuiAvatar-root": {
+            width: 32,
+            height: 32,
+            ml: -0.5,
+            mr: 1,
+          },
+          "&:before": {
+            content: '""',
+            display: "block",
+            position: "absolute",
+            top: 0,
+            right: 14,
+            width: 10,
+            height: 10,
+            bgcolor: "background.paper",
+            transform: "translateY(-50%) rotate(45deg)",
+            zIndex: 0,
+          },
+        },
+      }}
     >
-      <NotificationItem icon={<Icon>email</Icon>} title="Check new messages" />
+      <NotificationItem icon={<Icon>account_circle</Icon>} title="Mi perfil" />
       <NotificationItem
-        icon={<Icon>podcasts</Icon>}
-        title="Manage Podcast sessions"
-      />
-      <NotificationItem
-        icon={<Icon>shopping_cart</Icon>}
-        title="Payment successfully completed"
+        icon={<Icon>exit_to_app</Icon>}
+        title="Cerrar sesión"
+        onClick={() => {
+          dispatch1(apiSlice.util.resetApiState());
+          dispatch1(logOut());
+          navigate("/authentication/sign-in");
+        }}
       />
     </Menu>
   );
@@ -98,7 +130,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
         >
           <Breadcrumbs
             icon="home"
-            title={route[0]}
+            title={route[route.length - 1]}
             route={route}
             light={light}
           />
@@ -106,11 +138,29 @@ function DashboardNavbar({ absolute, light, isMini }) {
         {isMini ? null : (
           <MDBox sx={(theme) => navbarRow(theme, { isMini })}>
             <MDBox color={light ? "white" : "inherit"}>
-              <Link to="/authentication/sign-in/basic">
-                <IconButton sx={navbarIconButton} size="small" disableRipple>
-                  <Icon sx={iconsStyle}>account_circle</Icon>
-                </IconButton>
-              </Link>
+              <IconButton
+                size="small"
+                disableRipple
+                color="inherit"
+                sx={navbarIconButton}
+                aria-controls="notification-menu"
+                aria-haspopup="true"
+                variant="contained"
+                onClick={handleOpenMenu}
+              >
+                <Icon sx={iconsStyle}>account_circle</Icon>
+              </IconButton>
+              {renderMenu()}
+
+              <IconButton
+                size="small"
+                disableRipple
+                color="inherit"
+                sx={navbarIconButton}
+                onClick={handleConfiguratorOpen}
+              >
+                <Icon sx={iconsStyle}>settings</Icon>
+              </IconButton>
               <IconButton
                 size="small"
                 disableRipple
@@ -122,17 +172,6 @@ function DashboardNavbar({ absolute, light, isMini }) {
                   {miniSidenav ? "menu_open" : "menu"}
                 </Icon>
               </IconButton>
-              <IconButton
-                size="small"
-                disableRipple
-                color="inherit"
-                sx={navbarIconButton}
-                onClick={handleConfiguratorOpen}
-              >
-                <Icon sx={iconsStyle}>settings</Icon>
-              </IconButton>
-
-              {renderMenu()}
             </MDBox>
           </MDBox>
         )}

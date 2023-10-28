@@ -23,7 +23,11 @@ function DataProduct({
     <Box>
       <Box p={3} sx={{ display: "flex", gap: "20px" }}>
         <Box sx={{ border: "1px solid #ccc", width: "550px" }}>
-          <img src={productById?.img} alt={productById?.name} style={{ width: "100%" }} />
+          <img
+            src={productById?.img}
+            alt={productById?.name}
+            style={{ width: "100%" }}
+          />
         </Box>
         <Box p={2} sx={{ border: "1px solid #ccc", flex: 1 }}>
           <MDTypography
@@ -51,7 +55,9 @@ function DataProduct({
           <Divider />
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <MDTypography variant="h6">Categoría</MDTypography>
-            <MDTypography variant="h6">{productById?.category.name}</MDTypography>
+            <MDTypography variant="h6">
+              {productById?.category.name}
+            </MDTypography>
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <MDTypography variant="h6">Tipo de producto</MDTypography>
@@ -62,8 +68,12 @@ function DataProduct({
             <MDTypography variant="h6">{formatQuantity(stock)} kg</MDTypography>
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-            <MDTypography variant="h6">Precio Actual ({productById.unit})</MDTypography>
-            <MDTypography variant="h6">{formatPrice(ofertById?.retailPrice || 0)}</MDTypography>
+            <MDTypography variant="h6">
+              Precio Actual ({productById.unit})
+            </MDTypography>
+            <MDTypography variant="h6">
+              {formatPrice(ofertById?.retailPrice || 0)}
+            </MDTypography>
           </Box>
 
           <Divider />
@@ -72,11 +82,15 @@ function DataProduct({
           </MDTypography>
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <MDTypography variant="h6">Cantidad vendida</MDTypography>
-            <MDTypography variant="h6">{totalSell30days?.count || 0} kg</MDTypography>
+            <MDTypography variant="h6">
+              {totalSell30days?.count || 0} kg
+            </MDTypography>
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <MDTypography variant="h6">Total venta</MDTypography>
-            <MDTypography variant="h6">{formatPrice(totalSell30days?.total || 0)}</MDTypography>
+            <MDTypography variant="h6">
+              {formatPrice(totalSell30days?.total || 0)}
+            </MDTypography>
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <MDTypography variant="h6">Total ganancia</MDTypography>
@@ -96,7 +110,7 @@ function DataProduct({
           </Box>
           <Divider />
           <MDTypography sx={{ margin: "5px 0" }} variant="h5">
-            Ventas totales (desde el 21/3)
+            Ventas totales
           </MDTypography>
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <MDTypography variant="h6">Cantidad vendida</MDTypography>
@@ -104,11 +118,15 @@ function DataProduct({
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <MDTypography variant="h6">Total venta</MDTypography>
-            <MDTypography variant="h6">{formatPrice(totalSell?.total || 0)}</MDTypography>
+            <MDTypography variant="h6">
+              {formatPrice(totalSell?.total || 0)}
+            </MDTypography>
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <MDTypography variant="h6">Total ganancia</MDTypography>
-            <MDTypography variant="h6">{formatPrice(totalSell?.totalProfits || 0)}</MDTypography>
+            <MDTypography variant="h6">
+              {formatPrice(totalSell?.totalProfits || 0)}
+            </MDTypography>
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <MDTypography variant="h6">Total ganancia%</MDTypography>

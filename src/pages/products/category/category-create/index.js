@@ -4,7 +4,7 @@ import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import CategoryCreate from "./CategoryCreate";
+import AddCategoryForm from "components/OUForms/Category/add-category/AddCategoryForm";
 
 function NewCategory() {
   return (
@@ -29,7 +29,7 @@ function NewCategory() {
                 </MDTypography>
               </MDBox>
               <MDBox>
-                <CategoryCreate />
+                <AddCategoryForm />
               </MDBox>
             </Card>
           </Grid>

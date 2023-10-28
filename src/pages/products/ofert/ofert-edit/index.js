@@ -1,20 +1,15 @@
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
-
-// Material Dashboard 2 React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
-
-// Material Dashboard 2 React example components
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import { useGetProductsQuery } from "api/productApi";
-
 import Loading from "components/DRLoading";
 import { Alert } from "@mui/material";
 import { useGetOfertQuery } from "api/ofertApi";
 import { useParams } from "react-router-dom";
-import OfertEditLite from "./OfertEditLite";
+import EditOfertForm from "components/OUForms/Ofert/edit-ofert/EditOfert";
 
 function EditOfert() {
   const { id } = useParams();
@@ -48,9 +43,14 @@ function EditOfert() {
               </MDBox>
               <MDBox>
                 {(isLoading || isLoadingProduct) && <Loading />}
-                {(error || errorProduct) && <Alert severity="error">{error.error}</Alert>}
+                {(error || errorProduct) && (
+                  <Alert severity="error">{error.error}</Alert>
+                )}
                 {listProducts && ofertById && (
-                  <OfertEditLite listProducts={listProducts} ofertById={ofertById} />
+                  <EditOfertForm
+                    listProducts={listProducts}
+                    ofertById={ofertById}
+                  />
                 )}
               </MDBox>
             </Card>

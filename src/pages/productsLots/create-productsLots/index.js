@@ -9,11 +9,19 @@ import { useGetProductsQuery } from "api/productApi";
 import Loading from "components/DRLoading";
 import { Alert } from "@mui/material";
 import { useGetSuppliersQuery } from "api/supplierApi";
-import ProductsLotsCreate from "./ProductsLotsCreate";
+import AddStock from "components/OUForms/Stock/Add-Stock/AddStock";
 
 function CreateProductsLots() {
-  const { data: listProducts, isLoading: l1, isError: e1 } = useGetProductsQuery();
-  const { data: ListSuppliers, isLoading: l2, isError: e2 } = useGetSuppliersQuery();
+  const {
+    data: listProducts,
+    isLoading: l1,
+    isError: e1,
+  } = useGetProductsQuery();
+  const {
+    data: ListSuppliers,
+    isLoading: l2,
+    isError: e2,
+  } = useGetSuppliersQuery();
 
   return (
     <DashboardLayout>
@@ -38,9 +46,14 @@ function CreateProductsLots() {
               </MDBox>
               <MDBox>
                 {(l1 || l2) && <Loading />}
-                {(e1 || e2) && <Alert severity="error">Ha ocurrido un error</Alert>}
+                {(e1 || e2) && (
+                  <Alert severity="error">Ha ocurrido un error</Alert>
+                )}
                 {listProducts && ListSuppliers && (
-                  <ProductsLotsCreate listProducts={listProducts} ListSuppliers={ListSuppliers} />
+                  <AddStock
+                    listProducts={listProducts}
+                    ListSuppliers={ListSuppliers}
+                  />
                 )}
               </MDBox>
             </Card>

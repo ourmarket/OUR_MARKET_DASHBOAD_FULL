@@ -4,7 +4,6 @@ import { Grid } from "@mui/material";
 import MDBox from "components/MDBox";
 import ComplexStatisticsCard from "examples/Cards/StatisticsCards/ComplexStatisticsCard";
 import reportsLineChartData from "layouts/dashboard/data/reportsLineChartData";
-
 import React, { useEffect, useState } from "react";
 import { formatPrice } from "utils/formaPrice";
 import { dateToLocalDate } from "utils/dateFormat";
@@ -16,6 +15,7 @@ import TotalClientsDebt from "../ClientDebt/TotalClientDebt";
 import TotalClientsBuy from "../ClientBuy/TotalClientBuy";
 import TotalClientsProfits from "../ClientProfit/TotalClientProfit";
 import CharBar1 from "../Chart1/CharBar1";
+import { useSelector } from "react-redux";
 
 function DashboardTotals({
   orders,
@@ -30,6 +30,7 @@ function DashboardTotals({
   dataCategory,
 }) {
   const { sales, tasks } = reportsLineChartData;
+  const { version } = useSelector((store) => store.auth);
   const [updateDate, setUpdateDate] = useState(null);
 
   const totalClients = clients.length;
@@ -109,60 +110,62 @@ function DashboardTotals({
           </MDBox>
         </Grid>
       </Grid>
-      <Grid container spacing={3} mt={1}>
-        <Grid item xs={12} md={4} lg={4}>
-          <MDBox mb={1.5}>
-            <ComplexStatisticsCard
-              color="warning"
-              icon="inventory"
-              title="Stock Cajones de Pollo"
-              count={dataCategory?.stock?.actualStock || 0}
-              percentage={{
-                color: "secondary",
-                amount: "",
-                label: `Actualizado ${updateDate}hs`,
-              }}
-            />
-          </MDBox>
+      {version === "dr" && (
+        <Grid container spacing={3} mt={1}>
+          <Grid item xs={12} md={4} lg={4}>
+            <MDBox mb={1.5}>
+              <ComplexStatisticsCard
+                color="warning"
+                icon="inventory"
+                title="Stock Cajones de Pollo"
+                count={dataCategory?.stock?.actualStock || 0}
+                percentage={{
+                  color: "secondary",
+                  amount: "",
+                  label: `Actualizado ${updateDate}hs`,
+                }}
+              />
+            </MDBox>
+          </Grid>
+          <Grid item xs={12} md={4} lg={4}>
+            <MDBox mb={1.5}>
+              <ComplexStatisticsCard
+                icon="arrow_upward"
+                title="Cajones de pollo vendidos hoy"
+                count={dataCategory?.totalSell?.totalQuantitySell || 0}
+                color="success"
+                percentage={{
+                  color: "success",
+                  amount: "",
+                  label: `En Reparto ${
+                    dataCategory?.totalSellLocal?.totalQuantityLocalSell || 0
+                  }, en Local ${
+                    dataCategory?.totalSellLocal?.totalQuantityLocalSell
+                      ? dataCategory.totalSell.totalQuantitySell -
+                        dataCategory.totalSellLocal.totalQuantityLocalSell
+                      : dataCategory?.totalSell?.totalQuantitySell || 0
+                  }`,
+                }}
+              />
+            </MDBox>
+          </Grid>
+          <Grid item xs={12} md={4} lg={4}>
+            <MDBox mb={1.5}>
+              <ComplexStatisticsCard
+                color="error"
+                icon="arrow_downward"
+                title="Cajones de pollo comprados hoy"
+                count={dataCategory?.totalBuy?.buyToday || 0}
+                percentage={{
+                  color: "success",
+                  amount: "",
+                  label: `Actualizado ${updateDate}hs`,
+                }}
+              />
+            </MDBox>
+          </Grid>
         </Grid>
-        <Grid item xs={12} md={4} lg={4}>
-          <MDBox mb={1.5}>
-            <ComplexStatisticsCard
-              icon="arrow_upward"
-              title="Cajones de pollo vendidos hoy"
-              count={dataCategory?.totalSell?.totalQuantitySell || 0}
-              color="success"
-              percentage={{
-                color: "success",
-                amount: "",
-                label: `En Reparto ${
-                  dataCategory?.totalSellLocal?.totalQuantityLocalSell || 0
-                }, en Local ${
-                  dataCategory?.totalSellLocal?.totalQuantityLocalSell
-                    ? dataCategory.totalSell.totalQuantitySell -
-                      dataCategory.totalSellLocal.totalQuantityLocalSell
-                    : dataCategory?.totalSell?.totalQuantitySell || 0
-                }`,
-              }}
-            />
-          </MDBox>
-        </Grid>
-        <Grid item xs={12} md={4} lg={4}>
-          <MDBox mb={1.5}>
-            <ComplexStatisticsCard
-              color="error"
-              icon="arrow_downward"
-              title="Cajones de pollo comprados hoy"
-              count={dataCategory?.totalBuy?.buyToday || 0}
-              percentage={{
-                color: "success",
-                amount: "",
-                label: `Actualizado ${updateDate}hs`,
-              }}
-            />
-          </MDBox>
-        </Grid>
-      </Grid>
+      )}
       <MDBox mt={4.5}>
         <Grid container spacing={3}>
           <Grid item xs={12} md={6} lg={6}>

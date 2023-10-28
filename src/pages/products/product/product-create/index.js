@@ -10,9 +10,9 @@ import { useGetSuppliersQuery } from "api/supplierApi";
 import Loading from "components/DRLoading";
 import { Alert, Box, Tab, Tabs } from "@mui/material";
 import { useGetProductsQuery } from "api/productApi";
-import ProductCreate from "./product/ProductCreate";
-import OfertCreate from "./ofert/OfertCreate";
-import ProductsLotsCreate from "./stock/ProductsLotsCreate";
+import AddStock from "components/OUForms/Stock/Add-Stock/AddStock";
+import AddProductForm from "components/OUForms/Product/add-product/AddProduct";
+import AddOfertForm from "components/OUForms/Ofert/add-ofert/AddOfert";
 
 function CreateProduct() {
   const [page, setPage] = useState(0);
@@ -20,9 +20,21 @@ function CreateProduct() {
   const handleChange = (event, newValue) => {
     setPage(newValue);
   };
-  const { data: listCategories, isLoading: l1, error: e1 } = useGetCategoriesQuery();
-  const { data: listProducts, isLoading: l2, error: e2 } = useGetProductsQuery();
-  const { data: ListSuppliers, isLoading: l3, isError: e3 } = useGetSuppliersQuery();
+  const {
+    data: listCategories,
+    isLoading: l1,
+    error: e1,
+  } = useGetCategoriesQuery();
+  const {
+    data: listProducts,
+    isLoading: l2,
+    error: e2,
+  } = useGetProductsQuery();
+  const {
+    data: ListSuppliers,
+    isLoading: l3,
+    isError: e3,
+  } = useGetSuppliersQuery();
 
   return (
     <DashboardLayout>
@@ -69,7 +81,9 @@ function CreateProduct() {
               >
                 {l1 && <Loading />}
                 {e1 && <Alert severity="error">Ha ocurrido un error</Alert>}
-                {listCategories && <ProductCreate listCategories={listCategories} />}
+                {listCategories && (
+                  <AddProductForm listCategories={listCategories} />
+                )}
               </Card>
             )}
             {page === 1 && (
@@ -78,7 +92,7 @@ function CreateProduct() {
                   mx: 2.5,
                 }}
               >
-                <OfertCreate />
+                <AddOfertForm />
               </Card>
             )}
             {page === 2 && (
@@ -88,9 +102,14 @@ function CreateProduct() {
                 }}
               >
                 {(l2 || l3) && <Loading />}
-                {(e2 || e3) && <Alert severity="error">Ha ocurrido un error</Alert>}
+                {(e2 || e3) && (
+                  <Alert severity="error">Ha ocurrido un error</Alert>
+                )}
                 {listProducts && ListSuppliers && (
-                  <ProductsLotsCreate listProducts={listProducts} ListSuppliers={ListSuppliers} />
+                  <AddStock
+                    listProducts={listProducts}
+                    ListSuppliers={ListSuppliers}
+                  />
                 )}
               </Card>
             )}

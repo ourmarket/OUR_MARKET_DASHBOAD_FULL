@@ -17,7 +17,7 @@ function TableListUsers({ users }) {
   const [controller] = useMaterialUIController();
   const { darkMode } = controller;
   const [pageSize, setPageSize] = useState(50);
-  const listUsers = users.data.users;
+  const listUsers = users;
 
   const navigate = useNavigate();
   const [open, setOpen] = useState(null);
@@ -152,7 +152,11 @@ function TableListUsers({ users }) {
       headerClassName: "super-app-theme--header",
 
       renderCell: ({ row: { _id } }) => (
-        <IconButton size="large" color="inherit" onClick={(e) => handleOpenMenu(_id, e)}>
+        <IconButton
+          size="large"
+          color="inherit"
+          onClick={(e) => handleOpenMenu(_id, e)}
+        >
           <MoreVertIcon />
         </IconButton>
       ),
@@ -162,8 +166,17 @@ function TableListUsers({ users }) {
   return (
     <>
       <Box m="20px">
-        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
-          <MDButton color="dark" variant="gradient" onClick={() => navigate("/usuarios/nuevo")}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          mb={5}
+        >
+          <MDButton
+            color="dark"
+            variant="gradient"
+            onClick={() => navigate("/usuarios/nuevo")}
+          >
             Crear
           </MDButton>
         </Stack>
@@ -182,7 +195,7 @@ function TableListUsers({ users }) {
                 "https://ik.imagekit.io/mrprwema7/user_default_nUfUA9Fxa.png?ik-sdk-version=javascript-1.4.3&updatedAt=1668611498443"
                   ? "https://ik.imagekit.io/mrprwema7/OurMarket/pngwing.com%20(3)%20(2)_HuAjhlJK-.png?updatedAt=1695995911119"
                   : user.avatar,
-              role: user.role?.role,
+              role: user.role?.es,
               google: user?.google,
               verified: user?.verified || false,
             }))}
@@ -228,7 +241,11 @@ function TableListUsers({ users }) {
         </Box>
       </Box>
 
-      <MenuListUsers open={open} handleCloseMenu={handleCloseMenu} userId={userId} />
+      <MenuListUsers
+        open={open}
+        handleCloseMenu={handleCloseMenu}
+        userId={userId}
+      />
     </>
   );
 }

@@ -5,13 +5,12 @@ import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import { useGetProductsQuery, useGetProductQuery } from "api/productApi";
+import { useGetProductQuery } from "api/productApi";
 import Loading from "components/DRLoading";
 import { Alert } from "@mui/material";
 import { useGetSuppliersQuery } from "api/supplierApi";
-
 import { useParams, useSearchParams } from "react-router-dom";
-import ProductsLotsEdit from "./ProductsLotsEdit";
+import EditStock from "components/OUForms/Stock/Edit-Stock/EditStock";
 
 function EditProductsLots() {
   const { id } = useParams();
@@ -19,8 +18,16 @@ function EditProductsLots() {
 
   const lotId = searchParams.get("lotId");
 
-  const { data: ListSuppliers, isLoading: l2, isError: e2 } = useGetSuppliersQuery();
-  const { data: productLot, isLoading: l3, isError: e3 } = useGetProductQuery(id);
+  const {
+    data: ListSuppliers,
+    isLoading: l2,
+    isError: e2,
+  } = useGetSuppliersQuery();
+  const {
+    data: productLot,
+    isLoading: l3,
+    isError: e3,
+  } = useGetProductQuery(id);
 
   console.log(productLot);
 
@@ -47,9 +54,11 @@ function EditProductsLots() {
               </MDBox>
               <MDBox>
                 {(l2 || l3) && <Loading />}
-                {(e2 || e3) && <Alert severity="error">Ha ocurrido un error</Alert>}
+                {(e2 || e3) && (
+                  <Alert severity="error">Ha ocurrido un error</Alert>
+                )}
                 {ListSuppliers && productLot && (
-                  <ProductsLotsEdit
+                  <EditStock
                     ListSuppliers={ListSuppliers}
                     productLot={productLot}
                     lotId={lotId}

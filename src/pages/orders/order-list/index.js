@@ -1,25 +1,24 @@
 /* eslint-disable no-unused-vars */
-/* eslint-disable prettier/prettier */
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import {  Box, Tab, Tabs } from "@mui/material";
+import { Box, Tab, Tabs } from "@mui/material";
 import { useState } from "react";
-import TableAllOrders from "./all/TableAllOrders";
-import TableActiveOrders from "./active/TableActiveOrders";
-import TableUnpaidOrders from "./unpaid/TableUnpaidOrders";
-
+import TableAllOrders from "components/OUTables/Orders/All/TableAllOrders";
+import TableActiveOrders from "components/OUTables/Orders/Active/TableActiveOrders";
+import TableUnpaidOrders from "components/OUTables/Orders/Unpaid/TableUnpaidOrders";
+import { useSelector } from "react-redux";
 
 function ListOrders() {
   const [page, setPage] = useState(0);
+  const { version } = useSelector((store) => store.auth);
 
   const handleChange = (event, newValue) => {
     setPage(newValue);
   };
-  
 
   return (
     <DashboardLayout>
@@ -54,7 +53,9 @@ function ListOrders() {
             >
               <Tabs value={page} onChange={handleChange} centered>
                 <Tab label="Todas las ordenes" />
-                <Tab label="Ordenes Activas" />
+                {version === "full" && <Tab label="Ordenes Activas" />}
+                {version === "dr" && <Tab label="Ordenes Activas" />}
+
                 <Tab label="Ordenes impagas" />
               </Tabs>
             </Box>
@@ -64,8 +65,7 @@ function ListOrders() {
                   mx: 2.5,
                 }}
               >
-              
-               <TableAllOrders />
+                <TableAllOrders />
               </Card>
             )}
             {page === 1 && (
@@ -74,7 +74,7 @@ function ListOrders() {
                   mx: 2.5,
                 }}
               >
-               <TableActiveOrders />
+                <TableUnpaidOrders />
               </Card>
             )}
             {page === 2 && (
@@ -83,7 +83,7 @@ function ListOrders() {
                   mx: 2.5,
                 }}
               >
-                <TableUnpaidOrders />
+                <TableActiveOrders />
               </Card>
             )}
           </Grid>

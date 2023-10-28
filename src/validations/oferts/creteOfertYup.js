@@ -4,8 +4,9 @@ import * as yup from "yup";
 const { lettersNumbersAndSpaces } = regex;
 
 export const creteOfertSchema = yup.object().shape({
-  // product: yup.string().required("Requerido"),
-  description: yup.string().required("Requerido").matches(lettersNumbersAndSpaces, "Solo letras"),
+  description: yup
+    .string()
+    .required("Requerido")
+    .matches(lettersNumbersAndSpaces, "Solo letras"),
   basePrice: yup.number().required("Requerido"),
-  visible: yup.string().required("Requerido"),
 });

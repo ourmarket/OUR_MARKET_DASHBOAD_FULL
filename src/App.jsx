@@ -8,7 +8,7 @@ import Sidenav from "examples/Sidenav";
 import Configurator from "examples/Configurator";
 import theme from "assets/theme";
 import themeDark from "assets/theme-dark";
-import routes from "router/routes";
+import { routes_dr, routes_full, routes_lite } from "router/routes";
 import {
   useMaterialUIController,
   setMiniSidenav,
@@ -20,6 +20,7 @@ import brandWhite from "assets/images/logo.png";
 import brandDark from "assets/images/logo-ct-dark.png";
 import PersistLogin from "router/PersistRoute";
 import Login from "pages/auth/Login";
+import { useSelector } from "react-redux";
 
 export default function App() {
   const [controller, dispatch] = useMaterialUIController();
@@ -35,6 +36,8 @@ export default function App() {
   const [onMouseEnter, setOnMouseEnter] = useState(false);
 
   const { pathname } = useLocation();
+
+  const { version } = useSelector((store) => store.auth);
 
   // Open sidenav when mouse enter on mini sidenav
   const handleOnMouseEnter = () => {
@@ -119,7 +122,7 @@ export default function App() {
                 : brandWhite
             }
             brandName="Material Dashboard 2"
-            routes={routes}
+            routes={routes_dr}
             onMouseEnter={handleOnMouseEnter}
             onMouseLeave={handleOnMouseLeave}
           />
@@ -131,7 +134,9 @@ export default function App() {
       <Routes>
         <Route path="/authentication/sign-in" element={<Login />} />
         <Route element={<PersistLogin />}>
-          {getRoutes(routes)}
+          {version === "dr" && getRoutes(routes_dr)}
+          {version === "full" && getRoutes(routes_full)}
+          {version === "lite" && getRoutes(routes_lite)}
           <Route path="*" element={<Navigate to="/dashboard/totales" />} />
         </Route>
       </Routes>

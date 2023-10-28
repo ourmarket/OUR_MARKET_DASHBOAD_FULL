@@ -1,8 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { useEffect } from "react";
-import { useLocation, NavLink, useNavigate, Link } from "react-router-dom";
+import { useLocation, NavLink } from "react-router-dom";
 import PropTypes from "prop-types";
 import Divider from "@mui/material/Divider";
 import Icon from "@mui/material/Icon";
@@ -17,16 +16,14 @@ import {
   setTransparentSidenav,
   setWhiteSidenav,
 } from "context";
-import { useDispatch } from "react-redux";
-import axios from "api/axios";
-import { logOut } from "reduxToolkit/authSlice";
-import { menuList } from "data/menuList";
+import { menuList_dr, menuList_full, menuList_lite } from "data/menuList";
 import SidenavCustom from "./SidenavCustom";
+import { useSelector } from "react-redux";
 
-function Sidenav({ color, brand, brandName, routes, ...rest }) {
-  const dispatch1 = useDispatch();
-  const navigate = useNavigate();
+function Sidenav({ brand, brandName, ...rest }) {
+  const { version } = useSelector((store) => store.auth);
   const [controller, dispatch] = useMaterialUIController();
+
   const {
     miniSidenav,
     transparentSidenav,
@@ -45,19 +42,6 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
   }
 
   const closeSidenav = () => setMiniSidenav(dispatch, true);
-
-  /* const handlerLogout = async () => {
-    try {
-      const res = await axios.get("/auth/logout2", {
-        withCredentials: true,
-      });
-      console.log(res);
-      dispatch1(logOut());
-      navigate("/authentication/sign-in");
-    } catch (error) {
-      console.log(error);
-    }
-  }; */
 
   useEffect(() => {
     // A function that sets the mini state of the sidenav.
@@ -118,8 +102,11 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
               variant="button"
               fontWeight="medium"
               color={textColor}
+              sx={{
+                textTransform: "capitalize",
+              }}
             >
-              Our Market
+              {`Our Market ${version}`}
             </MDTypography>
           </MDBox>
         </MDBox>
@@ -130,10 +117,27 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
           (darkMode && !transparentSidenav && whiteSidenav)
         }
       />
-
-      {menuList.map((menu) => (
-        <SidenavCustom key={menu.key} menu={menu} />
-      ))}
+      {version === "lite" && (
+        <>
+          {menuList_lite.map((menu) => (
+            <SidenavCustom key={menu.key} menu={menu} />
+          ))}
+        </>
+      )}
+      {version === "dr" && (
+        <>
+          {menuList_dr.map((menu) => (
+            <SidenavCustom key={menu.key} menu={menu} />
+          ))}
+        </>
+      )}
+      {version === "full" && (
+        <>
+          {menuList_full.map((menu) => (
+            <SidenavCustom key={menu.key} menu={menu} />
+          ))}
+        </>
+      )}
 
       <MDBox p={2} mt="auto">
         <a href={import.meta.env.VITE_APP_TPV} target="_blank" rel="noreferrer">

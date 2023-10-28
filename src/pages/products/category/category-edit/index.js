@@ -8,7 +8,7 @@ import { useParams } from "react-router-dom";
 import { useGetCategoryQuery } from "api/categoryApi";
 import Loading from "components/DRLoading";
 import { Alert } from "@mui/material";
-import CategoryEdit from "./CategoryEdit";
+import EditCategoryForm from "components/OUForms/Category/edit-category/EditCategoryForm";
 
 function EditCategory() {
   const { id } = useParams();
@@ -36,8 +36,10 @@ function EditCategory() {
               </MDBox>
               <MDBox>
                 {isLoading && <Loading />}
-                {isError && <Alert severity="error">Ha ocurrido un error</Alert>}
-                {data && <CategoryEdit categoryData={data.category} />}
+                {isError && (
+                  <Alert severity="error">Ha ocurrido un error</Alert>
+                )}
+                {data && <EditCategoryForm categoryData={data.category} />}
               </MDBox>
             </Card>
           </Grid>

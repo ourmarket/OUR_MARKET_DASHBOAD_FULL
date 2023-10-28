@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-vars */
-/* eslint-disable prettier/prettier */
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import MDBox from "components/MDBox";
@@ -24,8 +23,16 @@ function Products() {
   const handleChange = (event, newValue) => {
     setPage(newValue);
   };
-  const { data: listProducts, isLoading: l1, error: e1 } = useGetProductsQuery();
-  const { data: listCategories, isLoading: l2, error: e2 } = useGetCategoriesQuery();
+  const {
+    data: listProducts,
+    isLoading: l1,
+    error: e1,
+  } = useGetProductsQuery();
+  const {
+    data: listCategories,
+    isLoading: l2,
+    error: e2,
+  } = useGetCategoriesQuery();
   const { data: listOferts, isLoading: l3, error: e3 } = useGetOfertsQuery();
 
   return (
@@ -83,7 +90,9 @@ function Products() {
               >
                 {l2 && <Loading />}
                 {e2 && <Alert severity="error">Ha ocurrido un error</Alert>}
-                {listCategories && <TableListCategories categories={listCategories.categories} />}
+                {listCategories && (
+                  <TableListCategories categories={listCategories.categories} />
+                )}
               </Card>
             )}
             {page === 2 && (

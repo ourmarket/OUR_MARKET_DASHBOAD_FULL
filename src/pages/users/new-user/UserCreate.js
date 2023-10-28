@@ -11,9 +11,11 @@ import { creteUserSchema } from "validations/users/createUserYup";
 import MDBox from "components/MDBox";
 import MDButton from "components/MDButton";
 import colors from "assets/theme/base/colors";
+import { useSelector } from "react-redux";
 
 function UserCreate({ roles }) {
   const navigate = useNavigate();
+  const { superUser } = useSelector((store) => store.auth);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState([]);
@@ -38,6 +40,7 @@ function UserCreate({ roles }) {
           password,
           role,
           verified: true,
+          superUser,
         });
         if (data.ok) {
           /*  Swal.fire({
@@ -131,7 +134,7 @@ function UserCreate({ roles }) {
             >
               {roles.map((option) => (
                 <MenuItem key={option._id} value={option._id}>
-                  {option.role}
+                  {option.es}
                 </MenuItem>
               ))}
             </TextField>
