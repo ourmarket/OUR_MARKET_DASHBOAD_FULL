@@ -1,8 +1,15 @@
-/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react/prop-types */
 import { Box } from "@mui/system";
-import { GoogleMap, HeatmapLayerF, Marker, Polygon } from "@react-google-maps/api";
+import {
+  GoogleMap,
+  HeatmapLayerF,
+  Marker,
+  Polygon,
+} from "@react-google-maps/api";
 import { useMemo } from "react";
 import { zones } from "./Zones";
+import { useSelector } from "react-redux";
 
 const optionZones = {
   fillColor: "lightblue",
@@ -19,15 +26,18 @@ const optionZones = {
 
 function MapsHeat({ clientAddress }) {
   const filterClientAddress = clientAddress.filter((client) => client.lat);
-  /* const dataHeat = filterClientAddress.map(
-    (client) => new window.google.maps.LatLng(client.lat, client.lng)
-  ); */
+
   const dataHeat = filterClientAddress.map((client) => ({
     location: new window.google.maps.LatLng(client.lat, client.lng),
     weight: 5,
   }));
 
-  const center = useMemo(() => ({ lat: -34.570428718491605, lng: -58.743382510475065 }), []); // -34.570428718491605, -58.743382510475065
+  const { superUserData } = useSelector((store) => store.auth);
+
+  const center = useMemo(
+    () => ({ lat: superUserData.lat, lng: superUserData.lng }),
+    []
+  );
   const options = useMemo(
     () => ({
       clickableIcons: false,
@@ -85,10 +95,18 @@ function MapsHeat({ clientAddress }) {
   );
   return (
     <Box p={3}>
-      <GoogleMap zoom={13} center={center} mapContainerClassName="map-container" options={options}>
+      <GoogleMap
+        zoom={13}
+        center={center}
+        mapContainerClassName="map-container"
+        options={options}
+      >
         <Marker position={center} icon="https://i.ibb.co/nbm4b4x/pngegg.png" />
 
-        <HeatmapLayerF data={dataHeat} options={{ radius: 30, maxIntensity: 10 }} />
+        <HeatmapLayerF
+          data={dataHeat}
+          options={{ radius: 30, maxIntensity: 10 }}
+        />
 
         <Polygon paths={zones.zona1} options={zone1} />
         <Polygon paths={zones.zona2} options={zone2} />

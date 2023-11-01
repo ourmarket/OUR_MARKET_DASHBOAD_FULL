@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-vars */
-/* eslint-disable prettier/prettier */
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import MDBox from "components/MDBox";
@@ -38,8 +37,14 @@ function ListDeliveryZone() {
               </MDBox>
               <MDBox pt={3}>
                 {isLoading && <Loading />}
-                {isError && <Alert severity="error">Ha ocurrido un error</Alert>}
-                {data && <TableListDeliveryZone deliveryZones={data.data.deliveryZones} />}
+                {isError && (
+                  <Alert severity="error">Ha ocurrido un error</Alert>
+                )}
+                {data && (
+                  <TableListDeliveryZone
+                    deliveryZones={data.data.deliveryZones}
+                  />
+                )}
               </MDBox>
             </Card>
           </Grid>

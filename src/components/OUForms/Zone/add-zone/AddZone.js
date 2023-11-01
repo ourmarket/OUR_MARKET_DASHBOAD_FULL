@@ -1,9 +1,7 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable react/jsx-boolean-value */
-/* eslint-disable no-underscore-dangle */
+/* eslint-disable react/prop-types */
 import { useNavigate } from "react-router-dom";
 import { LoadingButton } from "@mui/lab";
-import { Alert, Box, TextField } from "@mui/material";
+import { Alert, Box, MenuItem, TextField } from "@mui/material";
 import { useFormik } from "formik";
 import MDBox from "components/MDBox";
 import MDButton from "components/MDButton";
@@ -11,41 +9,49 @@ import colors from "assets/theme/base/colors";
 import { createDeliveryZoneSchema } from "validations/deliveryZone/createDeliveryZoneYup";
 import Swal from "sweetalert2";
 import { usePostDeliveryZoneMutation } from "api/deliveryZoneApi";
+import MDTypography from "components/MDTypography";
 
-function DeliveryZoneCreate() {
+import { useState } from "react";
+import { provinces } from "data/province";
+import DrawingMap from "components/OUMaps/DrawingMap/DrawingMap";
+
+function AddZones({ zones }) {
   const navigate = useNavigate();
-  const [createDeliveryZone, { isLoading, isError }] = usePostDeliveryZoneMutation();
+  const [createDeliveryZone, { isLoading, isError }] =
+    usePostDeliveryZoneMutation();
+
+  const [color, setColor] = useState("#f10909");
+  const [mapLimits, setMapLimits] = useState([]);
+  const [mapError, setMapError] = useState(false);
+
+  const onColorChange = (e) => {
+    setColor(e.target.value);
+  };
 
   const formik = useFormik({
     initialValues: {
       name: "",
-      cost: undefined,
+      cost: 0,
       province: "",
       city: "",
       zip: undefined,
-      east: "",
-      west: "",
-      north: "",
-      south: "",
     },
-    onSubmit: async ({ name, cost, province, city, zip, north, south, east, west }) => {
+    onSubmit: async ({ name, cost, province, city, zip }) => {
       const newDeliveryZone = {
         name,
         cost,
         province,
         city,
         zip,
-        limits: [
-          {
-            north,
-            south,
-            east,
-            west,
-          },
-        ],
+        fillColor: color,
+        mapLimits: mapLimits[0]?.latlngs,
       };
+      if (!mapLimits[0]?.latlngs) {
+        return setMapError(true);
+      }
+
       const res = await createDeliveryZone(newDeliveryZone).unwrap();
-      if (res) {
+      if (res.ok) {
         Swal.fire({
           position: "center",
           icon: "success",
@@ -53,7 +59,7 @@ function DeliveryZoneCreate() {
           showConfirmButton: false,
           timer: 2500,
         });
-        navigate("/distribucion/zonas/lista");
+        navigate(-1);
       }
     },
     validationSchema: createDeliveryZoneSchema,
@@ -72,7 +78,7 @@ function DeliveryZoneCreate() {
           autoComplete="off"
           noValidate
           onSubmit={formik.handleSubmit}
-          sx={{ mt: 1, mx: 2, display: "flex", gap: 3 }}
+          sx={{ mt: 1, mx: 2, display: "flex", gap: 3, width: "100%" }}
         >
           <Box sx={{ width: "50%" }}>
             <TextField
@@ -92,7 +98,7 @@ function DeliveryZoneCreate() {
               type="number"
               fullWidth
               autoFocus
-              label="Costo"
+              label="Costo (opcional si hay reparto)"
               name="cost"
               error={!!formik.errors.cost}
               helperText={formik.errors.cost}
@@ -102,14 +108,21 @@ function DeliveryZoneCreate() {
             <TextField
               margin="normal"
               required
+              select
               fullWidth
-              autoFocus
-              label="Provincia"
               name="province"
+              label="Provincia"
+              value={formik.values.province}
               error={!!formik.errors.province}
               helperText={formik.errors.province}
               onChange={formik.handleChange}
-            />
+            >
+              {provinces.map((province) => (
+                <MenuItem key={province} value={province}>
+                  {province}
+                </MenuItem>
+              ))}
+            </TextField>
             <TextField
               margin="normal"
               required
@@ -133,7 +146,20 @@ function DeliveryZoneCreate() {
               helperText={formik.errors.zip}
               onChange={formik.handleChange}
             />
-
+            <Box
+              p={1}
+              sx={{ display: "flex", justifyContent: "space-between" }}
+            >
+              <label>
+                <MDTypography variant="body2">Color de zona </MDTypography>
+              </label>
+              <input
+                type="color"
+                style={{ width: "50px" }}
+                value={color}
+                onChange={(e) => onColorChange(e)}
+              />
+            </Box>
             <LoadingButton
               type="submit"
               variant="contained"
@@ -159,50 +185,19 @@ function DeliveryZoneCreate() {
             >
               Cancelar
             </MDButton>
-            {isError && <Alert severity="error">Error — Proveedor no creado</Alert>}
+            {isError && (
+              <Alert severity="error">Error — Proveedor no creado</Alert>
+            )}
+            {mapError && (
+              <Alert severity="warning">(*) Error — Zona no dibujada.</Alert>
+            )}
           </Box>
 
-          <Box sx={{ width: "50%" }}>
-            <TextField
-              margin="normal"
-              fullWidth
-              required
-              name="east"
-              label="Limite este"
-              error={!!formik.errors.east}
-              helperText={formik.errors.east}
-              onChange={formik.handleChange}
-            />
-
-            <TextField
-              margin="normal"
-              fullWidth
-              required
-              name="west"
-              label="Limite oeste"
-              error={!!formik.errors.west}
-              helperText={formik.errors.west}
-              onChange={formik.handleChange}
-            />
-            <TextField
-              margin="normal"
-              fullWidth
-              required
-              name="north"
-              label="Limite norte"
-              error={!!formik.errors.north}
-              helperText={formik.errors.north}
-              onChange={formik.handleChange}
-            />
-            <TextField
-              margin="normal"
-              fullWidth
-              required
-              name="south"
-              label="Limite sur"
-              error={!!formik.errors.south}
-              helperText={formik.errors.south}
-              onChange={formik.handleChange}
+          <Box sx={{ width: "50%", height: 630 }}>
+            <DrawingMap
+              color={color}
+              setMapLimits={setMapLimits}
+              zones={zones}
             />
           </Box>
         </Box>
@@ -211,4 +206,4 @@ function DeliveryZoneCreate() {
   );
 }
 
-export default DeliveryZoneCreate;
+export default AddZones;

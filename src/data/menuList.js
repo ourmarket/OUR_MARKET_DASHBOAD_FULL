@@ -75,11 +75,6 @@ export const menuList_dr = [
         icon: "holiday_village_icon",
         url: "/clientes/direcciones/lista",
       },
-      {
-        name: "Localización",
-        icon: "location_on_icon",
-        url: "/clientes/localizacion",
-      },
     ],
   },
   {
@@ -234,11 +229,6 @@ export const menuList_full = [
         icon: "holiday_village_icon",
         url: "/clientes/direcciones/lista",
       },
-      {
-        name: "Localización",
-        icon: "location_on_icon",
-        url: "/clientes/localizacion",
-      },
     ],
   },
   {
@@ -387,11 +377,6 @@ export const menuList_lite = [
         name: "Direcciones",
         icon: "holiday_village_icon",
         url: "/clientes/direcciones/lista",
-      },
-      {
-        name: "Localización",
-        icon: "location_on_icon",
-        url: "/clientes/localizacion",
       },
     ],
   },

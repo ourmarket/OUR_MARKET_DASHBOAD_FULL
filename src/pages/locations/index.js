@@ -14,7 +14,6 @@ import TotalsCards from "./TotalsCards";
 
 function LocationsPage() {
   const { data, isLoading, error } = useGetClientAddressesQuery();
-  console.log(data);
 
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: import.meta.env.VITE_APP_MAP_API_KEY,

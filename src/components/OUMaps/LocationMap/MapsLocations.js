@@ -4,21 +4,7 @@ import { Box } from "@mui/system";
 import { GoogleMap, InfoWindow, Marker, Polygon } from "@react-google-maps/api";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { zones } from "./Zones";
 import { useSelector } from "react-redux";
-
-const optionZones = {
-  fillColor: "#e91e63",
-  fillOpacity: 0.2,
-  strokeColor: "blue",
-  strokeOpacity: 1,
-  strokeWeight: 2,
-  clickable: false,
-  draggable: false,
-  editable: false,
-  geodesic: false,
-  zIndex: 1,
-};
 
 function CustomMarker({ lat, lng, client }) {
   const [open, setOpen] = useState(false);
@@ -62,7 +48,7 @@ function CustomMarker({ lat, lng, client }) {
   );
 }
 
-function MapsLocations({ clientAddress }) {
+function MapsLocations({ clientAddress, zones }) {
   const filterClientAddress = clientAddress.filter((client) => client.lat);
   const { superUserData } = useSelector((store) => store.auth);
 
@@ -83,49 +69,22 @@ function MapsLocations({ clientAddress }) {
     }),
     []
   );
-  const zone1 = useMemo(
-    () => ({
-      ...optionZones,
-      fillColor: "#e91e63",
-    }),
-    []
-  );
-  const zone2 = useMemo(
-    () => ({
-      ...optionZones,
-      fillColor: "#7b809a",
-    }),
-    []
-  );
-  const zone3 = useMemo(
-    () => ({
-      ...optionZones,
-      fillColor: "#1A73E8",
-    }),
-    []
-  );
-  const zone4 = useMemo(
-    () => ({
-      ...optionZones,
-      fillColor: "#4CAF50",
-    }),
-    []
-  );
-  const zone5 = useMemo(
-    () => ({
-      ...optionZones,
-      fillColor: "#fb8c00",
-    }),
-    []
-  );
-  const zone6 = useMemo(
-    () => ({
-      ...optionZones,
-      fillColor: "#F44335",
-    }),
-    []
-  );
-
+  const deliveryZones = zones.map((zone) => ({
+    id: zone._id,
+    path: zone.mapLimits,
+    option: {
+      fillColor: zone.fillColor,
+      fillOpacity: 0.2,
+      strokeColor: "blue",
+      strokeOpacity: 1,
+      strokeWeight: 2,
+      clickable: false,
+      draggable: false,
+      editable: false,
+      geodesic: false,
+      zIndex: 1,
+    },
+  }));
   return (
     <Box p={3}>
       <GoogleMap
@@ -144,13 +103,9 @@ function MapsLocations({ clientAddress }) {
             key={client._id}
           />
         ))}
-
-        <Polygon paths={zones.zona1} options={zone1} />
-        <Polygon paths={zones.zona2} options={zone2} />
-        <Polygon paths={zones.zona3} options={zone3} />
-        <Polygon paths={zones.zona4} options={zone4} />
-        <Polygon paths={zones.zona5} options={zone5} />
-        <Polygon paths={zones.zona6} options={zone6} />
+        {deliveryZones.map((zone) => (
+          <Polygon key={zone.id} paths={zone.path} options={zone.option} />
+        ))}
       </GoogleMap>
     </Box>
   );

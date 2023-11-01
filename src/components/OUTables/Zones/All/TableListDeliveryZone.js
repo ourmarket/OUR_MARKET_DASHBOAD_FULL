@@ -1,7 +1,7 @@
-/* eslint-disable no-shadow */
 /* eslint-disable react/prop-types */
+/* eslint-disable no-unused-vars */
 /* eslint-disable no-underscore-dangle */
-import { Box, IconButton, Stack } from "@mui/material";
+import { Box, Card, IconButton, Stack } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -9,132 +9,77 @@ import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import MDButton from "components/MDButton";
 import colors from "assets/theme-dark/base/colors";
 import { useMaterialUIController } from "context";
-import CheckIcon from "@mui/icons-material/Check";
-import CloseIcon from "@mui/icons-material/Close";
-import MenuListClientAddress from "./MenuListClientAddress";
+import MenuProductsLots from "../Menu/MenuDeliveryZone";
 
-function TableListClientAddress({ clientAddress }) {
+function TableListDeliveryZone({ deliveryZones }) {
   const [controller] = useMaterialUIController();
   const { darkMode } = controller;
-  console.log(clientAddress);
+
+  console.log(deliveryZones);
 
   const navigate = useNavigate();
   const [open, setOpen] = useState(null);
-  const [clientId, setClientId] = useState(null);
-  const [addressId, setAddressId] = useState(null);
+  const [menuId, setMenuId] = useState(null);
 
-  const handleOpenMenu = (clientId, addressId, event) => {
+  const handleOpenMenu = (id, event) => {
     setOpen(event.currentTarget);
-    setClientId(clientId);
-    setAddressId(addressId);
+    setMenuId(id);
   };
 
   const handleCloseMenu = () => {
     setOpen(null);
-    setClientId(null);
-    setAddressId(null);
+    setMenuId(null);
   };
 
   const columns = [
     {
-      field: "user",
-      headerName: "Cliente",
-      flex: 1.5,
-      cellClassName: "name-column--cell",
-      headerClassName: "super-app-theme--header",
-    },
-
-    /* {
-      field: "phone",
-      headerName: "Teléfono",
-      flex: 1,
-      headerClassName: "super-app-theme--header",
-    },
-    {
-      field: "email",
-      headerName: "Email",
-      flex: 1.6,
-      headerClassName: "super-app-theme--header",
-    }, */
-    {
-      field: "address",
-      headerName: "Dirección",
-      flex: 1.5,
-      headerClassName: "super-app-theme--header",
-    },
-    {
-      field: "zone",
+      field: "name",
       headerName: "Zona",
       flex: 1,
+      cellClassName: "name-column--cell",
       headerClassName: "super-app-theme--header",
     },
     {
       field: "province",
-      headerName: "Provincia",
+      headerName: "Ciudad",
       flex: 1,
+      cellClassName: "name-column--cell",
       headerClassName: "super-app-theme--header",
     },
     {
       field: "city",
       headerName: "Ciudad",
       flex: 1,
+      cellClassName: "name-column--cell",
       headerClassName: "super-app-theme--header",
     },
+
     {
-      field: "zip",
-      headerName: "CP",
+      field: "cost",
+      headerName: "Costo",
       flex: 1,
       headerClassName: "super-app-theme--header",
     },
+
     {
-      field: "type",
-      headerName: "Tipo",
-      flex: 1,
+      field: "active",
+      headerName: "Color",
+      flex: 0.6,
       headerClassName: "super-app-theme--header",
-    },
-    {
-      field: "clientId",
-      headerName: "Cliente Id",
-      flex: 2,
-      headerClassName: "super-app-theme--header",
-    },
-    {
-      field: "lat",
-      headerName: "Geo",
-      flex: 0.8,
-      headerClassName: "super-app-theme--header",
-      renderCell: (params) =>
-        params.row.lat ? (
-          <div
-            style={{
-              height: "30px",
-              width: "30px",
-              borderRadius: "50%",
-              backgroundColor: "green",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "white",
-            }}
-          >
-            <CheckIcon />
-          </div>
-        ) : (
-          <div
-            style={{
-              height: "30px",
-              width: "30px",
-              borderRadius: "50%",
-              backgroundColor: "red",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "white",
-            }}
-          >
-            <CloseIcon />
-          </div>
-        ),
+      renderCell: (params) => (
+        <div
+          style={{
+            height: "30px",
+            width: "30px",
+            borderRadius: "50%",
+            backgroundColor: `${params.row.fillColor}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "white",
+          }}
+        ></div>
+      ),
     },
 
     {
@@ -142,11 +87,11 @@ function TableListClientAddress({ clientAddress }) {
       headerName: "Menu",
       headerClassName: "super-app-theme--header",
 
-      renderCell: ({ row: { clientId, _id } }) => (
+      renderCell: ({ row: { _id } }) => (
         <IconButton
           size="large"
           color="inherit"
-          onClick={(e) => handleOpenMenu(clientId, _id, e)}
+          onClick={(e) => handleOpenMenu(_id, e)}
         >
           <MoreVertIcon />
         </IconButton>
@@ -155,7 +100,7 @@ function TableListClientAddress({ clientAddress }) {
   ];
 
   return (
-    <>
+    <Card>
       <Box m="20px" sx={{ overflowX: "scroll" }}>
         <Stack
           direction="row"
@@ -166,9 +111,9 @@ function TableListClientAddress({ clientAddress }) {
           <MDButton
             color="dark"
             variant="gradient"
-            onClick={() => navigate("/clientes/direcciones/nuevo")}
+            onClick={() => navigate("/distribucion/zonas/nueva")}
           >
-            Crear
+            Nueva Zona
           </MDButton>
         </Stack>
         <Box m="40px 0 0 0" height="75vh" width="auto">
@@ -176,13 +121,8 @@ function TableListClientAddress({ clientAddress }) {
             checkboxSelection
             disableSelectionOnClick
             components={{ Toolbar: GridToolbar }}
-            rows={clientAddress.map((address) => ({
-              ...address,
-              user: `${address?.user?.name} ${address?.user?.lastName}`,
-              email: address?.user?.email,
-              phone: address?.user?.phone,
-              zone: address?.deliveryZone?.name,
-              clientId: address?.client?._id,
+            rows={deliveryZones.map((zone) => ({
+              ...zone,
             }))}
             columns={columns}
             getRowId={(row) => row._id}
@@ -222,14 +162,13 @@ function TableListClientAddress({ clientAddress }) {
         </Box>
       </Box>
 
-      <MenuListClientAddress
+      <MenuProductsLots
         open={open}
         handleCloseMenu={handleCloseMenu}
-        clientId={clientId}
-        addressId={addressId}
+        menuId={menuId}
       />
-    </>
+    </Card>
   );
 }
 
-export default TableListClientAddress;
+export default TableListDeliveryZone;

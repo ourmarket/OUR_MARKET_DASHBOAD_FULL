@@ -4,16 +4,27 @@ import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import { useGetDeliveryZoneQuery } from "api/deliveryZoneApi";
+import {
+  useGetDeliveryZoneQuery,
+  useGetDeliveryZonesQuery,
+} from "api/deliveryZoneApi";
 import { Alert } from "@mui/material";
 import Loading from "components/DRLoading";
 import { useParams } from "react-router-dom";
-import DeliveryZoneEdit from "./DeliveryZoneEdit";
+import EditZone from "components/OUForms/Zone/edit-zone/EditZone";
 
 function EditDeliveryZone() {
   const { id } = useParams();
-  const { data: deliveryZone, isLoading, isError } = useGetDeliveryZoneQuery(id);
-  console.log(deliveryZone);
+  const {
+    data: deliveryZone,
+    isLoading: l1,
+    isError: e1,
+  } = useGetDeliveryZoneQuery(id);
+  const {
+    data: dataZones,
+    isLoading: l2,
+    isError: e2,
+  } = useGetDeliveryZonesQuery();
 
   return (
     <DashboardLayout>
@@ -33,13 +44,20 @@ function EditDeliveryZone() {
                 coloredShadow="info"
               >
                 <MDTypography variant="h6" color="white">
-                  Editar zona de reparto
+                  Editar zona
                 </MDTypography>
               </MDBox>
               <MDBox>
-                {isLoading && <Loading />}
-                {isError && <Alert severity="error">Ha ocurrido un error</Alert>}
-                {deliveryZone && <DeliveryZoneEdit deliveryZone={deliveryZone.data.deliveryZone} />}
+                {(l1 || l2) && <Loading />}
+                {(e1 || e2) && (
+                  <Alert severity="error">Ha ocurrido un error</Alert>
+                )}
+                {deliveryZone && dataZones && (
+                  <EditZone
+                    deliveryZone={deliveryZone.data.deliveryZone}
+                    zones={dataZones.data.deliveryZones}
+                  />
+                )}
               </MDBox>
             </Card>
           </Grid>

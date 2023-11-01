@@ -1,6 +1,5 @@
 import "react-datepicker/dist/react-datepicker.css";
-
-import { Alert, Box, Grid } from "@mui/material";
+import { Alert, Box, Card, Grid } from "@mui/material";
 import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import { dateToLocalDate } from "utils/dateFormat";
@@ -16,11 +15,14 @@ import {
 } from "api/reportApi";
 import { LoadingButton } from "@mui/lab";
 import colors from "assets/theme/base/colors";
-import TableReportClientBuy from "./TableReportClientBuy";
-import TableReportProductsByRange from "./TableReportProductsByRange";
-import TableReportSellZones from "./TableReportSellZones";
+import { useSelector } from "react-redux";
+import TableReportProductsByRange from "components/OUTables/Reports/products-sell/TableReportProductsByRange";
+import TableReportClientBuy from "components/OUTables/Reports/client-buy/TableReportClientBuy";
+import TableReportSellZones from "components/OUTables/Reports/zones-sell/TableReportSellZones";
 
 function ReportProductsByRange() {
+  const { version } = useSelector((store) => store.auth);
+
   const [startDate, setStartDate] = useState(new Date().setHours(0, 0, 0, 0));
   const [endDate, setEndDate] = useState(new Date().setHours(23, 59, 59, 0));
   const [updateDate, setUpdateDate] = useState(null);
@@ -30,13 +32,13 @@ function ReportProductsByRange() {
   const [clientsBuy, setClientBuy] = useState([]);
   const [sellZones, setSellZones] = useState([]);
 
-  const [getTotalsOrders, { isLoading: l1, isError: e1 }] =
+  const [getTotalsOrders, { isLoading: l1, isError: e1, isSuccess: s1 }] =
     usePostTotalOrderProductsByRangeMutation();
-  const [getDataPayments, { isLoading: l2, isError: e2 }] =
+  const [getDataPayments, { isLoading: l2, isError: e2, isSuccess: s2 }] =
     usePostReportPaymentByRangeDayMutation();
-  const [getDataClientBuy, { isLoading: l3, isError: e3 }] =
+  const [getDataClientBuy, { isLoading: l3, isError: e3, isSuccess: s3 }] =
     usePostReportClientBuyByRangeDayMutation();
-  const [getSellData, { isLoading: l4, isError: e4 }] =
+  const [getSellData, { isLoading: l4, isError: e4, isSuccess: s4 }] =
     usePostReportSellByRangeDayMutation();
 
   const totalCost = reports.reduce((acc, curr) => curr.totalCost + acc, 0);
@@ -83,8 +85,12 @@ function ReportProductsByRange() {
   }
 
   return (
-    <Box px={3} pb={3}>
-      <Box px={3}>
+    <Box px={0} pb={3}>
+      <Card
+        sx={{
+          padding: "20px",
+        }}
+      >
         <MDTypography variant="h6">Selecciona un rango de días</MDTypography>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
           <DatePicker
@@ -120,10 +126,15 @@ function ReportProductsByRange() {
             Generar reporte
           </LoadingButton>
         </Box>
-      </Box>
+        {s1 && s2 && s3 && s4 && reports.length === 0 && (
+          <Alert severity="info">
+            No se registran ordenes en ese rango de días.
+          </Alert>
+        )}
+      </Card>
       {reports.length > 0 && (
         <Box>
-          <Box mt={4} px={3}>
+          <Box mt={6}>
             <Grid container spacing={3}>
               <Grid item xs={12} md={4} lg={4}>
                 <MDBox mb={1.5}>
@@ -171,7 +182,7 @@ function ReportProductsByRange() {
               </Grid>
             </Grid>
           </Box>
-          <Box mt={4} px={3}>
+          <Box mt={4}>
             <Grid container spacing={3}>
               <Grid item xs={12} md={3} lg={3}>
                 <MDBox mb={1.5}>
@@ -235,42 +246,50 @@ function ReportProductsByRange() {
               </Grid>
             </Grid>
           </Box>
-          <MDTypography
-            variant="h6"
-            sx={{
-              ml: 3,
-              mt: 3,
-            }}
-          >
-            Productos vendidos
-          </MDTypography>
-          <TableReportProductsByRange reports={reports} />
-          <MDTypography
-            variant="h6"
-            sx={{
-              ml: 3,
-              mt: 3,
-            }}
-          >
-            Compras de clientes
-          </MDTypography>
-          <TableReportClientBuy
-            reports={clientsBuy}
-            totalProfits={totalProfits}
-          />
-          <MDTypography
-            variant="h6"
-            sx={{
-              ml: 3,
-              mt: 3,
-            }}
-          >
-            Ventas por zonas
-          </MDTypography>
-          <TableReportSellZones
-            sellZones={sellZones}
-            totalProfits={totalProfits}
-          />
+          <Card sx={{ marginTop: "30px" }}>
+            <MDTypography
+              variant="h6"
+              sx={{
+                ml: 3,
+                mt: 3,
+              }}
+            >
+              Productos vendidos
+            </MDTypography>
+            <TableReportProductsByRange reports={reports} />
+          </Card>
+          <Card sx={{ marginTop: "30px" }}>
+            <MDTypography
+              variant="h6"
+              sx={{
+                ml: 3,
+                mt: 3,
+              }}
+            >
+              Compras de clientes
+            </MDTypography>
+            <TableReportClientBuy
+              reports={clientsBuy}
+              totalProfits={totalProfits}
+            />
+          </Card>
+          {(version === "dr" || version === "full") && (
+            <Card sx={{ marginTop: "30px" }}>
+              <MDTypography
+                variant="h6"
+                sx={{
+                  ml: 3,
+                  mt: 3,
+                }}
+              >
+                Ventas por zonas
+              </MDTypography>
+              <TableReportSellZones
+                sellZones={sellZones}
+                totalProfits={totalProfits}
+              />
+            </Card>
+          )}
         </Box>
       )}
     </Box>

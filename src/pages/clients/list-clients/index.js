@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useState } from "react";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
@@ -8,13 +9,16 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Loading from "components/DRLoading";
 import { Alert, Box, Tab, Tabs } from "@mui/material";
 import { useGetClientsQuery } from "api/clientsApi";
-import { useGetReportTotalClientBuyQuery } from "api/reportApi";
+import {
+  useGetReportTotalClientBuyQuery,
+  useGetReportTotalClientDebtQuery,
+} from "api/reportApi";
 import { useGetConfigQuery } from "api/configApi";
 import TotalClientsCards from "./TotalClientsCards";
 import TableListClients from "components/OUTables/Clients/All/TableListClient";
-import TableListClientsActive from "components/OUTables/Clients/Active/TableListClientActive";
-import TableListClientsInactive from "components/OUTables/Clients/Inactive/TableListClientInactive";
 import Config from "./Config";
+import TableListClientsOrder from "components/OUTables/Clients/OrderByProfits/TableListClientOrder";
+import TableDebtor from "components/OUTables/Clients/Debtor/TableDebtor";
 
 function ListClients() {
   const {
@@ -29,6 +33,14 @@ function ListClients() {
   } = useGetReportTotalClientBuyQuery();
 
   const { data: dataConfig, isLoading: l3, isError: e3 } = useGetConfigQuery();
+
+  const {
+    data: dataClientsDebs,
+    isLoading: l4,
+    isError: e4,
+  } = useGetReportTotalClientDebtQuery();
+  console.log(dataClientsDebs);
+  console.log(dataClientsBuy);
 
   const [page, setPage] = useState(0);
 
@@ -68,7 +80,8 @@ function ListClients() {
             >
               <Tabs value={page} onChange={handleChange} centered>
                 <Tab label="Lista de clientes" />
-                <Tab label="Clientes activos" />
+                <Tab label="Venta por cliente" />
+                <Tab label="Clientes deudores" />
                 <Tab label="Clientes inactivos" />
                 <Tab label="Configuración" />
               </Tabs>
@@ -97,12 +110,19 @@ function ListClients() {
                   mt: 4,
                 }}
               >
+                {l2 && <Loading />}
+                {e2 && <Alert severity="error">Ha ocurrido un error</Alert>}
+
                 <Card sx={{ margin: "0 20px" }}>
-                  {l2 && <Loading />}
-                  {e2 && <Alert severity="error">Ha ocurrido un error</Alert>}
                   {dataClientsBuy && (
-                    <TableListClientsActive
-                      clients={dataClientsBuy.data.report}
+                    <TableListClientsOrder
+                      clients={dataClientsBuy.data.report
+                        .filter(
+                          (client) =>
+                            client.name !== "consumidor " &&
+                            client.name !== "Caleb"
+                        )
+                        .sort((a, b) => b.totalProfits - a.totalProfits)}
                     />
                   )}
                 </Card>
@@ -114,18 +134,42 @@ function ListClients() {
                   mt: 4,
                 }}
               >
+                {l4 && <Loading />}
+                {e4 && <Alert severity="error">Ha ocurrido un error</Alert>}
+
+                <Card sx={{ margin: "0 20px" }}>
+                  {dataClientsDebs && (
+                    <TableDebtor clients={dataClientsDebs.data.report} />
+                  )}
+                </Card>
+              </Box>
+            )}
+
+            {page === 3 && (
+              <Box
+                sx={{
+                  mt: 4,
+                }}
+              >
                 <Card sx={{ margin: "0 20px" }}>
                   {l2 && <Loading />}
                   {e2 && <Alert severity="error">Ha ocurrido un error</Alert>}
                   {dataClientsBuy && (
-                    <TableListClientsInactive
-                      clients={dataClientsBuy.data.report}
+                    <TableListClientsOrder
+                      clients={dataClientsBuy.data.report
+                        .filter(
+                          (client) =>
+                            client.name !== "consumidor " &&
+                            client.name !== "Caleb" &&
+                            !client.active
+                        )
+                        .sort((a, b) => b.totalProfits - a.totalProfits)}
                     />
                   )}
                 </Card>
               </Box>
             )}
-            {page === 3 && (
+            {page === 4 && (
               <Box
                 sx={{
                   mt: 4,

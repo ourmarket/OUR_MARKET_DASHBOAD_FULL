@@ -24,10 +24,9 @@ import CreateSimpleClient from "pages/clients/create-simple-client";
 import EditClient from "pages/clients/edit-clients";
 import DetailsClients from "pages/clients/details-clients";
 import DetailClientProduct from "pages/clients/details-clients-products";
-import ListClientAddress from "pages/clientsAddress/list-clientAddress";
+import ListClientAddress from "pages/clientsAddress";
 import CreateNewClientAddress from "pages/clientsAddress/create-clientAddress";
 import EditClientAddress from "pages/clientsAddress/edit-clientAddress";
-import LocationsPage from "pages/locations";
 import ListOrders from "pages/orders/order-list";
 import OrderDetails from "pages/orders/order-datails";
 import OrderCreate from "pages/orders/order-create";
@@ -294,14 +293,6 @@ export const routes_dr = [
     component: (
       <RequireAuth>
         <EditClientAddress />
-      </RequireAuth>
-    ),
-  },
-  {
-    route: "/clientes/localizacion",
-    component: (
-      <RequireAuth>
-        <LocationsPage />
       </RequireAuth>
     ),
   },
@@ -738,14 +729,6 @@ export const routes_full = [
       </RequireAuth>
     ),
   },
-  {
-    route: "/clientes/localizacion",
-    component: (
-      <RequireAuth>
-        <LocationsPage />
-      </RequireAuth>
-    ),
-  },
 
   /* Ordenes */
   {
@@ -1171,11 +1154,20 @@ export const routes_lite = [
       </RequireAuth>
     ),
   },
+
   {
-    route: "/clientes/localizacion",
+    route: "/distribucion/zonas/nueva",
     component: (
       <RequireAuth>
-        <LocationsPage />
+        <CreateNewDeliveryZone />
+      </RequireAuth>
+    ),
+  },
+  {
+    route: "/distribucion/zonas/editar/:id",
+    component: (
+      <RequireAuth>
+        <EditDeliveryZone />
       </RequireAuth>
     ),
   },

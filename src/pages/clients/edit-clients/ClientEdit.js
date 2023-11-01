@@ -1,9 +1,4 @@
-/* eslint-disable array-callback-return */
-/* eslint-disable consistent-return */
 /* eslint-disable react/prop-types */
-/* eslint-disable no-unused-vars */
-/* eslint-disable react/jsx-boolean-value */
-/* eslint-disable no-underscore-dangle */
 import { useNavigate, useParams } from "react-router-dom";
 import { LoadingButton } from "@mui/lab";
 import { Alert, Autocomplete, Box, MenuItem, TextField } from "@mui/material";
@@ -45,7 +40,6 @@ function ClientEdit({ types, categories, users, client }) {
       cuit: client.cuit,
       contactMeans: client.contactMeans,
       campaignName: client.campaignName,
-      points: client?.points || 0,
     },
     onSubmit: async (values) => {
       const editClientValues = {
@@ -86,7 +80,9 @@ function ClientEdit({ types, categories, users, client }) {
             <Autocomplete
               margin="normal"
               options={autoCompleteUsers}
-              getOptionLabel={(options) => `${options.phone} - ${options.name} ${options.lastName}`}
+              getOptionLabel={(options) =>
+                `${options.phone} - ${options.name} ${options.lastName}`
+              }
               multiple={false}
               id="controlled-demo"
               value={inputValue}
@@ -95,7 +91,9 @@ function ClientEdit({ types, categories, users, client }) {
                 setInputValue(newValue);
               }}
               fullWidth
-              renderInput={(params) => <TextField {...params} label="Usuario" variant="outlined" />}
+              renderInput={(params) => (
+                <TextField {...params} label="Usuario" variant="outlined" />
+              )}
             />
 
             <TextField
@@ -171,7 +169,9 @@ function ClientEdit({ types, categories, users, client }) {
             >
               Cancelar
             </MDButton>
-            {isError && <Alert severity="error">Error — Cliente no creado</Alert>}
+            {isError && (
+              <Alert severity="error">Error — Cliente no creado</Alert>
+            )}
           </Box>
 
           <Box sx={{ width: "50%" }}>
@@ -204,18 +204,6 @@ function ClientEdit({ types, categories, users, client }) {
               value={formik.values.campaignName}
               error={!!formik.errors.campaignName}
               helperText={formik.errors.campaignName}
-              onChange={formik.handleChange}
-            />
-
-            <TextField
-              margin="normal"
-              fullWidth
-              required
-              name="points"
-              label="Puntos"
-              value={formik.values.points}
-              error={!!formik.errors.points}
-              helperText={formik.errors.points}
               onChange={formik.handleChange}
             />
           </Box>

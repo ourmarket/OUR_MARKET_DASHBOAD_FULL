@@ -1,19 +1,16 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable prettier/prettier */
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
+import { useGetDeliveryZonesQuery } from "api/deliveryZoneApi";
 import Loading from "components/DRLoading";
 import { Alert } from "@mui/material";
-import { useGetClientAddressesQuery } from "api/clientsAddressApi";
-import TableListClientAddress from "./TableListClientAddress";
+import AddZones from "components/OUForms/Zone/add-zone/AddZone";
 
-function ListClientAddress() {
-  const { data, isLoading, error } = useGetClientAddressesQuery();
-  console.log(data);
+function CreateNewDeliveryZone() {
+  const { data, isLoading, isError } = useGetDeliveryZonesQuery();
 
   return (
     <DashboardLayout>
@@ -33,13 +30,16 @@ function ListClientAddress() {
                 coloredShadow="info"
               >
                 <MDTypography variant="h6" color="white">
-                  Lista de direcciones de clientes
+                  Nueva zona
                 </MDTypography>
               </MDBox>
-              <MDBox pt={3}>
+
+              <MDBox>
                 {isLoading && <Loading />}
-                {error && <Alert severity="error">{error.error}</Alert>}
-                {data && <TableListClientAddress clientAddress={data.data.clientAddress} />}
+                {isError && (
+                  <Alert severity="error">Ha ocurrido un error</Alert>
+                )}
+                {data && <AddZones zones={data.data.deliveryZones} />}
               </MDBox>
             </Card>
           </Grid>
@@ -49,4 +49,4 @@ function ListClientAddress() {
   );
 }
 
-export default ListClientAddress;
+export default CreateNewDeliveryZone;

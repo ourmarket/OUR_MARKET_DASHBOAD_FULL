@@ -1,16 +1,13 @@
-/* eslint-disable prettier/prettier */
 import { apiSlice } from "./apiSlice";
 
 export const deliveryZoneApi = apiSlice.injectEndpoints({
-  
   keepUnusedDataFor: 60, // duración de datos en cache
   refetchOnMountOrArgChange: true, // revalida al montar el componente
   refetchOnFocus: true, // revalida al cambiar de foco
   refetchOnReconnect: true, // revalida al reconectar
   tagTypes: ["delivery_zone"],
-  
+
   endpoints: (builder) => ({
-    
     getDeliveryZones: builder.query({
       query: () => "/delivery_zone",
       // keepUnusedDataFor: 3,
@@ -44,7 +41,15 @@ export const deliveryZoneApi = apiSlice.injectEndpoints({
       invalidatesTags: ["delivery_zone"],
       extraOptions: { maxRetries: 0 },
     }),
-    
+    putDeleteMapZone: builder.mutation({
+      query: ({ id }) => ({
+        url: `/delivery_zone/deleteMapZone/${id}`,
+        method: "put",
+      }),
+      invalidatesTags: ["delivery_zone"],
+      extraOptions: { maxRetries: 0 },
+    }),
+
     deleteDeliveryZone: builder.mutation({
       query: (id) => ({
         url: `/delivery_zone/${id}`,
@@ -56,10 +61,11 @@ export const deliveryZoneApi = apiSlice.injectEndpoints({
   }),
 });
 
-export const { 
-  useGetDeliveryZonesQuery, 
-  useGetDeliveryZoneQuery, 
-  usePostDeliveryZoneMutation, 
-  usePutDeliveryZoneMutation, 
-  useDeleteDeliveryZoneMutation, 
+export const {
+  useGetDeliveryZonesQuery,
+  useGetDeliveryZoneQuery,
+  usePostDeliveryZoneMutation,
+  usePutDeliveryZoneMutation,
+  usePutDeleteMapZoneMutation,
+  useDeleteDeliveryZoneMutation,
 } = deliveryZoneApi;

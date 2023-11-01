@@ -7,7 +7,7 @@ export const optionZones = {
     strokeWeight: 2,
     clickable: false,
     draggable: false,
-    editable: false,
+    editable: true,
     geodesic: false,
     zIndex: 1,
   },
