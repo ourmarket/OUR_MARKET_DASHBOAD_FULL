@@ -1,14 +1,12 @@
-/* eslint-disable react/jsx-key */
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/prop-types */
-/* eslint-disable consistent-return */
-/* eslint-disable react/destructuring-assignment */
 /* eslint-disable no-unused-vars */
-
 import { Box } from "@mui/system";
 import { GoogleMap, InfoWindow, Marker, Polygon } from "@react-google-maps/api";
 import { optionZones } from "data/optionZones";
 import { zones } from "data/zones";
 import { useSocket } from "hooks/useSockets";
+import { useSocket2 } from "hooks/useSockets2";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
@@ -31,7 +29,10 @@ function ClientMarker({ data }) {
   };
   return (
     <Marker
-      position={{ lat: data.shippingAddress.lat, lng: data.shippingAddress.lng }}
+      position={{
+        lat: data.shippingAddress.lat,
+        lng: data.shippingAddress.lng,
+      }}
       onClick={handleOpen}
       icon={
         data.status === "Entregado"
@@ -41,7 +42,10 @@ function ClientMarker({ data }) {
     >
       {open && (
         <InfoWindow
-          position={{ lat: data.shippingAddress.lat, lng: data.shippingAddress.lng }}
+          position={{
+            lat: data.shippingAddress.lat,
+            lng: data.shippingAddress.lng,
+          }}
           onCloseClick={handleClose}
         >
           <div style={divStyle}>
@@ -63,10 +67,13 @@ function DeliveryMarker({ data, orders }) {
   const [open, setOpen] = useState(false);
 
   const filterOrders = orders.filter(
-    (order) => order.deliveryTruck && order.deliveryTruck.truckId === data.truckId
+    (order) =>
+      order.deliveryTruck && order.deliveryTruck.truckId === data.truckId
   );
 
-  const filterOrdersDelivered = filterOrders.filter((order) => order.status === "Entregado");
+  const filterOrdersDelivered = filterOrders.filter(
+    (order) => order.status === "Entregado"
+  );
 
   const handleOpen = () => {
     setOpen(!open);
@@ -89,12 +96,16 @@ function DeliveryMarker({ data, orders }) {
       icon="https://i.ibb.co/SJdVf1D/geo-icon-16-3.png"
     >
       {open && (
-        <InfoWindow position={{ lat: data.lat, lng: data.lng }} onCloseClick={handleClose}>
+        <InfoWindow
+          position={{ lat: data.lat, lng: data.lng }}
+          onCloseClick={handleClose}
+        >
           <div style={divStyle}>
             <h2>{data.truckId}</h2>
             <h3>{data.deliveryName}</h3>
             <h3 style={{ marginBottom: "5px" }}>
-              Ordenes entregadas : {filterOrdersDelivered.length}/{filterOrders.length}
+              Ordenes entregadas : {filterOrdersDelivered.length}/
+              {filterOrders.length}
             </h3>
             {/*  <Link to={`/clientes/detalle/${client.client._id}`}>Ver Cliente</Link>  */}
           </div>
@@ -105,21 +116,32 @@ function DeliveryMarker({ data, orders }) {
 }
 
 function MapDelivery({ activeOrders }) {
-  const activeFilterOrders = activeOrders.filter((order) => order.shippingAddress.lat);
-  useMemo(() => {
-    const faltantes = activeOrders
-      .filter((order) => !order.shippingAddress.lat)
-      .map((order) => order.shippingAddress);
+  const dispatch = useDispatch();
+  const activeFilterOrders = activeOrders.filter(
+    (order) => order.shippingAddress.lat
+  );
 
-    console.log("------Direcciones que les falta las coordenadas----------");
-    console.log(faltantes);
+  const { positions } = useSelector((store) => store.positions);
+  const { superUserData } = useSelector((store) => store.auth);
+
+  const { socket, connectSocket, disconnectSocket } = useSocket2(
+    `${import.meta.env.VITE_APP_SOCKET_URL}/orders/delivery`
+  );
+
+  useEffect(() => {
+    // Conecta el socket al montar el componente
+    connectSocket();
+
+    // Desconecta el socket al desmontar el componente
+    return () => {
+      disconnectSocket();
+    };
   }, []);
 
-  const dispatch = useDispatch();
-  const { positions } = useSelector((store) => store.positions);
-  const { socket } = useSocket(`${import.meta.env.VITE_APP_SOCKET_URL}/orders/delivery`);
-
-  const center = useMemo(() => ({ lat: -34.570428718491605, lng: -58.743382510475065 }), []); // -34.570428718491605, -58.743382510475065
+  const center = useMemo(
+    () => ({ lat: superUserData.lat, lng: superUserData.lng }),
+    []
+  );
   const options = useMemo(
     () => ({
       clickableIcons: false,
@@ -134,20 +156,28 @@ function MapDelivery({ activeOrders }) {
     []
   );
 
-  console.log("positions", positions);
   useEffect(() => {
-    socket.on("delivery", (data) => {
-      dispatch(setPositions(data));
-    });
+    if (socket) {
+      socket.on("delivery", (data) => {
+        dispatch(setPositions(data));
+      });
+    }
   }, [socket, dispatch]);
 
   return (
     <Box p={3}>
-      <GoogleMap zoom={13} center={center} mapContainerClassName="map-container" options={options}>
+      <GoogleMap
+        zoom={13}
+        center={center}
+        mapContainerClassName="map-container"
+        options={options}
+      >
         <Marker position={center} icon="https://i.ibb.co/nbm4b4x/pngegg.png" />
 
         {positions.length > 0 &&
-          positions.map((truck) => <DeliveryMarker data={truck} orders={activeOrders} />)}
+          positions.map((truck) => (
+            <DeliveryMarker key={truck} data={truck} orders={activeOrders} />
+          ))}
 
         {activeFilterOrders.map((order) => (
           <ClientMarker data={order} key={order._id} />
