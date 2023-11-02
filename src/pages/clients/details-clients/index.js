@@ -130,7 +130,7 @@ function DetailsClients() {
                   mx: 2.5,
                 }}
               >
-                {(l1 || l2 || l3 || l4 || l5 || l6 || !isLoaded) && <Loading />}
+                {(l1 || l2 || l3 || l4 || l5 || l6) && <Loading />}
                 {(e1 || e2 || e3 || e4 || e5 || e6) && (
                   <Alert severity="error">ha ocurrido un error</Alert>
                 )}
@@ -140,7 +140,8 @@ function DetailsClients() {
                   dataClientBuy &&
                   dataClientBuyByDay &&
                   totalBuyOrderByMonth &&
-                  recommendationData && (
+                  recommendationData &&
+                  isLoaded && (
                     <Box>
                       <ResumeDataClient
                         client={dataClient.data.client}

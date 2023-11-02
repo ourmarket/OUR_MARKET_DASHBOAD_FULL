@@ -24,8 +24,8 @@ import { useState } from "react";
 import { provinces } from "data/province";
 import { clearAddress } from "reduxToolkit/mapAutocomplete";
 import { useDispatch, useSelector } from "react-redux";
-import MapAutoComplete from "./mapAutoComplete";
 import { useSetAddressData } from "hooks/useSetAddressData";
+import AutoCompleteMap from "components/OUMaps/AutoCompleteMap/AutoCompleteMap";
 
 function SimpleClientCreate({ types, categories, zones }) {
   const navigate = useNavigate();
@@ -246,147 +246,155 @@ function SimpleClientCreate({ types, categories, zones }) {
             />
 
             {checked && (
-              <Box
-                sx={{
-                  mt: 1,
-                  display: "flex",
-                  gap: 3,
-                  width: "100%",
-                  justifyContent: "center",
-                }}
-              >
-                <Box sx={{ width: "50%" }}>
-                  <TextField
-                    margin="normal"
-                    fullWidth
-                    required
-                    name="address"
-                    label="Dirección"
-                    error={!!formik.errors.address}
-                    helperText={formik.errors.address}
-                    onChange={formik.handleChange}
-                  />
-                  <TextField
-                    margin="normal"
-                    fullWidth
-                    name="department"
-                    label="Departamento (opcional)"
-                    error={!!formik.errors.department}
-                    helperText={formik.errors.department}
-                    onChange={formik.handleChange}
-                  />
-                  <TextField
-                    margin="normal"
-                    fullWidth
-                    name="flor"
-                    label="Piso (opcional)"
-                    error={!!formik.errors.flor}
-                    helperText={formik.errors.flor}
-                    onChange={formik.handleChange}
-                  />
+              <Box>
+                {zones.length === 0 && (
+                  <Alert severity="info">
+                    Todavía no hay zonas creadas, crea una zona antes de cargar
+                    una dirección.
+                  </Alert>
+                )}
+                <Box
+                  sx={{
+                    mt: 1,
+                    display: "flex",
+                    gap: 3,
+                    width: "100%",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Box sx={{ width: "50%" }}>
+                    <TextField
+                      margin="normal"
+                      fullWidth
+                      required
+                      name="address"
+                      label="Dirección"
+                      error={!!formik.errors.address}
+                      helperText={formik.errors.address}
+                      onChange={formik.handleChange}
+                    />
+                    <TextField
+                      margin="normal"
+                      fullWidth
+                      name="department"
+                      label="Departamento (opcional)"
+                      error={!!formik.errors.department}
+                      helperText={formik.errors.department}
+                      onChange={formik.handleChange}
+                    />
+                    <TextField
+                      margin="normal"
+                      fullWidth
+                      name="flor"
+                      label="Piso (opcional)"
+                      error={!!formik.errors.flor}
+                      helperText={formik.errors.flor}
+                      onChange={formik.handleChange}
+                    />
 
-                  <TextField
-                    margin="normal"
-                    required
-                    select
-                    fullWidth
-                    name="province"
-                    label="Provincia"
-                    value={formik.values.province}
-                    error={!!formik.errors.province}
-                    helperText={formik.errors.province}
-                    onChange={formik.handleChange}
-                  >
-                    {provinces.map((province) => (
-                      <MenuItem key={province} value={province}>
-                        {province}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                  <TextField
-                    margin="normal"
-                    fullWidth
-                    required
-                    name="city"
-                    label="Ciudad"
-                    error={!!formik.errors.city}
-                    helperText={formik.errors.city}
-                    onChange={formik.handleChange}
-                  />
-                  <TextField
-                    margin="normal"
-                    fullWidth
-                    required
-                    type="number"
-                    name="zip"
-                    label="Código postal"
-                    error={!!formik.errors.zip}
-                    helperText={formik.errors.zip}
-                    onChange={formik.handleChange}
-                  />
+                    <TextField
+                      margin="normal"
+                      required
+                      select
+                      fullWidth
+                      name="province"
+                      label="Provincia"
+                      value={formik.values.province}
+                      error={!!formik.errors.province}
+                      helperText={formik.errors.province}
+                      onChange={formik.handleChange}
+                    >
+                      {provinces.map((province) => (
+                        <MenuItem key={province} value={province}>
+                          {province}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                    <TextField
+                      margin="normal"
+                      fullWidth
+                      required
+                      name="city"
+                      label="Ciudad"
+                      error={!!formik.errors.city}
+                      helperText={formik.errors.city}
+                      onChange={formik.handleChange}
+                    />
+                    <TextField
+                      margin="normal"
+                      fullWidth
+                      required
+                      type="number"
+                      name="zip"
+                      label="Código postal"
+                      error={!!formik.errors.zip}
+                      helperText={formik.errors.zip}
+                      onChange={formik.handleChange}
+                    />
 
-                  <TextField
-                    margin="normal"
-                    required
-                    select
-                    name="deliveryZone"
-                    fullWidth
-                    label="Zona"
-                    value={formik.values.deliveryZone}
-                    error={!!formik.errors.deliveryZone}
-                    helperText={formik.errors.deliveryZone}
-                    onChange={formik.handleChange}
-                  >
-                    {zones.map((zone) => (
-                      <MenuItem key={zone._id} value={zone._id}>
-                        {zone.name}
-                      </MenuItem>
-                    ))}
-                  </TextField>
+                    <TextField
+                      margin="normal"
+                      required
+                      select
+                      name="deliveryZone"
+                      fullWidth
+                      label="Zona"
+                      value={formik.values.deliveryZone}
+                      error={!!formik.errors.deliveryZone}
+                      helperText={formik.errors.deliveryZone}
+                      onChange={formik.handleChange}
+                    >
+                      {zones.map((zone) => (
+                        <MenuItem key={zone._id} value={zone._id}>
+                          {zone.name}
+                        </MenuItem>
+                      ))}
+                    </TextField>
 
-                  <TextField
-                    margin="normal"
-                    required
-                    select
-                    name="type"
-                    fullWidth
-                    label="Tipo de dirección"
-                    value={formik.values.type}
-                    error={!!formik.errors.type}
-                    helperText={formik.errors.type}
-                    onChange={formik.handleChange}
-                  >
-                    <MenuItem value="negocio">Negocio</MenuItem>
-                    <MenuItem value="casa">Casa</MenuItem>
-                  </TextField>
-                  <TextField
-                    margin="normal"
-                    fullWidth
-                    required
-                    type="number"
-                    name="lat"
-                    label="Latitud"
-                    value={lat}
-                    error={!!formik.errors.lat}
-                    helperText={formik.errors.lat}
-                    onChange={formik.handleChange}
-                  />
-                  <TextField
-                    margin="normal"
-                    fullWidth
-                    required
-                    type="number"
-                    name="lng"
-                    label="Longitud"
-                    value={lng}
-                    error={!!formik.errors.lng}
-                    helperText={formik.errors.lng}
-                    onChange={formik.handleChange}
-                  />
-                </Box>
+                    <TextField
+                      margin="normal"
+                      required
+                      select
+                      name="type"
+                      fullWidth
+                      label="Tipo de dirección"
+                      value={formik.values.type}
+                      error={!!formik.errors.type}
+                      helperText={formik.errors.type}
+                      onChange={formik.handleChange}
+                    >
+                      <MenuItem value="negocio">Negocio</MenuItem>
+                      <MenuItem value="casa">Casa</MenuItem>
+                    </TextField>
+                    <TextField
+                      margin="normal"
+                      fullWidth
+                      required
+                      type="number"
+                      name="lat"
+                      label="Latitud"
+                      value={lat}
+                      error={!!formik.errors.lat}
+                      helperText={formik.errors.lat}
+                      onChange={formik.handleChange}
+                    />
+                    <TextField
+                      margin="normal"
+                      fullWidth
+                      required
+                      type="number"
+                      name="lng"
+                      label="Longitud"
+                      value={lng}
+                      error={!!formik.errors.lng}
+                      helperText={formik.errors.lng}
+                      onChange={formik.handleChange}
+                    />
+                  </Box>
 
-                <Box sx={{ width: "50%" }}>
-                  <MapAutoComplete />
+                  <Box sx={{ width: "50%" }}>
+                    <AutoCompleteMap zones={zones} />
+                  </Box>
                 </Box>
               </Box>
             )}

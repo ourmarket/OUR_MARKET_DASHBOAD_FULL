@@ -1,23 +1,33 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { Box } from "@mui/material";
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer } from "react-leaflet";
-import { DraggableMarker } from "./DraggableMarker";
-import { RecenterAutomatically } from "./RecenterAutomatically";
+import { MapContainer, Polygon, TileLayer } from "react-leaflet";
+import { DraggableMarker } from "./components/DraggableMarker";
+import { RecenterAutomatically } from "./components/RecenterAutomatically";
 import MDTypography from "components/MDTypography";
 import colors from "assets/theme/base/colors";
 import { useSelector } from "react-redux";
-import { AutoCompleteForm } from "./AutoCompleteForm";
+import { AutoCompleteForm } from "./components/AutoCompleteForm";
 
-function Leaflet() {
+function AutoCompleteMap({ zones }) {
   const { lat, lng } = useSelector((store) => store.mapAutocomplete);
   const [position, setPosition] = useState({ lat, lng });
+
   useEffect(() => {
     setPosition({ lat, lng });
   }, [lat, lng]);
 
+  const deliveryZones = zones.map((zone) => ({
+    id: zone?._id,
+    colorFill: {
+      color: zone?.fillColor,
+    },
+    path: zone?.mapLimits.map((limit) => [limit?.lat, limit?.lng]),
+  }));
+
   return (
-    <div style={{ width: "100%", height: "100%" }}>
+    <Box sx={{ width: "100%", height: 610, marginTop: "15px" }}>
       <MapContainer
         center={position}
         zoom={17}
@@ -31,6 +41,14 @@ function Leaflet() {
         />
         <DraggableMarker position={position} setPosition={setPosition} />
         <RecenterAutomatically lat={position.lat} lng={position.lng} />
+
+        {deliveryZones.map((zone) => (
+          <Polygon
+            key={zone.id}
+            pathOptions={zone.colorFill}
+            positions={zone.path}
+          />
+        ))}
       </MapContainer>
       <Box
         sx={{
@@ -43,8 +61,8 @@ function Leaflet() {
           variant="h5"
         >{`Lat: ${position.lat} || Lon: ${position.lng}`}</MDTypography>
       </Box>
-    </div>
+    </Box>
   );
 }
 
-export default Leaflet;
+export default AutoCompleteMap;

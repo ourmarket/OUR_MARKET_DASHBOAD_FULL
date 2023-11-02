@@ -119,9 +119,9 @@ function ListClientAddress() {
                     mt: 4,
                   }}
                 >
-                  {(l3 || !isLoaded) && <Loading />}
+                  {l3 && <Loading />}
                   {e3 && <Alert severity="error">Ha ocurrido un error</Alert>}
-                  {clientAddressData && dataZones && (
+                  {clientAddressData && dataZones && isLoaded && (
                     <Card>
                       <MapsLocations
                         clientAddress={clientAddressData.data.clientAddress}

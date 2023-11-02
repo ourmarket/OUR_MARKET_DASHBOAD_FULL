@@ -42,15 +42,17 @@ function LocationsPage() {
                 </MDTypography>
               </MDBox>
               <MDBox pt={3} sx={{ minHeight: "70vh" }}>
-                {isLoading && !isLoaded && <Loading />}
+                {isLoading && <Loading />}
                 {error && <Alert severity="error">Ha ocurrido un error</Alert>}
                 {data && (
                   <TotalsCards clientAddress={data.data.clientAddress} />
                 )}
-                {data && (
+                {data && isLoaded && (
                   <MapsLocations clientAddress={data.data.clientAddress} />
                 )}
-                {data && <MapsHeat clientAddress={data.data.clientAddress} />}
+                {data && isLoaded && (
+                  <MapsHeat clientAddress={data.data.clientAddress} />
+                )}
               </MDBox>
             </Card>
           </Grid>

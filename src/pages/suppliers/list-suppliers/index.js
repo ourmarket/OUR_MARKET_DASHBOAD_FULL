@@ -9,7 +9,7 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Loading from "components/DRLoading";
 import { Alert } from "@mui/material";
 import { useGetSuppliersQuery } from "api/supplierApi";
-import TableListSuppliers from "./TableListSuppliers";
+import TableListSuppliers from "../../../components/OUTables/Suppliers/All/TableListSuppliers";
 
 function ListSuppliers() {
   const { data, isLoading, error } = useGetSuppliersQuery();

@@ -74,7 +74,7 @@ function ListOrders() {
                   mx: 2.5,
                 }}
               >
-                <TableUnpaidOrders />
+                <TableActiveOrders />
               </Card>
             )}
             {page === 2 && (
@@ -83,7 +83,7 @@ function ListOrders() {
                   mx: 2.5,
                 }}
               >
-                <TableActiveOrders />
+                <TableUnpaidOrders />
               </Card>
             )}
           </Grid>

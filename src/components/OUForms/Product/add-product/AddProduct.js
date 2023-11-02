@@ -72,8 +72,8 @@ function AddProductForm({ listCategories }) {
           >
             {listCategories.categories.length === 0 && (
               <Alert severity="warning" sx={{ marginBottom: "30px" }}>
-                No hay proveedores en la lista, agregue uno antes de cargar el
-                stock.
+                No hay categorías creadas, agregue una antes de crear un
+                producto.
               </Alert>
             )}
             <TextField

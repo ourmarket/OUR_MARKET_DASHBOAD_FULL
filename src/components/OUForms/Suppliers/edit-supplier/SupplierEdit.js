@@ -66,7 +66,7 @@ function SupplierEdit({ supplier }) {
               required
               fullWidth
               autoFocus
-              label="Razón social"
+              label="Razón social/Nombre"
               name="businessName"
               value={formik.values.businessName}
               error={!!formik.errors.businessName}
@@ -88,7 +88,6 @@ function SupplierEdit({ supplier }) {
 
             <TextField
               margin="normal"
-              required
               fullWidth
               label="Email"
               name="email"

@@ -18,7 +18,7 @@ function MenuProductsLots({ open, handleCloseMenu, productsLotsId }) {
       PaperProps={{
         sx: {
           p: 1,
-          width: 150,
+          width: 200,
           zIndex: 20,
           "& .MuiMenuItem-root": {
             px: 1,
@@ -30,19 +30,13 @@ function MenuProductsLots({ open, handleCloseMenu, productsLotsId }) {
     >
       <MenuItem
         onClick={() =>
-          navigate(`/productos/stock/editar/${productsLotsId.productId}?lotId=${productsLotsId.id}`)
+          navigate(
+            `/productos/stock/editar/${productsLotsId.productId}?lotId=${productsLotsId.id}`
+          )
         }
       >
         <EditIcon sx={{ mr: 1 }} />
-        Editar Stock
-      </MenuItem>
-      <MenuItem
-        onClick={() =>
-          navigate(`/productos/stock/mover/${productsLotsId.productId}?lotId=${productsLotsId.id}`)
-        }
-      >
-        <EditIcon sx={{ mr: 1 }} />
-        Mover Stock
+        Editar/Borrar Stock
       </MenuItem>
     </Popover>
   );

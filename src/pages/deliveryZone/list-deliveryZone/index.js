@@ -8,7 +8,7 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Loading from "components/DRLoading";
 import { Alert } from "@mui/material";
 import { useGetDeliveryZonesQuery } from "api/deliveryZoneApi";
-import TableListDeliveryZone from "./TableListDeliveryZone";
+import TableListDeliveryZone from "components/OUTables/Zones/All/TableListDeliveryZone";
 
 function ListDeliveryZone() {
   const { data, isLoading, isError } = useGetDeliveryZonesQuery();

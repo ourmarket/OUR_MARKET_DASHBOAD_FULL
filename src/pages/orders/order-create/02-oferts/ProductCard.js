@@ -43,19 +43,25 @@ function ProductCard({ product }) {
 
   // console.log(cost);
   return (
-    <Card
+    <Box
       sx={{
-        padding: "5px 20px",
+        padding: "5px 20px 5px 5px",
         display: "flex",
         height: "65px",
         flexDirection: "row",
         alignItems: "center",
+        border: "1px solid #ccc",
+        borderRadius: "10px",
       }}
     >
       <Box
         sx={{
           width: 60,
           mr: 2,
+          display: "flex",
+          alignItems: "center",
+          borderRadius: "10px",
+          overflow: "hidden",
         }}
       >
         <img
@@ -191,7 +197,7 @@ function ProductCard({ product }) {
           </MDButton>
         )}
       </Box>
-    </Card>
+    </Box>
   );
 }
 

@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
-import { Alert, Card, Grid, Tab, Tabs } from "@mui/material";
+import { Alert, Box, Card, Grid, Tab, Tabs } from "@mui/material";
 import { useGetClientAddressesQuery } from "api/clientsAddressApi";
 import { useGetDeliveryTrucksQuery } from "api/deliveryTruckApi";
 import { useGetDeliveryZonesQuery } from "api/deliveryZoneApi";
@@ -76,9 +76,10 @@ function OrderCreate() {
               </Tabs>
             </MDBox>
             {page === 0 && (
-              <Card
+              <Box
                 sx={{
                   mx: 2.5,
+                  mt: 3,
                 }}
               >
                 {(l2 || l3 || l4) && <Loading />}
@@ -93,12 +94,14 @@ function OrderCreate() {
                     deliveryTrucks={deliveryTrucks.data.deliveryTrucks}
                   />
                 )}
-              </Card>
+              </Box>
             )}
             {page === 1 && (
               <Card
                 sx={{
                   mx: 2.5,
+                  mt: 3,
+                  p: 2,
                 }}
               >
                 {l1 && <Loading />}
@@ -107,13 +110,14 @@ function OrderCreate() {
               </Card>
             )}
             {page === 2 && (
-              <Card
+              <Box
                 sx={{
                   mx: 2.5,
+                  mt: 3,
                 }}
               >
                 <Cart />
-              </Card>
+              </Box>
             )}
           </Grid>
         </Grid>

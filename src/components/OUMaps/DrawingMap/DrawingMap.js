@@ -28,8 +28,6 @@ const DrawingMap = ({ color, setMapLimits, zones }) => {
     path: zone.mapLimits.map((limit) => [limit.lat, limit.lng]),
   }));
 
-  console.log(deliveryZones);
-
   const center = useMemo(
     () => ({ lat: superUserData.lat, lng: superUserData.lng }),
     []

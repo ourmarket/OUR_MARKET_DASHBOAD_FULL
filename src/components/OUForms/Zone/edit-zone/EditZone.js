@@ -28,7 +28,6 @@ function EditZone({ deliveryZone, zones }) {
 
   const [color, setColor] = useState(deliveryZone.fillColor);
   const [mapLimits, setMapLimits] = useState([]);
-  const [mapError, setMapError] = useState(false);
 
   const onColorChange = (e) => {
     setColor(e.target.value);
@@ -52,9 +51,6 @@ function EditZone({ deliveryZone, zones }) {
         fillColor: color,
         mapLimits: mapLimits[0]?.latlngs || deliveryZone.mapLimits,
       };
-      if (!mapLimits[0]?.latlngs) {
-        return setMapError(true);
-      }
 
       const res = await editDeliveryZone({ id, ...newDeliveryZone }).unwrap();
       if (res.ok) {
@@ -251,9 +247,6 @@ function EditZone({ deliveryZone, zones }) {
               Volver
             </MDButton>
             {e1 && <Alert severity="error">Error — Zona no creada</Alert>}
-            {mapError && (
-              <Alert severity="warning">(*) Error — Zona no dibujada.</Alert>
-            )}
           </Box>
 
           <Box sx={{ width: "50%", height: 630 }}>

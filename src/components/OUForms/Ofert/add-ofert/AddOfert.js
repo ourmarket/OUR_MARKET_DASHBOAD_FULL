@@ -135,8 +135,8 @@ function AddOfertForm({ warning }) {
             >
               {listProducts.products.length === 0 && (
                 <Alert severity="warning" sx={{ marginBottom: "30px" }}>
-                  No hay proveedores en la lista, agregue uno antes de cargar el
-                  stock.
+                  No hay productos creados, agregue uno antes de crear una
+                  oferta.
                 </Alert>
               )}
               <Autocomplete

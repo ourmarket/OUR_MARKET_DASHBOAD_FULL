@@ -14,7 +14,8 @@ import { creteDistributorsSchema } from "validations/distributors/createDistrubu
 
 function DistributorCreate() {
   const navigate = useNavigate();
-  const [createDistributor, { isLoading, isError }] = usePostDistributorMutation();
+  const [createDistributor, { isLoading, isError }] =
+    usePostDistributorMutation();
 
   const formik = useFormik({
     initialValues: {
@@ -64,7 +65,7 @@ function DistributorCreate() {
               margin="normal"
               required
               fullWidth
-              label="Razón social"
+              label="Razón social/Nombre"
               name="businessName"
               error={!!formik.errors.businessName}
               helperText={formik.errors.businessName}
@@ -138,7 +139,9 @@ function DistributorCreate() {
             >
               Cancelar
             </MDButton>
-            {isError && <Alert severity="error">Error — Proveedor no creado</Alert>}
+            {isError && (
+              <Alert severity="error">Error — Proveedor no creado</Alert>
+            )}
           </Box>
 
           <Box sx={{ width: "50%" }}>

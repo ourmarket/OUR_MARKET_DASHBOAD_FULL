@@ -7,7 +7,7 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import { useGetClientsQuery } from "api/clientsApi";
 import Loading from "components/DRLoading";
 import { Alert } from "@mui/material";
-import SimpleClientCreate from "./ClientSimpleCreate";
+import SimpleClientCreate from "../../../components/OUForms/Clients/add-simple-client/ClientSimpleCreate";
 import { useGetClientTypesQuery } from "api/clientsTypeApi";
 import { useGetClientCategoriesQuery } from "api/clientsCategoryApi";
 import { useGetDeliveryZonesQuery } from "api/deliveryZoneApi";
@@ -54,11 +54,11 @@ function CreateSimpleClient() {
                 </MDTypography>
               </MDBox>
               <MDBox>
-                {(l1 || l2 || l3 || l4 || !isLoaded) && <Loading />}
+                {(l1 || l2 || l3 || l4) && <Loading />}
                 {(e1 || e2 || e3 || e4) && (
                   <Alert severity="error">Ha ocurrido un error</Alert>
                 )}
-                {clients && categories && types && zones && (
+                {clients && categories && types && zones && isLoaded && (
                   <SimpleClientCreate
                     clients={clients.data.clients}
                     categories={categories.data.clientCategories}

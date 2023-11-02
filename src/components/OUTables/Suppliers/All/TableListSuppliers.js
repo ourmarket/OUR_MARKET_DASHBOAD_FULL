@@ -1,5 +1,4 @@
 /* eslint-disable react/prop-types */
-/* eslint-disable no-unused-vars */
 /* eslint-disable no-underscore-dangle */
 import { Box, IconButton, Stack } from "@mui/material";
 import { useState } from "react";
@@ -9,70 +8,69 @@ import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import MDButton from "components/MDButton";
 import colors from "assets/theme-dark/base/colors";
 import { useMaterialUIController } from "context";
-import MenuProductsLots from "./MenuDeliveryZone";
+import MenuListSuppliers from "../Menu/MenuListSuppliers";
 
-function TableListDeliveryZone({ deliveryZones }) {
+function TableListOferts({ suppliers }) {
   const [controller] = useMaterialUIController();
   const { darkMode } = controller;
 
   const navigate = useNavigate();
   const [open, setOpen] = useState(null);
-  const [menuId, setMenuId] = useState(null);
+  const [suppliersId, setSuppliersId] = useState(null);
 
   const handleOpenMenu = (id, event) => {
     setOpen(event.currentTarget);
-    setMenuId(id);
+    setSuppliersId(id);
   };
 
   const handleCloseMenu = () => {
     setOpen(null);
-    setMenuId(null);
+    setSuppliersId(null);
   };
 
   const columns = [
     {
-      field: "name",
-      headerName: "Zona",
+      field: "businessName",
+      headerName: "Razón social",
       flex: 1,
       cellClassName: "name-column--cell",
+      headerClassName: "super-app-theme--header",
+    },
+
+    {
+      field: "cuit",
+      headerName: "CUIT",
+      flex: 1,
+      headerClassName: "super-app-theme--header",
+    },
+    {
+      field: "phone",
+      headerName: "Teléfono",
+      flex: 1,
+      headerClassName: "super-app-theme--header",
+    },
+    {
+      field: "email",
+      headerName: "Email",
+      flex: 1,
+      headerClassName: "super-app-theme--header",
+    },
+    {
+      field: "province",
+      headerName: "Provincia",
+      flex: 1,
       headerClassName: "super-app-theme--header",
     },
     {
       field: "city",
       headerName: "Ciudad",
       flex: 1,
-      cellClassName: "name-column--cell",
-      headerClassName: "super-app-theme--header",
-    },
-
-    {
-      field: "cost",
-      headerName: "Costo",
-      flex: 1,
       headerClassName: "super-app-theme--header",
     },
     {
-      field: "north",
-      headerName: "L.Norte",
-      flex: 1,
-      headerClassName: "super-app-theme--header",
-    },
-    {
-      field: "south",
-      headerName: "L.Sur",
-      flex: 1,
-      headerClassName: "super-app-theme--header",
-    },
-    {
-      field: "east",
-      headerName: "L.Este",
-      flex: 1,
-      headerClassName: "super-app-theme--header",
-    },
-    {
-      field: "west",
-      headerName: "L.Oeste",
-      flex: 1,
+      field: "zip",
+      headerName: "CP",
+      flex: 0.4,
       headerClassName: "super-app-theme--header",
     },
 
@@ -82,7 +80,11 @@ function TableListDeliveryZone({ deliveryZones }) {
       headerClassName: "super-app-theme--header",
 
       renderCell: ({ row: { _id } }) => (
-        <IconButton size="large" color="inherit" onClick={(e) => handleOpenMenu(_id, e)}>
+        <IconButton
+          size="large"
+          color="inherit"
+          onClick={(e) => handleOpenMenu(_id, e)}
+        >
           <MoreVertIcon />
         </IconButton>
       ),
@@ -92,11 +94,16 @@ function TableListDeliveryZone({ deliveryZones }) {
   return (
     <>
       <Box m="20px" sx={{ overflowX: "scroll" }}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          mb={5}
+        >
           <MDButton
             color="dark"
             variant="gradient"
-            onClick={() => navigate("/distribucion/zonas/nueva")}
+            onClick={() => navigate("/productos/proveedores/nuevo")}
           >
             Crear
           </MDButton>
@@ -106,12 +113,9 @@ function TableListDeliveryZone({ deliveryZones }) {
             checkboxSelection
             disableSelectionOnClick
             components={{ Toolbar: GridToolbar }}
-            rows={deliveryZones.map((zone) => ({
-              ...zone,
-              east: zone.limits[0]?.east,
-              north: zone.limits[0]?.north,
-              south: zone.limits[0]?.south,
-              west: zone.limits[0]?.west,
+            rows={suppliers.map((supplier) => ({
+              ...supplier,
+              email: supplier?.email || "No cargado",
             }))}
             columns={columns}
             getRowId={(row) => row._id}
@@ -151,9 +155,13 @@ function TableListDeliveryZone({ deliveryZones }) {
         </Box>
       </Box>
 
-      <MenuProductsLots open={open} handleCloseMenu={handleCloseMenu} menuId={menuId} />
+      <MenuListSuppliers
+        open={open}
+        handleCloseMenu={handleCloseMenu}
+        suppliersId={suppliersId}
+      />
     </>
   );
 }
 
-export default TableListDeliveryZone;
+export default TableListOferts;

@@ -21,7 +21,7 @@ import AddOfertForm from "components/OUForms/Ofert/add-ofert/AddOfert";
 import EditOfertForm from "components/OUForms/Ofert/edit-ofert/EditOfert";
 import EditProductoForm from "components/OUForms/Product/edit-product/EditProduct";
 import AddStock from "components/OUForms/Stock/Add-Stock/AddStock";
-import TableStock from "./stockList/TableStock";
+import TableStock from "../../../../components/OUTables/Stocks/Individual/TableStock";
 
 function ProductDetail() {
   const { id } = useParams();
@@ -109,7 +109,7 @@ function ProductDetail() {
             </Box>
 
             {page === 0 && (
-              <Card
+              <Box
                 sx={{
                   mx: 2.5,
                 }}
@@ -132,7 +132,7 @@ function ProductDetail() {
                       totalProductSellByMonth={totalProductSell.data.byMonth}
                     />
                   )}
-              </Card>
+              </Box>
             )}
             {page === 1 && (
               <Card

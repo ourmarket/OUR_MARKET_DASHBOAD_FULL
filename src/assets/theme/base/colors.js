@@ -114,8 +114,8 @@ const colors = {
     },
 
     error: {
-      main: "#49a3f1",
-      state: "#1A73E8",
+      main: "#d41f1a",
+      state: "#9b0404",
     },
 
     light: {

@@ -54,7 +54,7 @@ function ItemCart({ product }) {
   return (
     <Card
       sx={{
-        padding: "5px 20px",
+        padding: "5px 20px 5px 10px",
         display: "flex",
         minHeight: "75px",
         flexDirection: "row",
@@ -66,6 +66,10 @@ function ItemCart({ product }) {
         sx={{
           width: 60,
           mr: 2,
+          display: "flex",
+          alignItems: "center",
+          borderRadius: "10px",
+          overflow: "hidden",
         }}
       >
         <img

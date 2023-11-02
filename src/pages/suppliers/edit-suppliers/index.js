@@ -9,7 +9,7 @@ import { useGetSupplierQuery } from "api/supplierApi";
 import { useParams } from "react-router-dom";
 import { Alert } from "@mui/material";
 import Loading from "components/DRLoading";
-import SupplierEdit from "./SupplierEdit";
+import SupplierEdit from "../../../components/OUForms/Suppliers/edit-supplier/SupplierEdit";
 
 function EditSupplier() {
   const { id } = useParams();
@@ -38,7 +38,9 @@ function EditSupplier() {
               </MDBox>
               <MDBox>
                 {isLoading && <Loading />}
-                {isError && <Alert severity="error">Ha ocurrido un error</Alert>}
+                {isError && (
+                  <Alert severity="error">Ha ocurrido un error</Alert>
+                )}
                 {data && <SupplierEdit supplier={data.data.supplier} />}
               </MDBox>
             </Card>

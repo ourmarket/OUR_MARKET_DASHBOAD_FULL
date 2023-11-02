@@ -12,12 +12,16 @@ import { useGetClientCategoriesQuery } from "api/clientsCategoryApi";
 import { useGetUsersQuery } from "api/userApi";
 import { useParams } from "react-router-dom";
 import { useGetClientQuery } from "api/clientsApi";
-import ClientEdit from "./ClientEdit";
+import ClientEdit from "../../../components/OUForms/Clients/edit-client/ClientEdit";
 
 function EditClient() {
   const { id } = useParams();
   const { data: types, isLoading: l1, isError: e1 } = useGetClientTypesQuery();
-  const { data: categories, isLoading: l2, isError: e2 } = useGetClientCategoriesQuery();
+  const {
+    data: categories,
+    isLoading: l2,
+    isError: e2,
+  } = useGetClientCategoriesQuery();
   const { data: users, isLoading: l3, isError: e3 } = useGetUsersQuery();
   const { data: client, isLoading: l4, isError: e4 } = useGetClientQuery(id);
 
@@ -45,7 +49,9 @@ function EditClient() {
               </MDBox>
               <MDBox>
                 {(l1 || l2 || l3 || l4) && <Loading />}
-                {(e1 || e2 || e3 || e4) && <Alert severity="error">Ha ocurrido un error</Alert>}
+                {(e1 || e2 || e3 || e4) && (
+                  <Alert severity="error">Ha ocurrido un error</Alert>
+                )}
                 {types && categories && users && client && (
                   <ClientEdit
                     types={types.data.clientTypes}

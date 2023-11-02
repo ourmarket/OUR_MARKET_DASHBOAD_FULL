@@ -394,23 +394,19 @@ function TableActiveOrders() {
   return (
     <>
       <Box m="20px" sx={{ overflowX: "scroll" }}>
-        <Stack direction="row" alignItems="center" mb={5}>
+        <Stack direction="row" alignItems="center" mb={2}>
           <LoadingButton
             onClick={handleActive}
             variant="contained"
             loading={isLoading}
             sx={{
-              mt: 3,
-              mb: 2,
-              mr: 2,
-              backgroundColor: `${colors.info.main}`,
               color: "white !important",
             }}
           >
             Cambiar todas las ordenes a inactivas
           </LoadingButton>
         </Stack>
-        <Box m="40px 0 0 0" height="75vh" width="2300px">
+        <Box height="75vh" width="2300px">
           <DataGrid
             checkboxSelection
             disableSelectionOnClick

@@ -1,15 +1,8 @@
-/* eslint-disable no-unneeded-ternary */
-/* eslint-disable array-callback-return */
-/* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable react/prop-types */
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-underscore-dangle */
-import { Avatar, Box, IconButton, Stack } from "@mui/material";
+import { Avatar, Box, IconButton } from "@mui/material";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import MDButton from "components/MDButton";
 import colors from "assets/theme-dark/base/colors";
 import { useMaterialUIController } from "context";
 import { dateToLocalDate } from "utils/dateFormat";
@@ -23,7 +16,6 @@ function TableStock({ stock: dataStock }) {
   const [controller] = useMaterialUIController();
   const { darkMode } = controller;
 
-  const navigate = useNavigate();
   const [open, setOpen] = useState(null);
   const [productsLotsId, setProductsLotsId] = useState(null);
 
@@ -73,19 +65,7 @@ function TableStock({ stock: dataStock }) {
       cellClassName: "name-column--cell",
       headerClassName: "super-app-theme--header",
     },
-    {
-      field: "location",
-      headerName: "Deposito",
-      flex: 1,
-      cellClassName: "name-column--cell",
-      headerClassName: "super-app-theme--header",
-    },
-    {
-      field: "moveDate",
-      headerName: "Fecha Movimiento",
-      flex: 1.2,
-      headerClassName: "super-app-theme--header",
-    },
+
     {
       field: "thereIsStock",
       headerName: "Stock",
@@ -284,7 +264,11 @@ function TableStock({ stock: dataStock }) {
       headerClassName: "super-app-theme--header",
 
       renderCell: ({ row: { productId, _id } }) => (
-        <IconButton size="large" color="inherit" onClick={(e) => handleOpenMenu(productId, _id, e)}>
+        <IconButton
+          size="large"
+          color="inherit"
+          onClick={(e) => handleOpenMenu(productId, _id, e)}
+        >
           <MoreVertIcon />
         </IconButton>
       ),
@@ -309,7 +293,9 @@ function TableStock({ stock: dataStock }) {
               product: productsLot.name,
               cost_unit: `${formatPrice(productsLot.unityCost)}`,
               createdAt: dateToLocalDate(productsLot.createdStock),
-              updatedAt: productsLot.updateStock ? dateToLocalDate(productsLot.updateStock) : "",
+              updatedAt: productsLot.updateStock
+                ? dateToLocalDate(productsLot.updateStock)
+                : "",
               thereIsStock: productsLot.stock > 0 ? true : false,
               moveDate: productsLot.moveDate
                 ? dateToLocalDate(productsLot.moveDate)

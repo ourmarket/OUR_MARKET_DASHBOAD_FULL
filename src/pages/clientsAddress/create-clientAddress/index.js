@@ -47,11 +47,10 @@ function CreateNewClientAddress() {
                 </MDTypography>
               </MDBox>
               <MDBox>
-                {(l1 || l2 || !isLoaded) && <Loading />}
                 {(e1 || e2) && (
                   <Alert severity="error">Ha ocurrido un error</Alert>
                 )}
-                {clients && zones && (
+                {clients && zones && isLoaded && (
                   <ClientAddressCreate
                     clients={clients.data.clients}
                     zones={zones.data.deliveryZones}

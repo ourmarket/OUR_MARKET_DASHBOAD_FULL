@@ -1,11 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/prop-types */
-/* eslint-disable no-unused-vars */
 import { Box } from "@mui/system";
 import { GoogleMap, InfoWindow, Marker, Polygon } from "@react-google-maps/api";
-import { optionZones } from "data/optionZones";
-import { zones } from "data/zones";
-import { useSocket } from "hooks/useSockets";
 import { useSocket2 } from "hooks/useSockets2";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -107,7 +103,6 @@ function DeliveryMarker({ data, orders }) {
               Ordenes entregadas : {filterOrdersDelivered.length}/
               {filterOrders.length}
             </h3>
-            {/*  <Link to={`/clientes/detalle/${client.client._id}`}>Ver Cliente</Link>  */}
           </div>
         </InfoWindow>
       )}
@@ -115,7 +110,7 @@ function DeliveryMarker({ data, orders }) {
   );
 }
 
-function MapDelivery({ activeOrders }) {
+function MapDelivery({ activeOrders, zones }) {
   const dispatch = useDispatch();
   const activeFilterOrders = activeOrders.filter(
     (order) => order.shippingAddress.lat
@@ -164,6 +159,23 @@ function MapDelivery({ activeOrders }) {
     }
   }, [socket, dispatch]);
 
+  const deliveryZones = zones.map((zone) => ({
+    id: zone._id,
+    path: zone.mapLimits,
+    option: {
+      fillColor: zone.fillColor,
+      fillOpacity: 0.2,
+      strokeColor: "blue",
+      strokeOpacity: 1,
+      strokeWeight: 2,
+      clickable: false,
+      draggable: false,
+      editable: false,
+      geodesic: false,
+      zIndex: 1,
+    },
+  }));
+
   return (
     <Box p={3}>
       <GoogleMap
@@ -183,12 +195,9 @@ function MapDelivery({ activeOrders }) {
           <ClientMarker data={order} key={order._id} />
         ))}
 
-        <Polygon paths={zones.zona1} options={optionZones.zona1} />
-        <Polygon paths={zones.zona2} options={optionZones.zona2} />
-        <Polygon paths={zones.zona3} options={optionZones.zona3} />
-        <Polygon paths={zones.zona4} options={optionZones.zona4} />
-        <Polygon paths={zones.zona5} options={optionZones.zona5} />
-        <Polygon paths={zones.zona6} options={optionZones.zona6} />
+        {deliveryZones.map((zone) => (
+          <Polygon key={zone.id} paths={zone.path} options={zone.option} />
+        ))}
       </GoogleMap>
     </Box>
   );

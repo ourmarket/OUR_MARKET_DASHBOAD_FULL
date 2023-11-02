@@ -9,7 +9,7 @@ export const creteSupplierSchema = yup.object().shape({
     .required("Requerido")
     .matches(lettersNumbersAndSpaces, "Solo letras y números"),
   cuit: yup.string().required("Requerido").matches(onlyNumbers, "Solo números"),
-  email: yup.string().email("Formato incorrecto").required("Requerido"),
+  email: yup.string().email("Formato incorrecto"),
   phone: yup
     .string()
     .required("Requerido")

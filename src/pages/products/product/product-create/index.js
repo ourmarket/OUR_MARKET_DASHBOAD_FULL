@@ -13,6 +13,7 @@ import { useGetProductsQuery } from "api/productApi";
 import AddStock from "components/OUForms/Stock/Add-Stock/AddStock";
 import AddProductForm from "components/OUForms/Product/add-product/AddProduct";
 import AddOfertForm from "components/OUForms/Ofert/add-ofert/AddOfert";
+import AddCategoryForm from "components/OUForms/Category/add-category/AddCategoryForm";
 
 function CreateProduct() {
   const [page, setPage] = useState(0);
@@ -69,6 +70,7 @@ function CreateProduct() {
             >
               <Tabs value={page} onChange={handleChange} centered>
                 <Tab label="Crear producto" />
+                <Tab label="Crear categoria" />
                 <Tab label="Crear oferta" />
                 <Tab label="Cargar stock" />
               </Tabs>
@@ -92,10 +94,19 @@ function CreateProduct() {
                   mx: 2.5,
                 }}
               >
-                <AddOfertForm />
+                {listCategories && <AddCategoryForm />}
               </Card>
             )}
             {page === 2 && (
+              <Card
+                sx={{
+                  mx: 2.5,
+                }}
+              >
+                <AddOfertForm />
+              </Card>
+            )}
+            {page === 3 && (
               <Card
                 sx={{
                   mx: 2.5,

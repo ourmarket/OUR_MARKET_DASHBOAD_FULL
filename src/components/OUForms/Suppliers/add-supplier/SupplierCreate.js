@@ -65,7 +65,7 @@ function SupplierCreate() {
               required
               fullWidth
               autoFocus
-              label="Razón social"
+              label="Razón social/Nombre"
               name="businessName"
               error={!!formik.errors.businessName}
               helperText={formik.errors.businessName}
@@ -84,7 +84,6 @@ function SupplierCreate() {
 
             <TextField
               margin="normal"
-              required
               fullWidth
               label="Email"
               name="email"
