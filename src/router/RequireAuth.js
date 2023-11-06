@@ -7,6 +7,7 @@ import { selectCurrentToken } from "reduxToolkit/authSlice";
 const RequireAuth = ({ children }) => {
   const token = useSelector(selectCurrentToken);
   const location = useLocation();
+  console.log(token);
 
   return token ? (
     children

@@ -1,15 +1,16 @@
-/* eslint-disable no-return-assign */
-/* eslint-disable no-unused-expressions */
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from "react";
 import Loading from "components/DRLoading";
 import { useSelector } from "react-redux";
 import useRefreshToken from "hooks/useRefreshToken";
-import { Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 function PersistLogin() {
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
   const { token } = useSelector((state) => state.auth);
   const refresh = useRefreshToken();
+  const location = useLocation();
 
   useEffect(() => {
     let isMounted = true;
@@ -20,18 +21,26 @@ function PersistLogin() {
         console.log("Refresh");
       } catch (err) {
         console.log(err);
+        setError(true);
       } finally {
         isMounted && setIsLoading(false);
       }
     };
 
-    // persist added here AFTER tutorial video
-    // Avoids unwanted call to verifyRefreshToken
     !token ? verifyRefreshToken() : setIsLoading(false);
 
     return () => (isMounted = false);
   }, []);
 
+  if (error) {
+    return (
+      <Navigate
+        to="/authentication/sign-in"
+        state={{ from: location }}
+        replace
+      />
+    );
+  }
   return isLoading ? <Loading /> : <Outlet />;
 }
 
