@@ -29,11 +29,17 @@ function TableStock({ stock: dataStock }) {
     setProductsLotsId(null);
   };
 
-  const arrStock = dataStock.stock.map((item) => ({
-    ...item,
-    name: dataStock.name,
-    img: dataStock.img,
-  }));
+  const arrStock = dataStock.stock
+    .map((item) => ({
+      ...item,
+      name: dataStock.name,
+      img: dataStock.img,
+    }))
+    .sort((a, b) => {
+      const dateA = new Date(a.createdStock);
+      const dateB = new Date(b.createdStock);
+      return dateB - dateA;
+    });
 
   const columns = [
     {

@@ -64,8 +64,6 @@ function EditStock({ ListSuppliers, productLot: product, lotId }) {
   const handleDelete = async () => {
     const stock = [...restOfLots];
 
-    console.log(stock);
-
     Swal.fire({
       title: "Deseas borrar el stock de este producto?",
       text: "Este cambio no se puede revertir",
@@ -78,7 +76,7 @@ function EditStock({ ListSuppliers, productLot: product, lotId }) {
       if (result.isConfirmed) {
         const res = await editProductsLots({ id, stock }).unwrap();
 
-        if (res.ok) {
+        if (res) {
           Swal.fire({
             position: "center",
             icon: "success",
@@ -87,7 +85,7 @@ function EditStock({ ListSuppliers, productLot: product, lotId }) {
             timer: 2500,
           });
 
-          navigate("/productos/stock/lista");
+          navigate(-1);
         }
       }
     });

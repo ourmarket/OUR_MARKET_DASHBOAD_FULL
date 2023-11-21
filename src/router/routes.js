@@ -49,6 +49,7 @@ import ProductsSellByRange from "pages/reports/reportByRange";
 import CreateNewExpenses from "pages/expenses/new-expenses";
 import ListExpenses from "pages/expenses/list-expenses";
 import EditExpenses from "pages/expenses/edit-expenses";
+import Sales from "pages/sales";
 
 export const routes_dr = [
   //dashboard
@@ -486,6 +487,17 @@ export const routes_dr = [
     component: (
       <RequireAuth>
         <EditExpenses />
+      </RequireAuth>
+    ),
+  },
+
+  //sales
+
+  {
+    route: "/ventas",
+    component: (
+      <RequireAuth>
+        <Sales />
       </RequireAuth>
     ),
   },

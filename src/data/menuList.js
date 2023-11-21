@@ -100,6 +100,18 @@ export const menuList_dr = [
     ],
   },
   {
+    name: "Ventas",
+    icon: "loyalty",
+    key: "ventas",
+    subRoutes: [
+      {
+        name: "Ventas",
+        icon: "format_list_bulleted_icon",
+        url: "/ventas",
+      },
+    ],
+  },
+  {
     name: "Gastos",
     icon: "assignment_returned_icon",
     key: "gastos",

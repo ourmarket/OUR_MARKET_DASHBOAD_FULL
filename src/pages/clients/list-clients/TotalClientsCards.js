@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable no-unused-vars */
 import { Box, Grid } from "@mui/material";
@@ -17,13 +18,23 @@ function TotalClientsCards({ clients }) {
   const clientType1 = clients.filter(
     (client) => client.clientType.clientType === "Consumidor final"
   );
-  const clientType1Active = clientType1.filter((client) => client.active).length;
+  const clientType1Active = clientType1.filter(
+    (client) => client.active
+  ).length;
 
-  const clientType2 = clients.filter((client) => client.clientType.clientType === "Minorista");
-  const clientType2Active = clientType2.filter((client) => client.active).length;
+  const clientType2 = clients.filter(
+    (client) => client.clientType.clientType === "Minorista"
+  );
+  const clientType2Active = clientType2.filter(
+    (client) => client.active
+  ).length;
 
-  const clientType3 = clients.filter((client) => client.clientType.clientType === "Mayorista");
-  const clientType3Active = clientType3.filter((client) => client.active).length;
+  const clientType3 = clients.filter(
+    (client) => client.clientType.clientType === "Mayorista"
+  );
+  const clientType3Active = clientType3.filter(
+    (client) => client.active
+  ).length;
 
   return (
     <Box p={3}>
@@ -64,7 +75,11 @@ function TotalClientsCards({ clients }) {
               color="info"
               icon="person_add"
               title="Clientes Activos %"
-              count={`${formatQuantity((activeClients * 100) / clients.length)}%`}
+              count={`${
+                clients.length > 0
+                  ? formatQuantity((activeClients * 100) / clients.length)
+                  : 0
+              }%`}
               percentage={{
                 color: "success",
                 amount: "",

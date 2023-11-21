@@ -57,26 +57,23 @@ function AddStock({ ListSuppliers }) {
       location: "",
     },
     onSubmit: async (values) => {
-      const stock = [
-        ...inputValue.stock,
-        {
-          productId: inputValue.id,
-          name: inputValue.product,
-          img: inputValue.img,
-          supplier: values.supplier,
-          quantity: values.quantity,
-          cost: values.unityCost * values.quantity,
-          unityCost: values.unityCost,
-          stock: values.quantity,
-          location: values.location,
-          moveDate: null,
-          createdStock: new Date(),
-          updateStock: new Date(),
-        },
-      ];
+      const newStock = {
+        productId: inputValue.id,
+        name: inputValue.product,
+        img: inputValue.img,
+        supplier: values.supplier,
+        quantity: values.quantity,
+        cost: values.unityCost * values.quantity,
+        unityCost: values.unityCost,
+        stock: values.quantity,
+        location: values.location,
+        moveDate: null,
+        createdStock: new Date(),
+        updateStock: new Date(),
+      };
 
       const { id } = inputValue;
-      const res = await editProduct({ id, stock }).unwrap();
+      const res = await editProduct({ id, newStock }).unwrap();
 
       if (res) {
         Swal.fire({
@@ -202,7 +199,7 @@ function AddStock({ ListSuppliers }) {
                 color: "white !important",
               }}
             >
-              Crear
+              Agregar
             </LoadingButton>
             <MDButton
               variant="outlined"
