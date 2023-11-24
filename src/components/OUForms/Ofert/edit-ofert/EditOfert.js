@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { LoadingButton } from "@mui/lab";
 import { Alert, Box, MenuItem, TextField } from "@mui/material";
 import { useFormik } from "formik";
@@ -14,8 +14,8 @@ import { ProductCard } from "../component/ProductCard/ProductCard";
 
 function EditOfertForm({ ofertById }) {
   const navigate = useNavigate();
-  const { id } = useParams();
   const { ofert } = ofertById.data;
+  const id = ofert._id;
 
   const [editOfert, { isLoading, isError }] = usePutOfertMutation();
 

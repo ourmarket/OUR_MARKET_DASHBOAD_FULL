@@ -72,7 +72,7 @@ function MenuTable({ open, handleCloseMenu, sessionId }) {
         },
       }}
     >
-      <MenuItem onClick={() => navigate(`/ventas`)}>
+      <MenuItem onClick={() => navigate(`/ventas/${sessionId}`)}>
         <EditIcon sx={{ mr: 1 }} />
         Ver sesión
       </MenuItem>

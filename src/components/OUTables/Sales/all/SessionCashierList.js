@@ -17,9 +17,9 @@ function SessionCashierList({ sessions = [] }) {
   const [open, setOpen] = useState(null);
   const [sessionId, setSessionId] = useState(null);
 
-  const handleOpenMenu = (productId, id, event) => {
+  const handleOpenMenu = (id, event) => {
     setOpen(event.currentTarget);
-    setSessionId({ productId, id });
+    setSessionId(id);
   };
 
   const handleCloseMenu = () => {
@@ -113,11 +113,11 @@ function SessionCashierList({ sessions = [] }) {
       headerName: "Menu",
       headerClassName: "super-app-theme--header",
 
-      renderCell: ({ row: { productId, _id } }) => (
+      renderCell: ({ row: { _id } }) => (
         <IconButton
           size="large"
           color="inherit"
-          onClick={(e) => handleOpenMenu(productId, _id, e)}
+          onClick={(e) => handleOpenMenu(_id, e)}
         >
           <MoreVertIcon />
         </IconButton>
