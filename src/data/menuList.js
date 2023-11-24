@@ -105,7 +105,7 @@ export const menuList_dr = [
     key: "ventas",
     subRoutes: [
       {
-        name: "Ventas",
+        name: "Caja Local",
         icon: "format_list_bulleted_icon",
         url: "/ventas",
       },

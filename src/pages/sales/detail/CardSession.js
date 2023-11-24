@@ -1,15 +1,23 @@
 /* eslint-disable react/prop-types */
+import { LoadingButton } from "@mui/lab";
 import { Card, Divider, Grid } from "@mui/material";
 import { Box } from "@mui/system";
+import { usePutCashierSessionMutation } from "api/apiCashierSession";
+import colors from "assets/theme/base/colors";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import ComplexStatisticsCard from "examples/Cards/StatisticsCards/ComplexStatisticsCard";
 import { useEffect, useMemo, useState } from "react";
+import Swal from "sweetalert2";
 import { dateToLocalDate } from "utils/dateFormat";
 import { formatPrice } from "utils/formaPrice";
 
 const CardSession = ({ orders, session }) => {
   const [updateDate, setUpdateDate] = useState(null);
+
+  const [editSession, { isLoading: l1, isError: e1, isSuccess }] =
+    usePutCashierSessionMutation();
+
   useEffect(() => {
     setUpdateDate(dateToLocalDate(new Date()));
   }, []);
@@ -41,6 +49,56 @@ const CardSession = ({ orders, session }) => {
     () => orders.filter((order) => order.paid).length,
     [orders]
   );
+
+  const closeSession = async () => {
+    Swal.fire({
+      title: "Deseas cerrar la sesión de caja?",
+      text: "⚠ Atención: No usar en sesiones activas actualmente!! Solo para sesiones antiguas que no pudieron ser cerradas por algún error. ",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Cerrar caja",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const finishData = {
+          finalCash: cash,
+          payment: {
+            cash,
+            transfer,
+            debt,
+          },
+          finishDate: new Date(),
+        };
+        await editSession({
+          id: session._id,
+          ...finishData,
+        });
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (e1)
+      Swal.fire({
+        position: "center",
+        icon: "error",
+        title: "Error",
+        text: "Ha ocurrido un error, sesión de caja no cerrada",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+  }, [e1]);
+  useEffect(() => {
+    if (isSuccess)
+      Swal.fire({
+        position: "center",
+        icon: "success",
+        title: "Sesión de caja con éxito",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+  }, [isSuccess]);
+
   return (
     <Box>
       <Grid container spacing={3}>
@@ -160,6 +218,22 @@ const CardSession = ({ orders, session }) => {
                 </MDTypography>
               </MDBox>
             </MDBox>
+            {!session.finishDate && (
+              <LoadingButton
+                onClick={closeSession}
+                variant="contained"
+                size="small"
+                loading={l1}
+                sx={{
+                  mt: 1,
+                  mb: 1,
+                  backgroundColor: `${colors.info.main}`,
+                  color: "white !important",
+                }}
+              >
+                Cerrar caja
+              </LoadingButton>
+            )}
           </Card>
         </Grid>
       </Grid>
