@@ -11,21 +11,21 @@ import { useDeleteCashierSessionMutation } from "api/apiCashierSession";
 function MenuTable({ open, handleCloseMenu, sessionId }) {
   const navigate = useNavigate();
 
-  const [deleteClient, { isError, isSuccess }] =
+  const [deleteSession, { isError, isSuccess }] =
     useDeleteCashierSessionMutation();
 
   const handlerDelete = () => {
     handleCloseMenu();
     Swal.fire({
-      title: "Deseas borrar este cliente?",
-      text: "También borraras el usuario y todas las direcciones asociadas",
+      title: "Deseas borrar esta sesión de caja?",
+      text: "Atención, estos cambios son irreversibles",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
       confirmButtonText: "Borrar",
     }).then(async (result) => {
       if (result.isConfirmed) {
-        await deleteClient(sessionId).unwrap();
+        await deleteSession(sessionId).unwrap();
       }
     });
   };
@@ -36,7 +36,7 @@ function MenuTable({ open, handleCloseMenu, sessionId }) {
         position: "center",
         icon: "error",
         title: "Error",
-        text: "Ha ocurrido un error, Cliente no borrado",
+        text: "Ha ocurrido un error, sesión de caja no borrada",
         showConfirmButton: false,
         timer: 2500,
       });
@@ -46,7 +46,7 @@ function MenuTable({ open, handleCloseMenu, sessionId }) {
       Swal.fire({
         position: "center",
         icon: "success",
-        title: "Cliente borrado con éxito",
+        title: "Sesión de caja borrada con éxito",
         showConfirmButton: false,
         timer: 2500,
       });
@@ -76,10 +76,10 @@ function MenuTable({ open, handleCloseMenu, sessionId }) {
         <EditIcon sx={{ mr: 1 }} />
         Ver sesión
       </MenuItem>
-      <MenuItem onClick={() => navigate(`/ventas`)}>
+      {/*   <MenuItem onClick={() => navigate(`/ventas`)}>
         <EditIcon sx={{ mr: 1 }} />
         Ver cajero
-      </MenuItem>
+      </MenuItem> */}
       <MenuItem sx={{ color: "error.main" }} onClick={handlerDelete}>
         <DeleteIcon sx={{ mr: 1 }} />
         Borrar sesión

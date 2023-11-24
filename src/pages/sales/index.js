@@ -55,8 +55,8 @@ const Sales = () => {
             >
               <Tabs value={page} onChange={handleChange} centered>
                 <Tab label="Sesiones caja" />
-                <Tab label="Venta por cliente" />
-                <Tab label="Clientes deudores" />
+                <Tab label="Sesiones abiertas" />
+                <Tab label="Sesiones cerradas" />
               </Tabs>
             </Box>
             {page === 0 && (
@@ -70,25 +70,36 @@ const Sales = () => {
                 )}
               </>
             )}
-            {/*  {page === 0 && (
-              <Box
-                sx={{
-                  mt: 4,
-                }}
-              >
+            {page === 1 && (
+              <>
                 {l1 && <Loading />}
                 {e1 && <Alert severity="error">Ha ocurrido un error</Alert>}
-                {dataClients && (
-                  <TotalClientsCards clients={dataClients.data.clients} />
+                {sessionsData && (
+                  <Card>
+                    <SessionCashierList
+                      sessions={sessionsData.data.sessions.filter(
+                        (session) => !session.finishDate
+                      )}
+                    />
+                  </Card>
                 )}
-                <Card sx={{ margin: "0 20px" }}>
-                  {dataClients && (
-                    <TableListClients clients={dataClients.data.clients} />
-                  )}
-                </Card>
-              </Box>
+              </>
             )}
-          */}
+            {page === 2 && (
+              <>
+                {l1 && <Loading />}
+                {e1 && <Alert severity="error">Ha ocurrido un error</Alert>}
+                {sessionsData && (
+                  <Card>
+                    <SessionCashierList
+                      sessions={sessionsData.data.sessions.filter(
+                        (session) => session.finishDate
+                      )}
+                    />
+                  </Card>
+                )}
+              </>
+            )}
           </Grid>
         </Grid>
       </MDBox>
