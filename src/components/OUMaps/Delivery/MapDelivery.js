@@ -184,7 +184,10 @@ function MapDelivery({ activeOrders, zones }) {
         mapContainerClassName="map-container"
         options={options}
       >
-        <Marker position={center} icon="https://i.ibb.co/nbm4b4x/pngegg.png" />
+        <Marker
+          position={center}
+          icon="https://ik.imagekit.io/mrprwema7/OurMarket/home_5973800%20(1)_bn1AFnpE4.png?updatedAt=1701697209819"
+        />
 
         {positions.length > 0 &&
           positions.map((truck) => (

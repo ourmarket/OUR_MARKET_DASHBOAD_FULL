@@ -51,6 +51,8 @@ import ListExpenses from "pages/expenses/list-expenses";
 import EditExpenses from "pages/expenses/edit-expenses";
 import Sales from "pages/sales";
 import SalesDetail from "pages/sales/detail/SalesDetail";
+import NewBuy from "pages/buys/new-buy";
+import ListBuys from "pages/buys/list-buys";
 
 export const routes_dr = [
   //dashboard
@@ -507,6 +509,24 @@ export const routes_dr = [
     component: (
       <RequireAuth>
         <SalesDetail />
+      </RequireAuth>
+    ),
+  },
+
+  //buys
+  {
+    route: "/compras/lista",
+    component: (
+      <RequireAuth>
+        <ListBuys />
+      </RequireAuth>
+    ),
+  },
+  {
+    route: "/compras/nueva",
+    component: (
+      <RequireAuth>
+        <NewBuy />
       </RequireAuth>
     ),
   },

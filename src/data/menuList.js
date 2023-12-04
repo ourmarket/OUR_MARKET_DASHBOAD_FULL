@@ -77,35 +77,46 @@ export const menuList_dr = [
       },
     ],
   },
+
   {
-    name: "Ordenes",
-    icon: "view_list_icon",
-    key: "ordenes",
+    name: "Compras",
+    icon: "add_business_icon",
+    key: "compras",
     subRoutes: [
       {
-        name: "Crear orden local",
+        name: "Nueva compra",
         icon: "add_circle_outline_icon",
-        url: "/ordenes/nueva-local",
+        url: "/compras/nueva",
       },
       {
-        name: "Crear orden reparto",
-        icon: "add_circle_outline_icon",
-        url: "/ordenes/nueva",
-      },
-      {
-        name: "Lista ordenes",
+        name: "Lista compras",
         icon: "format_list_bulleted_icon",
-        url: "/ordenes/lista",
+        url: "/compras/lista",
       },
     ],
   },
   {
     name: "Ventas",
-    icon: "loyalty",
+    icon: "add_shopping_cart_icon",
     key: "ventas",
     subRoutes: [
       {
-        name: "Caja Local",
+        name: "Nueva venta local",
+        icon: "add_circle_outline_icon",
+        url: "/ordenes/nueva-local",
+      },
+      {
+        name: "Nueva venta reparto",
+        icon: "add_circle_outline_icon",
+        url: "/ordenes/nueva",
+      },
+      {
+        name: "Lista ventas",
+        icon: "format_list_bulleted_icon",
+        url: "/ordenes/lista",
+      },
+      {
+        name: "Resumen caja",
         icon: "format_list_bulleted_icon",
         url: "/ventas",
       },

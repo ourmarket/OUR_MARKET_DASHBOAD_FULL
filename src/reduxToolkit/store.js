@@ -8,6 +8,7 @@ import { productApi } from "api/productApi";
 import { userApi } from "api/userApi";
 import authReducer from "./authSlice";
 import cartReducer from "./cartSlice";
+import buyReducer from "./buySlice";
 import orderReducer from "./ordersSlice";
 import positionsReducer from "./positionSlice";
 import mapAutocompleteReducer from "./mapAutocomplete";
@@ -16,6 +17,7 @@ export const store = configureStore({
   reducer: {
     auth: authReducer,
     cart: cartReducer,
+    buy: buyReducer,
     order: orderReducer,
     positions: positionsReducer,
     mapAutocomplete: mapAutocompleteReducer,

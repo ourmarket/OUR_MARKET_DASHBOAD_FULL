@@ -15,6 +15,7 @@ import AddStock from "components/OUForms/Stock/Add-Stock/AddStock";
 import StockAvailableTable from "components/OUTables/Stocks/Available/StockAvailableTable";
 import StockTotalTable from "components/OUTables/Stocks/Total/StockTotalsTable";
 import StockAllTable from "components/OUTables/Stocks/All/StockAllTable";
+import AddStockManufacture from "components/OUForms/Stock/Add-Stock-Manufacture/AddStockManufacture";
 
 function StockMain() {
   const [page, setPage] = useState(0);
@@ -71,6 +72,7 @@ function StockMain() {
                 <Tab label="Stock total" />
                 <Tab label="Historial de compras" />
                 <Tab label="Agregar stock" />
+                <Tab label="Agregar stock manofactura" />
               </Tabs>
             </Box>
             {page === 0 && (
@@ -120,6 +122,24 @@ function StockMain() {
                 )}
                 {stock && ListSuppliers && (
                   <AddStock
+                    listProducts={stock}
+                    ListSuppliers={ListSuppliers}
+                  />
+                )}
+              </Card>
+            )}
+            {page === 4 && (
+              <Card
+                sx={{
+                  mx: 2.5,
+                }}
+              >
+                {(l1 || l3) && <Loading />}
+                {(e1 || e3) && (
+                  <Alert severity="error">Ha ocurrido un error</Alert>
+                )}
+                {stock && ListSuppliers && (
+                  <AddStockManufacture
                     listProducts={stock}
                     ListSuppliers={ListSuppliers}
                   />
