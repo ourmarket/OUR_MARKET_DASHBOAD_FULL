@@ -6,7 +6,7 @@ const useRefreshToken = () => {
   const dispatch = useDispatch();
 
   const refresh = async () => {
-    const response = await axios.get("/auth/refresh", {
+    const response = await axios.get("/auth/dashboard/refresh", {
       withCredentials: true,
     });
 

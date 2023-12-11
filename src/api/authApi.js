@@ -4,17 +4,23 @@ export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (credentials) => ({
-        url: "/auth/login2",
+        url: "/auth/dashboard/login",
         method: "POST",
         body: { ...credentials },
       }),
     }),
+    logout: builder.mutation({
+      query: () => ({
+        url: "/auth/dashboard/logout",
+        method: "POST",
+      }),
+    }),
     refresh: builder.query({
-      query: () => "/auth/refresh",
+      query: () => "/auth/dashboard/refresh",
       // keepUnusedDataFor: 3,
       extraOptions: { maxRetries: 5 },
     }),
   }),
 });
 
-export const { useLoginMutation, useRefreshQuery } = authApi;
+export const { useLoginMutation, useRefreshQuery, useLogoutMutation } = authApi;

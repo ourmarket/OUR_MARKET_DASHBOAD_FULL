@@ -27,6 +27,7 @@ import { logOut } from "reduxToolkit/authSlice";
 import { useDispatch } from "react-redux";
 import { apiSlice } from "api/apiSlice";
 import { useNavigate } from "react-router-dom/dist";
+import { useLogoutMutation } from "api/authApi";
 
 function DashboardNavbar({ absolute, light, isMini }) {
   const dispatch1 = useDispatch();
@@ -37,6 +38,8 @@ function DashboardNavbar({ absolute, light, isMini }) {
     controller;
   const [openMenu, setOpenMenu] = useState(false);
   const route = useLocation().pathname.split("/").slice(1);
+
+  const [apiLogOut] = useLogoutMutation();
 
   useEffect(() => {
     setNavbarType("sticky");
@@ -93,6 +96,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
           dispatch1(apiSlice.util.resetApiState());
           dispatch1(logOut());
           navigate("/authentication/sign-in");
+          apiLogOut();
         }}
       />
     </Menu>

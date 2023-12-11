@@ -43,7 +43,7 @@ function StockMain() {
         <Grid container spacing={6}>
           <Grid item xs={12}>
             <MDBox
-              mx={2}
+              mx={0}
               mt={-3}
               py={3}
               px={2}
@@ -63,7 +63,7 @@ function StockMain() {
                 gap: "20px",
                 width: "100%",
                 flexDirection: "column",
-                px: 2,
+
                 my: 2,
               }}
             >
@@ -72,26 +72,18 @@ function StockMain() {
                 <Tab label="Stock total" />
                 <Tab label="Historial de compras" />
                 <Tab label="Agregar stock" />
-                <Tab label="Agregar stock manofactura" />
+                <Tab label="Agregar stock subproducto" />
               </Tabs>
             </Box>
             {page === 0 && (
-              <Card
-                sx={{
-                  mx: 2.5,
-                }}
-              >
+              <Card>
                 {l1 && <Loading />}
                 {e1 && <Alert severity="error">Ha ocurrido un error</Alert>}
                 {stock && <StockAvailableTable products={stock.products} />}
               </Card>
             )}
             {page === 1 && (
-              <Card
-                sx={{
-                  mx: 2.5,
-                }}
-              >
+              <Card>
                 {l2 && <Loading />}
                 {e2 && <Alert severity="error">Ha ocurrido un error</Alert>}
                 {stock && (
@@ -100,22 +92,14 @@ function StockMain() {
               </Card>
             )}
             {page === 2 && (
-              <Card
-                sx={{
-                  mx: 2.5,
-                }}
-              >
+              <Card>
                 {l1 && <Loading />}
                 {e1 && <Alert severity="error">Ha ocurrido un error</Alert>}
                 {stock && <StockAllTable products={stock.products} />}
               </Card>
             )}
             {page === 3 && (
-              <Card
-                sx={{
-                  mx: 2.5,
-                }}
-              >
+              <Card>
                 {(l1 || l3) && <Loading />}
                 {(e1 || e3) && (
                   <Alert severity="error">Ha ocurrido un error</Alert>
@@ -129,11 +113,7 @@ function StockMain() {
               </Card>
             )}
             {page === 4 && (
-              <Card
-                sx={{
-                  mx: 2.5,
-                }}
-              >
+              <Card>
                 {(l1 || l3) && <Loading />}
                 {(e1 || e3) && (
                   <Alert severity="error">Ha ocurrido un error</Alert>

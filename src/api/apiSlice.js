@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { logOut, setCredentials } from "reduxToolkit/authSlice";
 
@@ -21,7 +22,11 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 
   if (result?.error?.originalStatus === 403) {
     // send refresh token to get new access token
-    const refreshResult = await baseQuery("/auth/refresh", api, extraOptions);
+    const refreshResult = await baseQuery(
+      "/auth/dashboard/refresh",
+      api,
+      extraOptions
+    );
 
     if (refreshResult?.data) {
       const user = api.getState().auth.user;

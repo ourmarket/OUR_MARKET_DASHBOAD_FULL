@@ -2,6 +2,7 @@ import MDBox from "components/MDBox";
 import {
   Alert,
   Box,
+  Checkbox,
   TextField,
   Typography,
   useMediaQuery,
@@ -14,6 +15,7 @@ import { useLoginMutation } from "api/authApi";
 import { setCredentials } from "reduxToolkit/authSlice";
 import { useDispatch } from "react-redux";
 import BasicLayout from "./BasicLayout";
+import { useEffect, useState } from "react";
 
 const schema = yup.object().shape({
   email: yup.string().email("Formato incorrecto").required("Requerido"),
@@ -27,17 +29,49 @@ function Login() {
 
   const navigate = useNavigate();
 
+  const [rememberMe, setRememberMe] = useState(true);
+
+  useEffect(() => {
+    const storedEmail = localStorage.getItem("rememberedEmail_dashboard");
+    const storedClientId = localStorage.getItem("rememberedClientId_dashboard");
+
+    if (storedEmail && storedClientId) {
+      setRememberMe(true);
+    }
+  }, []);
+
   const formik = useFormik({
     initialValues: {
-      email: "",
+      email: rememberMe
+        ? localStorage.getItem("rememberedEmail_dashboard") || ""
+        : "",
+      clientId: rememberMe
+        ? localStorage.getItem("rememberedClientId_dashboard") || ""
+        : "",
       password: "",
     },
     onSubmit: async (values) => {
       try {
         const userData = await login({
           email: values.email,
+          clientId: values.clientId,
           password: values.password,
         }).unwrap();
+        if (userData) {
+          dispatch(setCredentials({ ...userData }));
+          navigate("/");
+
+          if (rememberMe) {
+            localStorage.setItem("rememberedEmail_dashboard", values.email);
+            localStorage.setItem(
+              "rememberedClientId_dashboard",
+              values.clientId
+            );
+          } else {
+            localStorage.removeItem("rememberedEmail_dashboard");
+            localStorage.removeItem("rememberedClientId_dashboard");
+          }
+        }
         dispatch(setCredentials({ ...userData }));
         navigate("/");
       } catch (err) {
@@ -51,7 +85,6 @@ function Login() {
     <BasicLayout>
       <Box
         sx={{
-          /* border: "1px solid #666", */
           boxShadow: "3px 3px 30px #ccc, -3px -3px 30px #ccc",
           borderRadius: "10px",
           backgroundColor: "#f1f1f1",
@@ -88,13 +121,31 @@ function Login() {
                 margin="normal"
                 required
                 fullWidth
-                id="email"
                 label="Email"
                 name="email"
-                autoComplete="email"
                 autoFocus
+                value={formik.values.email}
                 error={!!formik.errors.email}
                 helperText={formik.errors.email}
+                onChange={formik.handleChange}
+              />
+            </Box>
+            <Box sx={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              <img
+                src="https://ik.imagekit.io/mrprwema7/OurMarket/user_OkKLt0tst%20(1)__K2sUFDZJ.png?updatedAt=1695681678392"
+                alt="icono usuario"
+                style={{ width: "30px", height: "30px" }}
+              />
+
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                label="Id del cliente"
+                name="clientId"
+                value={formik.values.clientId}
+                error={!!formik.errors.clientId}
+                helperText={formik.errors.clientId}
                 onChange={formik.handleChange}
               />
             </Box>
@@ -111,12 +162,27 @@ function Login() {
                 name="password"
                 label="Password"
                 type="password"
-                id="password"
-                autoComplete="current-password"
                 error={!!formik.errors.password}
                 helperText={formik.errors.password}
                 onChange={formik.handleChange}
               />
+            </Box>
+            <Box sx={{ marginLeft: "-3px", marginTop: "10px" }}>
+              <Checkbox
+                value={rememberMe}
+                name="remember"
+                checked={rememberMe}
+                onChange={() => setRememberMe(!rememberMe)}
+              />
+              <span
+                style={{
+                  fontSize: "13.5px",
+                  color: "#888",
+                  marginLeft: "3px",
+                }}
+              >
+                Recordar
+              </span>
             </Box>
 
             <LoadingButton
@@ -125,7 +191,7 @@ function Login() {
               variant="contained"
               loading={isLoading}
               sx={{
-                mt: 3,
+                mt: 2,
                 mb: 2,
                 color: "#fff",
               }}
