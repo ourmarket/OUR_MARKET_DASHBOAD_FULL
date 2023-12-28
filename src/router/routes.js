@@ -53,6 +53,7 @@ import Sales from "pages/sales";
 import SalesDetail from "pages/sales/detail/SalesDetail";
 import NewBuy from "pages/buys/new-buy";
 import ListBuys from "pages/buys/list-buys";
+import BuyDetails from "pages/buys/details-buy";
 
 export const routes_dr = [
   //dashboard
@@ -527,6 +528,14 @@ export const routes_dr = [
     component: (
       <RequireAuth>
         <NewBuy />
+      </RequireAuth>
+    ),
+  },
+  {
+    route: "/compras/detalle/:id",
+    component: (
+      <RequireAuth>
+        <BuyDetails />
       </RequireAuth>
     ),
   },

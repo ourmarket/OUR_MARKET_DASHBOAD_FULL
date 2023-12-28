@@ -88,64 +88,7 @@ function StockAllTable({ products }) {
           </div>
         ),
     },
-    {
-      field: "return",
-      headerName: "Devolución",
-      flex: 0.6,
-      headerClassName: "super-app-theme--header",
-      renderCell: (params) =>
-        params.row.return ? (
-          <div
-            style={{
-              width: "100%",
-              height: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <div
-              style={{
-                height: "30px",
-                width: "30px",
-                borderRadius: "50%",
-                backgroundColor: "green",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "white",
-              }}
-            >
-              <CheckIcon />
-            </div>
-          </div>
-        ) : (
-          <div
-            style={{
-              width: "100%",
-              height: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <div
-              style={{
-                height: "30px",
-                width: "30px",
-                borderRadius: "50%",
-                backgroundColor: "red",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "white",
-              }}
-            >
-              <CloseIcon />
-            </div>
-          </div>
-        ),
-    },
+
     {
       field: "quantity",
       headerName: "Cant. Comprada",
@@ -282,9 +225,7 @@ function StockAllTable({ products }) {
               quantity: `${formatQuantity(productsLot.quantity)}`,
               supplier: productsLot.supplier,
               product: productsLot.name,
-              cost_unit: `${formatPrice(
-                productsLot.cost / productsLot.quantity
-              )}`,
+              cost_unit: `${formatPrice(productsLot.unityCost)}`,
               createdAt: dateToLocalDate(productsLot.createdStock),
               updatedAt: productsLot.updateStock
                 ? dateToLocalDate(productsLot.updateStock)

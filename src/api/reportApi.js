@@ -152,6 +152,15 @@ export const userApi = apiSlice.injectEndpoints({
       invalidatesTags: ["reports"],
       extraOptions: { maxRetries: 0 },
     }),
+
+    // expenses
+
+    getReportTotalExpensesByMonth: builder.query({
+      query: () => "/reports/reportTotalExpensesByMonth",
+      // keepUnusedDataFor: 3,
+      extraOptions: { maxRetries: 5 },
+      providesTags: ["reports"],
+    }),
   }),
 });
 
@@ -170,6 +179,7 @@ export const {
   useGetTotalIndividualProductLast30DaysQuery,
   useGetCategoryReportQuery,
   useGetCategoryReportByDayQuery,
+  useGetReportTotalExpensesByMonthQuery,
 
   usePostTotalOrderProductsByRangeMutation,
   usePostReportPaymentByRangeDayMutation,

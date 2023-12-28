@@ -106,7 +106,7 @@ function Sidenav({ brand, brandName, ...rest }) {
                 textTransform: "capitalize",
               }}
             >
-              {`Our Market ${version}`}
+              {`Our Market ${version || ""}`}
             </MDTypography>
           </MDBox>
         </MDBox>

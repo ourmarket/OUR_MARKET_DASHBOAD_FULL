@@ -40,6 +40,7 @@ const FinishBuy = ({ setPage }) => {
       },
 
       products,
+      paid: +cash + +transfer === total,
     };
 
     const res = await createBuyOrder(data).unwrap();

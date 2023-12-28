@@ -28,6 +28,7 @@ function DashboardTotals({
   dataClientsDebs,
   reportTotalClientBuy,
   dataCategory,
+  dataExpenses,
 }) {
   const { sales, tasks } = reportsLineChartData;
   const { version } = useSelector((store) => store.auth);
@@ -184,7 +185,7 @@ function DashboardTotals({
         <Grid container spacing={3}>
           <Grid item xs={12} md={12} lg={12}>
             <MDBox mb={3}>
-              <CharBar3 reports={dataOrdersByMonth} />
+              <CharBar3 reports={dataOrdersByMonth} expenses={dataExpenses} />
             </MDBox>
           </Grid>
         </Grid>

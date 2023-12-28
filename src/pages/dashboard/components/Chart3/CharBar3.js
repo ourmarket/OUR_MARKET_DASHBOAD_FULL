@@ -1,7 +1,5 @@
 /* eslint-disable no-prototype-builtins */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable eqeqeq */
-/* eslint-disable no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/prop-types */
 import {
   Chart as ChartJS,
@@ -19,11 +17,17 @@ import Divider from "@mui/material/Divider";
 import Icon from "@mui/material/Icon";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
-import { dateToLocalDate, dateToLocalDateMin } from "utils/dateFormat";
-import { formatQuantity } from "utils/quantityFormat";
+import { dateToLocalDate } from "utils/dateFormat";
 import colors from "assets/theme/base/colors";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 export const options = {
   responsive: true,
@@ -89,16 +93,34 @@ export const options = {
   },
 };
 
-function CharBar3({ reports }) {
+function CharBar3({ reports, expenses }) {
+  console.log(reports);
+  console.log(expenses);
+
+  const fullReport = reports.map((item1) => {
+    const matchingItem = expenses.find(
+      (item2) => item1.month === item2.month && item1.year === item2.year
+    );
+
+    const newItem = { ...item1 };
+
+    if (matchingItem) {
+      newItem.totalExpenses = matchingItem.total;
+    }
+
+    return newItem;
+  });
+
   // Crear un objeto para almacenar las ventas por mes
   const salesForMonth = {};
   const months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
   // Llenar el objeto con las ventas existentes
-  for (const report of reports) {
+  for (const report of fullReport) {
     salesForMonth[report.month] = {
       totalCost: report.totalCost,
       totalProfits: report.totalProfits,
       totalSell: report.totalSell,
+      totalExpenses: report.totalExpenses || 0,
       year: report.year,
     };
   }
@@ -108,6 +130,7 @@ function CharBar3({ reports }) {
         totalCost: 0,
         totalProfits: 0,
         totalSell: 0,
+        totalExpenses: 0,
         year: 0,
       };
     }
@@ -117,6 +140,8 @@ function CharBar3({ reports }) {
     month,
     ...salesForMonth[month],
   }));
+
+  console.log(oneYearSales);
 
   const labels = [
     "Enero",
@@ -134,7 +159,10 @@ function CharBar3({ reports }) {
   ];
   const totalSell = oneYearSales.map((item) => item.totalSell);
   const totalCost = oneYearSales.map((item) => item.totalCost);
-  const totalProfits = oneYearSales.map((item) => item.totalProfits);
+  const totalExpenses = oneYearSales.map((item) => item.totalExpenses);
+  const totalProfits = oneYearSales.map(
+    (item) => item.totalProfits - item.totalExpenses
+  );
   const totalProfitsPercentage = oneYearSales.map(
     (item) => (item.totalProfits * 100) / item.totalCost
   );
@@ -150,15 +178,21 @@ function CharBar3({ reports }) {
       {
         label: "Costo",
         data: totalCost,
-        backgroundColor: "rgba(230, 18, 18, 0.7)",
+        backgroundColor: "rgba(244, 5, 200, 0.7)",
       },
       {
-        label: "Ganancia",
+        label: "Ganancia Neta",
         data: totalProfits,
         backgroundColor: "rgba(85, 230, 18, 0.7)",
       },
       {
-        label: "Ganancia%",
+        label: "Gastos",
+        data: totalExpenses,
+        backgroundColor: "rgba(230, 18, 18, 0.7)",
+      },
+
+      {
+        label: "Ganancia Neta%",
         data: totalProfitsPercentage,
         backgroundColor: "rgba(3, 252, 157, 0.7)",
       },
@@ -189,12 +223,22 @@ function CharBar3({ reports }) {
           <MDTypography variant="h6" textTransform="capitalize">
             Totales mensuales
           </MDTypography>
-          <MDTypography component="div" variant="button" color="text" fontWeight="light">
+          <MDTypography
+            component="div"
+            variant="button"
+            color="text"
+            fontWeight="light"
+          >
             Total desde el 21/03/2023
           </MDTypography>
           <Divider />
           <MDBox display="flex" alignItems="center">
-            <MDTypography variant="button" color="text" lineHeight={1} sx={{ mt: 0.15, mr: 0.5 }}>
+            <MDTypography
+              variant="button"
+              color="text"
+              lineHeight={1}
+              sx={{ mt: 0.15, mr: 0.5 }}
+            >
               <Icon>schedule</Icon>
             </MDTypography>
             <MDTypography variant="button" color="text" fontWeight="light">

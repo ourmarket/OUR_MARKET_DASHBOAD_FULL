@@ -19,7 +19,6 @@ import MDBox from "components/MDBox";
 import MDButton from "components/MDButton";
 import colors from "assets/theme/base/colors";
 import { useEffect, useState } from "react";
-
 import { creteProductLotsSchema } from "validations/productsLots/creteProductsLotsYup";
 import { usePutProductMutation, useGetProductsQuery } from "api/productApi";
 import Loading from "components/DRLoading";
@@ -27,13 +26,19 @@ import MDTypography from "components/MDTypography";
 import FolderIcon from "@mui/icons-material/Folder";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { formatQuantity } from "utils/quantityFormat";
+import { v4 as uuidv4 } from "uuid";
 
-const Product = ({ product, mode }) => {
+const Product = ({ product, mode, handleDelete }) => {
   return (
     <ListItem
       key={product.id}
       secondaryAction={
-        <IconButton edge="end" aria-label="delete" sx={{ marginRight: 2 }}>
+        <IconButton
+          edge="end"
+          aria-label="delete"
+          sx={{ marginRight: 2 }}
+          onClick={() => handleDelete(product.uniqueId)}
+        >
           <DeleteIcon sx={{ color: "red" }} />
         </IconButton>
       }
@@ -76,7 +81,9 @@ function AddStockManufacture({ ListSuppliers }) {
     error: e1,
   } = useGetProductsQuery();
   const [editProduct, { isLoading, isError }] = usePutProductMutation();
+
   const [products, setProducts] = useState([]);
+  const [productsAvailable, setProductsAvailable] = useState([]);
 
   const [inputValue1, setInputValue1] = useState(null);
   const [inputValue2, setInputValue2] = useState(null);
@@ -93,6 +100,7 @@ function AddStockManufacture({ ListSuppliers }) {
         .map((product) => {
           const firstLetter = product.name[0].toUpperCase();
           return {
+            uniqueId: uuidv4(),
             id: product._id,
             unit: product.unit,
             product: product.name,
@@ -106,25 +114,56 @@ function AddStockManufacture({ ListSuppliers }) {
         })
         .sort((a, b) => -b.firstLetter.localeCompare(a.firstLetter));
 
-      setInputValue1(autoCompleteProducts[0]);
-      setStock1(autoCompleteProducts[0].stockValue);
+      const autoCompleteProductsAvailable = autoCompleteProducts.filter(
+        (product) => product.stockValue > 0
+      );
+
+      setInputValue1(autoCompleteProductsAvailable[0]);
+      setStock1(autoCompleteProductsAvailable[0].stockValue);
 
       setInputValue2(autoCompleteProducts[0]);
       setStock2(autoCompleteProducts[0].stockValue);
 
       setProducts(autoCompleteProducts);
+      setProductsAvailable(autoCompleteProductsAvailable);
     }
   }, [listProducts]);
 
   const formik = useFormik({
     initialValues: {
-      product1: "",
-      stock1: 0,
       quantity1: 0,
-      stock2: 0,
       quantity2: 0,
+      unityCost: 0,
     },
-    onSubmit: async () => {},
+    onSubmit: async (values) => {
+      const data = {
+        // este actualiza
+        product1: list1.map((product) => ({
+          productId: product,
+          stock: product.stock + values.quantity1,
+          updateStock: new Date(),
+        })),
+        // este crea
+        product2: [
+          {
+            buyId: null,
+            productId: null,
+            name: null,
+            img: null,
+            supplier: null,
+            quantity: { type: Number },
+            cost: { type: Number },
+            unityCost: { type: Number },
+            stock: { type: Number },
+            location: null,
+            moveDate: null,
+            createdStock: new Date(),
+            updateStock: null,
+            return: false,
+          },
+        ],
+      };
+    },
     validationSchema: creteProductLotsSchema,
   });
 
@@ -132,7 +171,19 @@ function AddStockManufacture({ ListSuppliers }) {
     setList1([...list1, { ...inputValue1, quantity: formik.values.quantity1 }]);
   };
   const handleAdd2 = () => {
-    setList2([...list2, { ...inputValue2, quantity: formik.values.quantity2 }]);
+    setList2([
+      ...list2,
+      {
+        ...inputValue2,
+        quantity: formik.values.quantity2,
+        unityCost: formik.values.unityCost,
+      },
+    ]);
+  };
+
+  const handleDelete = (id) => {
+    setList1(list1.filter((product) => product.uniqueId !== id));
+    setList2(list2.filter((product) => product.uniqueId !== id));
   };
 
   if (l1) {
@@ -168,13 +219,13 @@ function AddStockManufacture({ ListSuppliers }) {
             <MDTypography variant="body2" sx={{ marginBottom: "30px" }}>
               Se realiza la manofactura de un producto propio, por ejemplo, con
               pechugas, pan rallado y huevo, se realizan Supremas de Pollo. Se
-              quitar entonces los primeros del stock y agregar al stock la
+              quitan entonces los primeros del stock y agregar al stock la
               cantidad creada de Supremas.
             </MDTypography>
             <Box sx={{ display: "flex", gap: 3 }}>
               <Box
                 sx={{
-                  width: "50%",
+                  width: "40%",
                   border: "1px solid #ccc",
                   padding: "20px",
                   borderRadius: "10px",
@@ -193,9 +244,9 @@ function AddStockManufacture({ ListSuppliers }) {
                   }}
                 >
                   <Autocomplete
-                    options={products}
+                    options={productsAvailable}
                     getOptionLabel={(options) =>
-                      `${options.product} || Stock: ${options.stockValue}`
+                      `Stock: ${options.stockValue} || ${options.product}`
                     }
                     groupBy={(option) => option.firstLetter}
                     multiple={false}
@@ -217,23 +268,25 @@ function AddStockManufacture({ ListSuppliers }) {
                       />
                     )}
                   />
-                  <TextField
-                    sx={{ maxWidth: "80px" }}
-                    type="number"
-                    name="stock1"
-                    label="Stock"
-                    InputProps={{ sx: { height: 55 } }}
-                    value={stock1}
-                    error={!!formik.errors.stock1}
-                    helperText={formik.errors.stock1}
-                    onChange={formik.handleChange}
-                  />
+
                   <TextField
                     sx={{ maxWidth: "80px" }}
                     type="number"
                     name="quantity1"
                     label="Quitar"
-                    InputProps={{ sx: { height: 55 } }}
+                    InputProps={{
+                      type: "number",
+                      sx: {
+                        height: 55,
+                        "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button":
+                          {
+                            display: "none",
+                          },
+                        "& input[type=number]": {
+                          MozAppearance: "textfield",
+                        },
+                      },
+                    }}
                     value={formik.values.quantity1}
                     error={!!formik.errors.quantity1}
                     helperText={formik.errors.quantity1}
@@ -260,13 +313,18 @@ function AddStockManufacture({ ListSuppliers }) {
                 )}
                 <List>
                   {list1.map((product) => (
-                    <Product key={product.id} product={product} mode="remove" />
+                    <Product
+                      key={product.id}
+                      product={product}
+                      mode="remove"
+                      handleDelete={handleDelete}
+                    />
                   ))}
                 </List>
               </Box>
               <Box
                 sx={{
-                  width: "50%",
+                  width: "60%",
                   border: "1px solid #ccc",
                   padding: "20px",
                   borderRadius: "10px",
@@ -286,7 +344,9 @@ function AddStockManufacture({ ListSuppliers }) {
                 >
                   <Autocomplete
                     options={products}
-                    getOptionLabel={(options) => options.product}
+                    getOptionLabel={(options) =>
+                      `Stock: ${options.stockValue} || ${options.product}`
+                    }
                     groupBy={(option) => option.firstLetter}
                     multiple={false}
                     id="controlled-demo"
@@ -307,23 +367,71 @@ function AddStockManufacture({ ListSuppliers }) {
                       />
                     )}
                   />
-                  <TextField
-                    sx={{ maxWidth: "80px" }}
-                    type="number"
-                    name="stock2"
-                    label="Stock"
-                    InputProps={{ sx: { height: 55 } }}
-                    value={stock2}
-                    error={!!formik.errors.stock2}
-                    helperText={formik.errors.stock2}
-                    onChange={formik.handleChange}
-                  />
+
                   <TextField
                     sx={{ maxWidth: "80px" }}
                     type="number"
                     name="quantity2"
                     label="Agregar"
-                    InputProps={{ sx: { height: 55 } }}
+                    InputProps={{
+                      type: "number",
+                      sx: {
+                        height: 55,
+                        "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button":
+                          {
+                            display: "none",
+                          },
+                        "& input[type=number]": {
+                          MozAppearance: "textfield",
+                        },
+                      },
+                    }}
+                    value={formik.values.quantity2}
+                    error={!!formik.errors.quantity2}
+                    helperText={formik.errors.quantity2}
+                    onChange={formik.handleChange}
+                  />
+                  <TextField
+                    sx={{ maxWidth: "120px" }}
+                    type="number"
+                    name="quantity2"
+                    label="Costo Unidad"
+                    InputProps={{
+                      type: "number",
+                      sx: {
+                        height: 55,
+                        "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button":
+                          {
+                            display: "none",
+                          },
+                        "& input[type=number]": {
+                          MozAppearance: "textfield",
+                        },
+                      },
+                    }}
+                    value={formik.values.quantity2}
+                    error={!!formik.errors.quantity2}
+                    helperText={formik.errors.quantity2}
+                    onChange={formik.handleChange}
+                  />
+                  <TextField
+                    sx={{ maxWidth: "120px" }}
+                    type="number"
+                    name="quantity2"
+                    label="Costo Total"
+                    InputProps={{
+                      type: "number",
+                      sx: {
+                        height: 55,
+                        "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button":
+                          {
+                            display: "none",
+                          },
+                        "& input[type=number]": {
+                          MozAppearance: "textfield",
+                        },
+                      },
+                    }}
                     value={formik.values.quantity2}
                     error={!!formik.errors.quantity2}
                     helperText={formik.errors.quantity2}
@@ -348,7 +456,12 @@ function AddStockManufacture({ ListSuppliers }) {
                 )}
                 <List>
                   {list2.map((product) => (
-                    <Product key={product.id} product={product} mode="add" />
+                    <Product
+                      key={product.id}
+                      product={product}
+                      mode="add"
+                      handleDelete={handleDelete}
+                    />
                   ))}
                 </List>
               </Box>
