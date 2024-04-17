@@ -10,7 +10,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
 import Card from "@mui/material/Card";
 import Divider from "@mui/material/Divider";
@@ -19,6 +19,9 @@ import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import { dateToLocalDate } from "utils/dateFormat";
 import colors from "assets/theme/base/colors";
+import { Box, IconButton } from "@mui/material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import MenuChart3 from "./MenuChart3";
 
 ChartJS.register(
   CategoryScale,
@@ -29,7 +32,7 @@ ChartJS.register(
   Legend
 );
 
-export const options = {
+const options = {
   responsive: true,
   plugins: {
     legend: {
@@ -93,28 +96,26 @@ export const options = {
   },
 };
 
-function CharBar3({ reports, expenses }) {
-  console.log(reports);
-  console.log(expenses);
-
-  const fullReport = reports.map((item1) => {
-    const matchingItem = expenses.find(
-      (item2) => item1.month === item2.month && item1.year === item2.year
-    );
-
-    const newItem = { ...item1 };
-
-    if (matchingItem) {
-      newItem.totalExpenses = matchingItem.total;
-    }
-
-    return newItem;
-  });
-
-  // Crear un objeto para almacenar las ventas por mes
+const getDataChart = (reports, expenses, selectYear) => {
   const salesForMonth = {};
   const months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-  // Llenar el objeto con las ventas existentes
+
+  const fullReport = reports
+    .map((item1) => {
+      const matchingItem = expenses.find(
+        (item2) => item1.month === item2.month && item1.year === item2.year
+      );
+
+      const newItem = { ...item1 };
+
+      if (matchingItem) {
+        newItem.totalExpenses = matchingItem.total;
+      }
+
+      return newItem;
+    })
+    .filter((report) => report.year === selectYear);
+
   for (const report of fullReport) {
     salesForMonth[report.month] = {
       totalCost: report.totalCost,
@@ -141,113 +142,148 @@ function CharBar3({ reports, expenses }) {
     ...salesForMonth[month],
   }));
 
-  console.log(oneYearSales);
+  return oneYearSales;
+};
 
-  const labels = [
-    "Enero",
-    "Febrero",
-    "Marzo",
-    "Abril",
-    "Mayo",
-    "Junio",
-    "Julio",
-    "Agosto",
-    "Septiembre",
-    "Octubre",
-    "Noviembre",
-    "Diciembre",
-  ];
-  const totalSell = oneYearSales.map((item) => item.totalSell);
-  const totalCost = oneYearSales.map((item) => item.totalCost);
-  const totalExpenses = oneYearSales.map((item) => item.totalExpenses);
-  const totalProfits = oneYearSales.map(
-    (item) => item.totalProfits - item.totalExpenses
+const labels = [
+  "Enero",
+  "Febrero",
+  "Marzo",
+  "Abril",
+  "Mayo",
+  "Junio",
+  "Julio",
+  "Agosto",
+  "Septiembre",
+  "Octubre",
+  "Noviembre",
+  "Diciembre",
+];
+
+function CharBar3({ reports, expenses }) {
+  const date = new Date();
+  const yearDate = date.getFullYear();
+  const reportYears = reports.map((item) => item.year);
+  const years = [...new Set(reportYears)];
+
+  const [open, setOpen] = useState(null);
+  const [selectYear, setSelectYear] = useState(yearDate);
+  const [oneYearData, setOneYearData] = useState(
+    getDataChart(reports, expenses, selectYear)
   );
-  const totalProfitsPercentage = oneYearSales.map(
-    (item) => (item.totalProfits * 100) / item.totalCost
-  );
+
+  useEffect(() => {
+    setOneYearData(getDataChart(reports, expenses, selectYear));
+  }, [selectYear]);
 
   const data = {
     labels,
     datasets: [
       {
         label: "Ventas",
-        data: totalSell,
+        data: oneYearData.map((item) => item.totalSell),
         backgroundColor: colors.info.main,
       },
       {
         label: "Costo",
-        data: totalCost,
+        data: oneYearData.map((item) => item.totalCost),
         backgroundColor: "rgba(244, 5, 200, 0.7)",
       },
       {
         label: "Ganancia Neta",
-        data: totalProfits,
+        data: oneYearData.map((item) => item.totalProfits - item.totalExpenses),
         backgroundColor: "rgba(85, 230, 18, 0.7)",
       },
       {
         label: "Gastos",
-        data: totalExpenses,
+        data: oneYearData.map((item) => item.totalExpenses),
         backgroundColor: "rgba(230, 18, 18, 0.7)",
       },
 
       {
         label: "Ganancia Neta%",
-        data: totalProfitsPercentage,
+        data: oneYearData.map(
+          (item) => (item.totalProfits * 100) / item.totalCost
+        ),
         backgroundColor: "rgba(3, 252, 157, 0.7)",
       },
     ],
   };
+
+  const handleOpenMenu = (event) => {
+    setOpen(event.currentTarget);
+  };
+
+  const handleCloseMenu = () => {
+    setOpen(null);
+  };
+
   return (
-    <Card sx={{ height: "100%" }}>
-      <MDBox padding="1rem">
-        {useMemo(
-          () => (
-            <MDBox
-              variant="gradient"
-              borderRadius="lg"
-              coloredShadow="dark"
-              py={2}
-              pr={0.5}
-              mt={-5}
-              sx={{
-                background: "linear-gradient(0deg, #464b55 0%, #73809b 100%)",
-              }}
-            >
-              <Bar options={options} data={data} />
-            </MDBox>
-          ),
-          []
-        )}
-        <MDBox pt={3} pb={1} px={1}>
-          <MDTypography variant="h6" textTransform="capitalize">
-            Totales mensuales
-          </MDTypography>
-          <MDTypography
-            component="div"
-            variant="button"
-            color="text"
-            fontWeight="light"
+    <>
+      <Card sx={{ height: "100%" }}>
+        <MDBox padding="1rem">
+          <MDBox
+            variant="gradient"
+            borderRadius="lg"
+            coloredShadow="dark"
+            py={2}
+            pr={0.5}
+            mt={-5}
+            sx={{
+              background: "linear-gradient(0deg, #464b55 0%, #73809b 100%)",
+            }}
           >
-            Total desde el 21/03/2023
-          </MDTypography>
-          <Divider />
-          <MDBox display="flex" alignItems="center">
-            <MDTypography
-              variant="button"
-              color="text"
-              lineHeight={1}
-              sx={{ mt: 0.15, mr: 0.5 }}
-            >
-              <Icon>schedule</Icon>
-            </MDTypography>
-            <MDTypography variant="button" color="text" fontWeight="light">
-              Actualizado {dateToLocalDate(new Date())}
-            </MDTypography>
+            <Bar options={options} data={data} />
+          </MDBox>
+
+          <MDBox pt={3} pb={1} px={1}>
+            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+              <Box>
+                <MDTypography variant="h6">
+                  {`Totales mensuales del ${selectYear}`}
+                </MDTypography>
+                <MDTypography
+                  component="div"
+                  variant="button"
+                  color="text"
+                  fontWeight="light"
+                >
+                  Total de resultados mensuales
+                </MDTypography>
+              </Box>
+              <IconButton
+                size="large"
+                color="inherit"
+                onClick={(e) => handleOpenMenu(e)}
+              >
+                <MoreVertIcon />
+              </IconButton>
+            </Box>
+
+            <Divider />
+            <MDBox display="flex" alignItems="center">
+              <MDTypography
+                variant="button"
+                color="text"
+                lineHeight={1}
+                sx={{ mt: 0.15, mr: 0.5 }}
+              >
+                <Icon>schedule</Icon>
+              </MDTypography>
+              <MDTypography variant="button" color="text" fontWeight="light">
+                Actualizado {dateToLocalDate(new Date())}
+              </MDTypography>
+            </MDBox>
           </MDBox>
         </MDBox>
-      </MDBox>
-    </Card>
+      </Card>
+      <MenuChart3
+        open={open}
+        handleCloseMenu={handleCloseMenu}
+        years={years}
+        setSelectYear={setSelectYear}
+      />
+    </>
   );
 }
 

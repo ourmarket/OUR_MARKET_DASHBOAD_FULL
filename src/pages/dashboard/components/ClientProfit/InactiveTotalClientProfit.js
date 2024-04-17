@@ -1,43 +1,33 @@
-/* eslint-disable eqeqeq */
 /* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
 
 import Card from "@mui/material/Card";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
-import { Avatar, Divider } from "@mui/material";
+import { Avatar, Box, Divider } from "@mui/material";
 import { formatPrice } from "utils/formaPrice";
 import { Link } from "react-router-dom";
 import PollIcon from "@mui/icons-material/Poll";
 
-function TotalClientsBuy({ clients }) {
-  const sliceClients = clients
-    .filter(
-      (client) =>
-        client.name !== "consumidor " &&
-        client.name !== "Caleb" &&
-        client.active
-    )
-    .slice(0, 12)
-    .sort((a, b) => b.totalProfits - a.totalProfits);
-
+function InactiveTotalClientsProfits({ inactive }) {
   return (
     <Card>
-      <MDBox sx={{ flex: 1, padding: 3 }}>
+      <Box sx={{ flex: 1, padding: 3 }}>
         <MDTypography
           variant="h6"
           sx={{ display: "flex", alignItems: "center" }}
         >
-          <PollIcon fontSize="large" /> Top 12 Clientes{" "}
-          <span style={{ color: "green", margin: " 0 5px" }}>Activos</span> con
-          más ganancia
+          <PollIcon fontSize="large" />
+          {`Top ${inactive.length} Clientes`}
+          <span style={{ color: "red", margin: "0 5px" }}>Inactivos</span> con
+          mas ganancia
         </MDTypography>
         <MDTypography variant="button" fontWeight="regular" color="text">
-          Han comprado los últimos 20 días.
+          Ultima compra hace más de 20 días.
         </MDTypography>
         <Divider />
 
-        {sliceClients.map((client) => (
+        {inactive.map((client) => (
           <Link
             to={`/clientes/detalle/${client.clientId}`}
             key={client.clientId}
@@ -83,9 +73,9 @@ function TotalClientsBuy({ clients }) {
             </MDBox>
           </Link>
         ))}
-      </MDBox>
+      </Box>
     </Card>
   );
 }
 
-export default TotalClientsBuy;
+export default InactiveTotalClientsProfits;

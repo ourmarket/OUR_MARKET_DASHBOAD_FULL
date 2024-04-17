@@ -15,6 +15,13 @@ export const clientApi = apiSlice.injectEndpoints({
       providesTags: ["clients"],
     }),
 
+    getClientsQuantity: builder.query({
+      query: () => "/clients/quantity",
+      // keepUnusedDataFor: 3,
+      extraOptions: { maxRetries: 5 },
+      providesTags: ["clients"],
+    }),
+
     getClient: builder.query({
       query: (id) => `/clients/${id}`,
       // keepUnusedDataFor: 3,
@@ -79,6 +86,7 @@ export const clientApi = apiSlice.injectEndpoints({
 export const {
   useGetClientsQuery,
   useGetClientQuery,
+  useGetClientsQuantityQuery,
   useGetAddressesClientQuery,
   usePostClientMutation,
   usePostClientSimpleMutation,

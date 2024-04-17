@@ -1,8 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
 
-import { Box, Card, Divider } from "@mui/material";
+import { Alert, Box, Card, Divider } from "@mui/material";
 import MDTypography from "components/MDTypography";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,11 +13,65 @@ import { formatPrice } from "utils/formaPrice";
 import EditAddressForm from "./EditAddressForm";
 import ItemCard from "./ItemCard";
 
-function Details({ order, deliveryZones, deliveryTrucks }) {
+function Details({ order, stock, deliveryZones, deliveryTrucks }) {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(addOrder(order));
+    dispatch(
+      addOrder({
+        ...order,
+        orderItems: order.orderItems.map((product) => ({
+          ...product,
+          visible: true,
+          originalTotalQuantity: product.totalQuantity,
+          originalUnitCost: product.unitCost,
+          // unifico todas las modificaciones en este array
+          allStockData: product.stockData.map((stock) => ({
+            stockId: stock.stockId,
+            quantity: stock.quantityOriginal,
+            stock: stock.quantityNew,
+            modify: stock.quantityModify,
+            unitCost: stock.unitCost,
+            dateStock: stock.dateStock,
+          })),
+          modifyStockData: product.stockData.map((stock) => ({
+            stockId: stock.stockId,
+            quantity: stock.quantityOriginal,
+            stock: stock.quantityNew,
+            modify: stock.quantityModify,
+            unitCost: stock.unitCost,
+            dateStock: stock.dateStock,
+          })),
+          stockData: product.stockData.map((stock) => ({
+            stockId: stock.stockId,
+            quantity: stock.quantityOriginal,
+            stock: stock.quantityNew,
+            modify: stock.quantityModify,
+            unitCost: stock.unitCost,
+            dateStock: stock.dateStock,
+          })),
+
+          modifyAvailableStock: stock
+            .filter((s) => s.product === product.productId)[0]
+            .stock.map((stock) => ({
+              stockId: stock._id,
+              quantity: stock.quantity,
+              stock: stock.stock,
+              unitCost: stock.unityCost,
+              dateStock: stock.createdAt,
+            })),
+          availableStock: stock
+            .filter((s) => s.product === product.productId)[0]
+            .stock.map((stock) => ({
+              stockId: stock._id,
+              quantity: stock.quantity,
+              stock: stock.stock,
+              unitCost: stock.unityCost,
+              dateStock: stock.createdAt,
+            })),
+        })),
+      })
+    );
   }, []);
 
   useEffect(() => {
@@ -26,6 +81,9 @@ function Details({ order, deliveryZones, deliveryTrucks }) {
       stockId: product.stockId,
       totalQuantity: product.totalQuantity,
       newQuantity: product.totalQuantity,
+      stock: stock
+        .filter((s) => s.product === product.productId)[0]
+        .stock.map((stock) => stock),
     }));
     dispatch(addStock(originalStock));
   }, []);
@@ -46,9 +104,13 @@ function Details({ order, deliveryZones, deliveryTrucks }) {
           alignSelf: "flex-start",
         }}
       >
-        {orderStore?.orderItems.map((product) => (
-          <ItemCard product={product} key={product._id} />
-        ))}
+        {orderStore?.orderItems
+          .filter((item) => item.visible)
+          .map((product) => (
+            <ItemCard product={product} key={product._id} />
+          ))}
+
+        <Alert severity="info">(*) Valores calculados automáticamente</Alert>
       </Box>
       <Card
         sx={{

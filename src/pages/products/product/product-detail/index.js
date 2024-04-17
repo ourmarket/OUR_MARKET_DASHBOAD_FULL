@@ -20,8 +20,7 @@ import DataProduct from "./productData/DataProduct";
 import AddOfertForm from "components/OUForms/Ofert/add-ofert/AddOfert";
 import EditOfertForm from "components/OUForms/Ofert/edit-ofert/EditOfert";
 import EditProductoForm from "components/OUForms/Product/edit-product/EditProduct";
-import AddStock from "components/OUForms/Stock/Add-Stock/AddStock";
-import TableStock from "../../../../components/OUTables/Stocks/Individual/TableStock";
+import AddStockById from "components/OUForms/Stock/Add-Stock-by-Id/AddStockById";
 
 function ProductDetail() {
   const { id } = useParams();
@@ -104,7 +103,6 @@ function ProductDetail() {
                 <Tab label="Editar producto" />
                 <Tab label="Editar oferta" />
                 <Tab label="Agregar Stock" />
-                <Tab label="Lista de stock" />
               </Tabs>
             </Box>
 
@@ -167,17 +165,7 @@ function ProductDetail() {
                 )}
               </Card>
             )}
-            {page === 4 && (
-              <Card
-                sx={{
-                  mx: 2.5,
-                }}
-              >
-                {l2 && <Loading />}
-                {e2 && <Alert severity="error">Ha ocurrido un error</Alert>}
-                {productById && <TableStock stock={productById} />}
-              </Card>
-            )}
+
             {page === 3 && (
               <Card
                 sx={{
@@ -189,10 +177,7 @@ function ProductDetail() {
                   <Alert severity="error">Ha ocurrido un error</Alert>
                 )}
                 {ListSuppliers && productById && (
-                  <AddStock
-                    ListSuppliers={ListSuppliers}
-                    productById={productById}
-                  />
+                  <AddStockById product={productById} setPage={setPage} />
                 )}
               </Card>
             )}

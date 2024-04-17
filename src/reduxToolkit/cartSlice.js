@@ -33,7 +33,9 @@ const cartSlice = createSlice({
       state.client = null;
     },
     deleteProduct: (state, action) => {
-      state.products = state.products.filter((product) => product._id !== action.payload);
+      state.products = state.products.filter(
+        (product) => product._id !== action.payload
+      );
       state.subTotal = state.products.reduce((acc, cur) => {
         return acc + cur.finalPrice;
       }, 0);
@@ -46,6 +48,7 @@ const cartSlice = createSlice({
             finalPrice: +action.payload.finalPrice,
             finalQuantity: +action.payload.finalQuantity,
             basePrice: +action.payload.basePrice,
+            stockModify: action.payload.stockModify,
           };
         } else {
           return product;

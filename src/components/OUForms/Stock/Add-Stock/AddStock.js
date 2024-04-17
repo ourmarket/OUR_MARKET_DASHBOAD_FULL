@@ -1,8 +1,7 @@
 /* eslint-disable react/prop-types */
-
 import { useNavigate } from "react-router-dom";
 import { LoadingButton } from "@mui/lab";
-import { Alert, Autocomplete, Box, MenuItem, TextField } from "@mui/material";
+import { Alert, Autocomplete, Box, TextField } from "@mui/material";
 import { useFormik } from "formik";
 import MDBox from "components/MDBox";
 import MDButton from "components/MDButton";
@@ -10,20 +9,15 @@ import colors from "assets/theme/base/colors";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { creteProductLotsSchema } from "validations/productsLots/creteProductsLotsYup";
-import { usePutProductMutation, useGetProductsQuery } from "api/productApi";
 import MDTypography from "components/MDTypography";
 import { formatPrice } from "utils/formaPrice";
-import Loading from "components/DRLoading";
+import { usePostStockMutation } from "api/stockApi";
+import { v4 as uuidv4 } from "uuid";
 
-function AddStock({ ListSuppliers }) {
+function AddStock({ listProducts, ListSuppliers }) {
   const navigate = useNavigate();
 
-  const {
-    data: listProducts,
-    isLoading: l1,
-    error: e1,
-  } = useGetProductsQuery();
-  const [editProduct, { isLoading, isError }] = usePutProductMutation();
+  const [addStock, { isLoading, isError }] = usePostStockMutation();
   const [inputValue, setInputValue] = useState(null);
   const [products, setProducts] = useState([]);
 
@@ -54,32 +48,27 @@ function AddStock({ ListSuppliers }) {
       supplier: "",
       quantity: undefined,
       unityCost: undefined,
-      location: "",
     },
     onSubmit: async (values) => {
       const newStock = {
-        productId: inputValue.id,
-        name: inputValue.product,
-        img: inputValue.img,
-        supplier: values.supplier,
+        stockId: uuidv4(),
+        product: inputValue.id,
+        buy: null,
         quantity: values.quantity,
         cost: values.unityCost * values.quantity,
         unityCost: values.unityCost,
         stock: values.quantity,
-        location: values.location,
-        moveDate: null,
         createdStock: new Date(),
         updateStock: new Date(),
       };
 
-      const { id } = inputValue;
-      const res = await editProduct({ id, newStock }).unwrap();
+      const res = await addStock(newStock).unwrap();
 
       if (res) {
         Swal.fire({
           position: "center",
           icon: "success",
-          title: "Lote de productos con éxito",
+          title: "Stock cargado con éxito",
           showConfirmButton: false,
           timer: 2500,
         });
@@ -87,13 +76,6 @@ function AddStock({ ListSuppliers }) {
     },
     validationSchema: creteProductLotsSchema,
   });
-
-  if (l1) {
-    return <Loading />;
-  }
-  if (e1) {
-    return <Alert severity="error">El proveedor no fue creado</Alert>;
-  }
 
   return (
     <MDBox pt={5} pb={3}>
@@ -135,26 +117,6 @@ function AddStock({ ListSuppliers }) {
                 <TextField {...params} label="Productos" variant="outlined" />
               )}
             />
-            <TextField
-              id="product_available_ofert"
-              margin="normal"
-              required
-              select
-              autoComplete="product_available_ofert"
-              name="supplier"
-              fullWidth
-              label="Proveedor"
-              value={formik.values.supplier}
-              error={!!formik.errors.supplier}
-              helperText={formik.errors.supplier}
-              onChange={formik.handleChange}
-            >
-              {ListSuppliers.data.suppliers.map((supplier) => (
-                <MenuItem key={supplier._id} value={supplier.businessName}>
-                  {supplier.businessName}
-                </MenuItem>
-              ))}
-            </TextField>
 
             <TextField
               margin="normal"

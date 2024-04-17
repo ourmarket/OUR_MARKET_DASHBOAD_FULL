@@ -9,27 +9,22 @@ function Oferts({ oferts }) {
   const [search, setSearch] = useState("");
   const [stock, setStock] = useState(true);
 
-  const productsWithStockField = oferts.map((ofert) => {
-    const stock = ofert.product.stock.reduce(
-      (acc, curr) => curr.stock + acc,
-      0
-    );
-    if (stock > 0) {
-      return {
-        ...ofert,
-        existStock: true,
-      };
-    }
-    return {
-      ...ofert,
-      existStock: false,
-    };
-  });
+  const productWithStock = oferts.filter((ofert) => ofert.stock.length > 0);
 
-  const productWithStock = productsWithStockField.filter(
-    (product) => product.existStock
-  );
-  const allProducts = oferts;
+  const allProducts = oferts
+    .map((ofert) => ofert)
+    .sort((a, b) => {
+      if (a.description < b.description) {
+        return -1;
+      }
+      if (a.description > b.description) {
+        return 1;
+      }
+      return 0;
+    });
+
+  console.log(allProducts);
+  console.log(productWithStock);
   const [filterArr, setFilterArr] = useState(productWithStock);
 
   const filtrar = (arrayToFilter) => {
@@ -96,19 +91,24 @@ function Oferts({ oferts }) {
           flexDirection: "row",
           alignItems: "center",
           width: "100%",
+          padding: "0px 20px",
         }}
       >
-        <MDTypography variant="h6" sx={{ width: "48%" }}>
+        <MDTypography variant="h6" sx={{ width: "52%" }}>
           Producto
         </MDTypography>
-        <MDTypography variant="h6" sx={{ width: "17%" }}>
-          Costo
-        </MDTypography>
+
         <MDTypography variant="h6" sx={{ width: "17%" }}>
           Precio
         </MDTypography>
-        <MDTypography variant="h6" sx={{ width: "17%" }}>
+        <MDTypography variant="h6" sx={{ width: "17%", paddingLeft: "2%" }}>
           Stock
+        </MDTypography>
+        <MDTypography
+          variant="h6"
+          sx={{ width: "17%", textAlign: "right", paddingRight: "30px" }}
+        >
+          Acción
         </MDTypography>
       </Box>
       {filterArr.map((product) => (

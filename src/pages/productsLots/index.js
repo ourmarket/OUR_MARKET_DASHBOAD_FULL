@@ -9,13 +9,13 @@ import Loading from "components/DRLoading";
 import { Alert, Box, Tab, Tabs } from "@mui/material";
 import { useState } from "react";
 import { useGetProductsQuery } from "api/productApi";
-import { useGetTotalStockQuery } from "api/reportApi";
 import { useGetSuppliersQuery } from "api/supplierApi";
 import AddStock from "components/OUForms/Stock/Add-Stock/AddStock";
 import StockAvailableTable from "components/OUTables/Stocks/Available/StockAvailableTable";
 import StockTotalTable from "components/OUTables/Stocks/Total/StockTotalsTable";
 import StockAllTable from "components/OUTables/Stocks/All/StockAllTable";
 import AddStockManufacture from "components/OUForms/Stock/Add-Stock-Manufacture/AddStockManufacture";
+import { useGetAvailableStocksQuery, useGetStocksQuery } from "api/stockApi";
 
 function StockMain() {
   const [page, setPage] = useState(0);
@@ -24,17 +24,24 @@ function StockMain() {
     setPage(newValue);
   };
 
-  const { data: stock, isLoading: l1, error: e1 } = useGetProductsQuery();
   const {
-    data: actualStock,
-    isLoading: l2,
-    error: e2,
-  } = useGetTotalStockQuery();
+    data: dataProducts,
+    isLoading: l1,
+    error: e1,
+  } = useGetProductsQuery(1);
+
   const {
     data: ListSuppliers,
     isLoading: l3,
     isError: e3,
   } = useGetSuppliersQuery();
+
+  const { data: allStock, isLoading: l4, isError: e4 } = useGetStocksQuery();
+  const {
+    data: allAvailableStock,
+    isLoading: l5,
+    isError: e5,
+  } = useGetAvailableStocksQuery();
 
   return (
     <DashboardLayout>
@@ -72,30 +79,32 @@ function StockMain() {
                 <Tab label="Stock total" />
                 <Tab label="Historial de compras" />
                 <Tab label="Agregar stock" />
-                <Tab label="Agregar stock subproducto" />
+                {/*  <Tab label="Agregar stock subproducto" /> */}
               </Tabs>
             </Box>
             {page === 0 && (
               <Card>
-                {l1 && <Loading />}
-                {e1 && <Alert severity="error">Ha ocurrido un error</Alert>}
-                {stock && <StockAvailableTable products={stock.products} />}
+                {l4 && <Loading />}
+                {e4 && <Alert severity="error">Ha ocurrido un error</Alert>}
+                {allStock && (
+                  <StockAvailableTable allStock={allStock.data.stock} />
+                )}
               </Card>
             )}
             {page === 1 && (
               <Card>
-                {l2 && <Loading />}
-                {e2 && <Alert severity="error">Ha ocurrido un error</Alert>}
-                {stock && (
-                  <StockTotalTable actualStock={actualStock.data.report} />
+                {l5 && <Loading />}
+                {e5 && <Alert severity="error">Ha ocurrido un error</Alert>}
+                {allAvailableStock && (
+                  <StockTotalTable actualStock={allAvailableStock.data.stock} />
                 )}
               </Card>
             )}
             {page === 2 && (
               <Card>
-                {l1 && <Loading />}
-                {e1 && <Alert severity="error">Ha ocurrido un error</Alert>}
-                {stock && <StockAllTable products={stock.products} />}
+                {l4 && <Loading />}
+                {e4 && <Alert severity="error">Ha ocurrido un error</Alert>}
+                {allStock && <StockAllTable allStock={allStock.data.stock} />}
               </Card>
             )}
             {page === 3 && (
@@ -104,9 +113,9 @@ function StockMain() {
                 {(e1 || e3) && (
                   <Alert severity="error">Ha ocurrido un error</Alert>
                 )}
-                {stock && ListSuppliers && (
+                {dataProducts && ListSuppliers && (
                   <AddStock
-                    listProducts={stock}
+                    listProducts={dataProducts}
                     ListSuppliers={ListSuppliers}
                   />
                 )}
@@ -118,10 +127,10 @@ function StockMain() {
                 {(e1 || e3) && (
                   <Alert severity="error">Ha ocurrido un error</Alert>
                 )}
-                {stock && ListSuppliers && (
+                {dataProducts && allAvailableStock && (
                   <AddStockManufacture
-                    listProducts={stock}
-                    ListSuppliers={ListSuppliers}
+                    listProducts={dataProducts.products}
+                    actualStock={allAvailableStock.data.stock}
                   />
                 )}
               </Card>

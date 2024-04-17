@@ -20,8 +20,7 @@ import MDButton from "components/MDButton";
 import colors from "assets/theme/base/colors";
 import { useEffect, useState } from "react";
 import { creteProductLotsSchema } from "validations/productsLots/creteProductsLotsYup";
-import { usePutProductMutation, useGetProductsQuery } from "api/productApi";
-import Loading from "components/DRLoading";
+import { usePutProductMutation } from "api/productApi";
 import MDTypography from "components/MDTypography";
 import FolderIcon from "@mui/icons-material/Folder";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -72,14 +71,10 @@ const Product = ({ product, mode, handleDelete }) => {
   );
 };
 
-function AddStockManufacture({ ListSuppliers }) {
+function AddStockManufacture({ listProducts }) {
+  console.log(listProducts);
   const navigate = useNavigate();
 
-  const {
-    data: listProducts,
-    isLoading: l1,
-    error: e1,
-  } = useGetProductsQuery();
   const [editProduct, { isLoading, isError }] = usePutProductMutation();
 
   const [products, setProducts] = useState([]);
@@ -96,7 +91,7 @@ function AddStockManufacture({ ListSuppliers }) {
 
   useEffect(() => {
     if (listProducts) {
-      const autoCompleteProducts = listProducts.products
+      const autoCompleteProducts = listProducts
         .map((product) => {
           const firstLetter = product.name[0].toUpperCase();
           return {
@@ -106,9 +101,7 @@ function AddStockManufacture({ ListSuppliers }) {
             product: product.name,
             img: product.img,
             stock: product.stock,
-            stockValue: formatQuantity(
-              product.stock.reduce((acc, curr) => acc + curr.stock, 0)
-            ),
+            stockValue: formatQuantity(product.stock),
             firstLetter: /[0-9]/.test(firstLetter) ? "0-9" : firstLetter,
           };
         })
@@ -186,12 +179,8 @@ function AddStockManufacture({ ListSuppliers }) {
     setList2(list2.filter((product) => product.uniqueId !== id));
   };
 
-  if (l1) {
-    return <Loading />;
-  }
-  if (e1) {
-    return <Alert severity="error">El proveedor no fue creado</Alert>;
-  }
+  console.log(products);
+  console.log(productsAvailable);
 
   return (
     <MDBox pt={5} pb={3}>
@@ -210,12 +199,6 @@ function AddStockManufacture({ ListSuppliers }) {
             onSubmit={formik.handleSubmit}
             sx={{ width: "100%" }}
           >
-            {ListSuppliers.data.suppliers.length === 0 && (
-              <Alert severity="warning" sx={{ marginBottom: "30px" }}>
-                No hay proveedores en la lista, agregue uno antes de cargar el
-                stock.
-              </Alert>
-            )}
             <MDTypography variant="body2" sx={{ marginBottom: "30px" }}>
               Se realiza la manofactura de un producto propio, por ejemplo, con
               pechugas, pan rallado y huevo, se realizan Supremas de Pollo. Se
@@ -225,7 +208,7 @@ function AddStockManufacture({ ListSuppliers }) {
             <Box sx={{ display: "flex", gap: 3 }}>
               <Box
                 sx={{
-                  width: "40%",
+                  width: "50%",
                   border: "1px solid #ccc",
                   padding: "20px",
                   borderRadius: "10px",
@@ -324,7 +307,7 @@ function AddStockManufacture({ ListSuppliers }) {
               </Box>
               <Box
                 sx={{
-                  width: "60%",
+                  width: "50%",
                   border: "1px solid #ccc",
                   padding: "20px",
                   borderRadius: "10px",

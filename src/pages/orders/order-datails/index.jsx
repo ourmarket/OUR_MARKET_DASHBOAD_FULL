@@ -10,7 +10,7 @@ import Details from "./Details";
 
 function OrderDetails() {
   const { id } = useParams();
-  const { data: order, isLoading, error } = useGetOrderQuery(id);
+  const { data: order, isLoading, error } = useGetOrderQuery({ id, stock: 0 });
 
   console.log(order?.data.order);
   return (

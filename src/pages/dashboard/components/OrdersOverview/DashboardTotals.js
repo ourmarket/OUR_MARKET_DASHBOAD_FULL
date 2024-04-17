@@ -3,7 +3,6 @@
 import { Grid } from "@mui/material";
 import MDBox from "components/MDBox";
 import ComplexStatisticsCard from "examples/Cards/StatisticsCards/ComplexStatisticsCard";
-import reportsLineChartData from "layouts/dashboard/data/reportsLineChartData";
 import React, { useEffect, useState } from "react";
 import { formatPrice } from "utils/formaPrice";
 import { dateToLocalDate } from "utils/dateFormat";
@@ -12,10 +11,10 @@ import TotalProducts from "../TotalProducts/TotalProducts";
 import TotalProductsProfit from "../TotalProducts/TotalProductsProfit";
 import CharBar3 from "../Chart3/CharBar3";
 import TotalClientsDebt from "../ClientDebt/TotalClientDebt";
-import TotalClientsBuy from "../ClientBuy/TotalClientBuy";
-import TotalClientsProfits from "../ClientProfit/TotalClientProfit";
 import CharBar1 from "../Chart1/CharBar1";
 import { useSelector } from "react-redux";
+import InactiveTotalClientsProfits from "../ClientProfit/InactiveTotalClientProfit";
+import ActiveTotalClientsBuy from "../ClientBuy/ActiveTotalClientBuy";
 
 function DashboardTotals({
   orders,
@@ -30,19 +29,14 @@ function DashboardTotals({
   dataCategory,
   dataExpenses,
 }) {
-  const { sales, tasks } = reportsLineChartData;
   const { version } = useSelector((store) => store.auth);
   const [updateDate, setUpdateDate] = useState(null);
 
-  const totalClients = clients.length;
-
-  // const { totalCash, totalDebt, totalSales, totalTransfer } = orders[0];
+  console.log(clients);
 
   useEffect(() => {
     setUpdateDate(dateToLocalDate(new Date()));
   }, []);
-
-  const totalActivesClients = clients.filter((client) => client.active).length;
 
   return (
     <MDBox py={3} mt={2}>
@@ -53,11 +47,11 @@ function DashboardTotals({
               color="dark"
               icon="person_add"
               title="Clientes Activos"
-              count={totalActivesClients}
+              count={clients?.active}
               percentage={{
                 color: "success",
                 amount: "",
-                label: `Total clientes ${totalClients}`,
+                label: `Total clientes ${clients?.total}`,
               }}
             />
           </MDBox>
@@ -183,7 +177,12 @@ function DashboardTotals({
       </MDBox>
       <MDBox mt={4.5}>
         <Grid container spacing={3}>
-          <Grid item xs={12} md={12} lg={12}>
+          <Grid item xs={12} md={6} lg={6}>
+            <MDBox mb={3}>
+              <CharBar3 reports={dataOrdersByMonth} expenses={dataExpenses} />
+            </MDBox>
+          </Grid>
+          <Grid item xs={12} md={6} lg={6}>
             <MDBox mb={3}>
               <CharBar3 reports={dataOrdersByMonth} expenses={dataExpenses} />
             </MDBox>
@@ -206,10 +205,12 @@ function DashboardTotals({
             <TotalClientsDebt clients={dataClientsDebs} />
           </Grid>
           <Grid item xs={12} md={6} lg={4}>
-            <TotalClientsBuy clients={reportTotalClientBuy} />
+            <ActiveTotalClientsBuy active={reportTotalClientBuy.active} />
           </Grid>
           <Grid item xs={12} md={6} lg={4}>
-            <TotalClientsProfits clients={reportTotalClientBuy} />
+            <InactiveTotalClientsProfits
+              inactive={reportTotalClientBuy.inactive}
+            />
           </Grid>
         </Grid>
       </MDBox>

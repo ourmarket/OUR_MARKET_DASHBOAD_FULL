@@ -12,24 +12,24 @@ import { formatPrice } from "utils/formaPrice";
 import { formatQuantity } from "utils/quantityFormat";
 import MenuTableStocks from "../Menu/MenuTableStock";
 
-function StockAllTable({ products }) {
+function StockAllTable({ allStock }) {
   const [controller] = useMaterialUIController();
   const { darkMode } = controller;
 
   const [open, setOpen] = useState(null);
-  const [productsLotsId, setProductsLotsId] = useState(null);
+  const [stockId, setStockId] = useState(null);
 
   const handleOpenMenu = (productId, id, event) => {
     setOpen(event.currentTarget);
-    setProductsLotsId({ productId, id });
+    setStockId(id);
   };
 
   const handleCloseMenu = () => {
     setOpen(null);
-    setProductsLotsId(null);
+    setStockId(null);
   };
 
-  const stocks = products.reduce((acc, curr) => curr.stock.concat(acc), []);
+  const stocks = allStock;
 
   const columns = [
     {
@@ -197,11 +197,11 @@ function StockAllTable({ products }) {
       headerName: "Menu",
       headerClassName: "super-app-theme--header",
 
-      renderCell: ({ row: { productId, _id } }) => (
+      renderCell: ({ row: { product, _id } }) => (
         <IconButton
           size="large"
           color="inherit"
-          onClick={(e) => handleOpenMenu(productId, _id, e)}
+          onClick={(e) => handleOpenMenu(product, _id, e)}
         >
           <MoreVertIcon />
         </IconButton>
@@ -224,11 +224,12 @@ function StockAllTable({ products }) {
               stock: `${formatQuantity(productsLot.stock)}`,
               quantity: `${formatQuantity(productsLot.quantity)}`,
               supplier: productsLot.supplier,
-              product: productsLot.name,
+              product: productsLot.product.name,
+              img: productsLot.product.img,
               cost_unit: `${formatPrice(productsLot.unityCost)}`,
               createdAt: dateToLocalDate(productsLot.createdStock),
-              updatedAt: productsLot.updateStock
-                ? dateToLocalDate(productsLot.updateStock)
+              updatedAt: productsLot.updatedAt
+                ? dateToLocalDate(productsLot.updatedAt)
                 : "",
               thereIsStock: productsLot.stock > 0 ? true : false,
               moveDate: productsLot.moveDate
@@ -276,7 +277,7 @@ function StockAllTable({ products }) {
       <MenuTableStocks
         open={open}
         handleCloseMenu={handleCloseMenu}
-        productsLotsId={productsLotsId}
+        stockId={stockId}
       />
     </>
   );

@@ -1,53 +1,43 @@
 /* eslint-disable react/prop-types */
-
 import { useNavigate, useParams } from "react-router-dom";
 import { LoadingButton } from "@mui/lab";
-import { Alert, Box, MenuItem, TextField } from "@mui/material";
+import { Alert, Box, TextField } from "@mui/material";
 import { useFormik } from "formik";
 import MDBox from "components/MDBox";
 import MDButton from "components/MDButton";
 import colors from "assets/theme/base/colors";
 import { creteProductLotsSchema } from "validations/productsLots/creteProductsLotsYup";
-import { usePutProductMutation } from "api/productApi";
 import Swal from "sweetalert2";
 import MDTypography from "components/MDTypography";
 import { formatPrice } from "utils/formaPrice";
 import { formatQuantity } from "utils/quantityFormat";
+import { usePutStockMutation } from "api/stockApi";
 
-function EditStock({ ListSuppliers, productLot: product, lotId }) {
+function EditStock({ dataStock }) {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const [editProductsLots, { isLoading, isError }] = usePutProductMutation();
-
-  const [lotToEdit] = product.stock.filter((stock) => stock._id === lotId);
-  const restOfLots = product.stock.filter((stock) => stock._id !== lotId);
+  const [editStock, { isLoading, isError }] = usePutStockMutation();
 
   const formik = useFormik({
     initialValues: {
-      product: lotToEdit.name,
-      supplier: lotToEdit.supplier,
-      quantity: lotToEdit.quantity,
-      unityCost: lotToEdit.unityCost,
-      stock: formatQuantity(lotToEdit.stock),
-      /*  location: lotToEdit.location, */
+      product: dataStock.product.name,
+      quantity: dataStock.quantity,
+      unityCost: dataStock.unityCost,
+      stock: formatQuantity(dataStock.stock),
     },
     onSubmit: async (values) => {
-      const stock = [
-        ...restOfLots,
-        {
-          ...lotToEdit,
-          supplier: values.supplier,
-          quantity: values.quantity,
-          cost: values.unityCost * values.quantity,
-          stock: values.stock,
-          /*   location: values.location, */
-          updateStock: new Date(),
-          unityCost: values.unityCost,
-        },
-      ];
+      const stock = {
+        ...dataStock,
+        product: dataStock.product._id,
+        quantity: values.quantity,
+        cost: values.unityCost * values.quantity,
+        stock: values.stock,
+        unityCost: values.unityCost,
+        updateStock: new Date(),
+      };
 
-      const res = await editProductsLots({ id, stock }).unwrap();
+      const res = await editStock({ id, ...stock }).unwrap();
       console.log(res);
       Swal.fire({
         position: "center",
@@ -60,36 +50,6 @@ function EditStock({ ListSuppliers, productLot: product, lotId }) {
     },
     validationSchema: creteProductLotsSchema,
   });
-
-  const handleDelete = async () => {
-    const stock = [...restOfLots];
-
-    Swal.fire({
-      title: "Deseas borrar el stock de este producto?",
-      text: "Este cambio no se puede revertir",
-
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Borrar",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        const res = await editProductsLots({ id, stock }).unwrap();
-
-        if (res) {
-          Swal.fire({
-            position: "center",
-            icon: "success",
-            title: "Stock de productos borrado con éxito",
-            showConfirmButton: false,
-            timer: 2500,
-          });
-
-          navigate(-1);
-        }
-      }
-    });
-  };
 
   return (
     <MDBox pt={6} pb={3}>
@@ -123,41 +83,6 @@ function EditStock({ ListSuppliers, productLot: product, lotId }) {
 
             <TextField
               margin="normal"
-              required
-              select
-              name="supplier"
-              fullWidth
-              label="Proveedor"
-              value={formik.values.supplier}
-              error={!!formik.errors.supplier}
-              helperText={formik.errors.supplier}
-              onChange={formik.handleChange}
-            >
-              {ListSuppliers.data.suppliers.map((supplier) => (
-                <MenuItem key={supplier._id} value={supplier.businessName}>
-                  {supplier.businessName}
-                </MenuItem>
-              ))}
-            </TextField>
-
-            {/*   <TextField
-              margin="normal"
-              required
-              select
-              name="location"
-              fullWidth
-              label="Ubicación de stock"
-              value={formik.values.location}
-              error={!!formik.errors.location}
-              helperText={formik.errors.location}
-              onChange={formik.handleChange}
-            >
-              <MenuItem value="proveedor">En cámara del proveedor</MenuItem>
-              <MenuItem value="local">En cámara del local</MenuItem>
-            </TextField> */}
-
-            <TextField
-              margin="normal"
               fullWidth
               required
               type="number"
@@ -166,6 +91,19 @@ function EditStock({ ListSuppliers, productLot: product, lotId }) {
               value={formik.values.quantity}
               error={!!formik.errors.quantity}
               helperText={formik.errors.quantity}
+              onChange={formik.handleChange}
+            />
+
+            <TextField
+              margin="normal"
+              fullWidth
+              required
+              type="number"
+              name="stock"
+              label="Stock actual"
+              value={formik.values.stock}
+              error={!!formik.errors.stock}
+              helperText={formik.errors.stock}
               onChange={formik.handleChange}
             />
             <TextField
@@ -178,18 +116,6 @@ function EditStock({ ListSuppliers, productLot: product, lotId }) {
               value={formik.values.unityCost}
               error={!!formik.errors.unityCost}
               helperText={formik.errors.unityCost}
-              onChange={formik.handleChange}
-            />
-            <TextField
-              margin="normal"
-              fullWidth
-              required
-              type="number"
-              name="stock"
-              label="Stock actual"
-              value={formik.values.stock}
-              error={!!formik.errors.stock}
-              helperText={formik.errors.stock}
               onChange={formik.handleChange}
             />
 
@@ -217,20 +143,7 @@ function EditStock({ ListSuppliers, productLot: product, lotId }) {
             >
               Editar
             </LoadingButton>
-            <LoadingButton
-              variant="contained"
-              loading={isLoading}
-              onClick={handleDelete}
-              sx={{
-                mt: 3,
-                mb: 2,
-                mr: 2,
-                backgroundColor: `${colors.error.main}`,
-                color: "white !important",
-              }}
-            >
-              Borrar
-            </LoadingButton>
+
             <MDButton
               onClick={() => navigate(-1)}
               variant="outlined"
@@ -244,7 +157,7 @@ function EditStock({ ListSuppliers, productLot: product, lotId }) {
             </MDButton>
             {isError && (
               <Alert severity="error">
-                Ha ocurrido un error, producto no creado
+                Ha ocurrido un error, stock no editado.
               </Alert>
             )}
           </Box>

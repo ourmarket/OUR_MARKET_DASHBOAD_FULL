@@ -1,35 +1,22 @@
-/* eslint-disable no-unused-vars */
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import { useGetProductQuery } from "api/productApi";
 import Loading from "components/DRLoading";
 import { Alert } from "@mui/material";
-import { useGetSuppliersQuery } from "api/supplierApi";
-import { useParams, useSearchParams } from "react-router-dom";
+
+import { useParams } from "react-router-dom";
 import EditStock from "components/OUForms/Stock/Edit-Stock/EditStock";
+import { useGetStockQuery } from "api/stockApi";
 
 function EditProductsLots() {
   const { id } = useParams();
-  const [searchParams] = useSearchParams();
 
-  const lotId = searchParams.get("lotId");
+  const { data: dataStock, isLoading: l1, isError: e1 } = useGetStockQuery(id);
 
-  const {
-    data: ListSuppliers,
-    isLoading: l2,
-    isError: e2,
-  } = useGetSuppliersQuery();
-  const {
-    data: productLot,
-    isLoading: l3,
-    isError: e3,
-  } = useGetProductQuery(id);
-
-  console.log(productLot);
+  console.log(dataStock);
 
   return (
     <DashboardLayout>
@@ -53,17 +40,9 @@ function EditProductsLots() {
                 </MDTypography>
               </MDBox>
               <MDBox>
-                {(l2 || l3) && <Loading />}
-                {(e2 || e3) && (
-                  <Alert severity="error">Ha ocurrido un error</Alert>
-                )}
-                {ListSuppliers && productLot && (
-                  <EditStock
-                    ListSuppliers={ListSuppliers}
-                    productLot={productLot}
-                    lotId={lotId}
-                  />
-                )}
+                {l1 && <Loading />}
+                {e1 && <Alert severity="error">Ha ocurrido un error</Alert>}
+                {dataStock && <EditStock dataStock={dataStock.data.stock} />}
               </MDBox>
             </Card>
           </Grid>

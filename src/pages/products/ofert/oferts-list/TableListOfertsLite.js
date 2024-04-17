@@ -21,9 +21,7 @@ import { formatQuantity } from "utils/quantityFormat";
 function TableListOfertsLite({ oferts }) {
   const [controller] = useMaterialUIController();
   const { darkMode } = controller;
-  const listOferts = oferts.data.oferts;
-
-  console.log(listOferts);
+  const listOferts = oferts;
 
   const navigate = useNavigate();
   const [open, setOpen] = useState(null);
@@ -188,7 +186,11 @@ function TableListOfertsLite({ oferts }) {
       headerClassName: "super-app-theme--header",
       flex: 0.8,
       renderCell: ({ row: { _id, productId } }) => (
-        <IconButton size="large" color="inherit" onClick={(e) => handleOpenMenu(_id, e, productId)}>
+        <IconButton
+          size="large"
+          color="inherit"
+          onClick={(e) => handleOpenMenu(_id, e, productId)}
+        >
           <MoreVertIcon />
         </IconButton>
       ),
@@ -198,7 +200,12 @@ function TableListOfertsLite({ oferts }) {
   return (
     <>
       <Box m="20px" sx={{ overflowX: "scroll" }}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          mb={5}
+        >
           <MDButton
             color="dark"
             variant="gradient"
@@ -238,9 +245,7 @@ function TableListOfertsLite({ oferts }) {
               quantity4: ofert.quantities[0]?.quantity4 || "",
               updateAt: dateToLocalDate(ofert.createdAt),
               productId: ofert.product?._id,
-              stock: formatQuantity(
-                ofert.product?.stock.reduce((acc, curr) => acc + curr.stock, 0) || 0
-              ),
+              stock: formatQuantity(ofert.stock || 0),
             }))}
             columns={columns}
             getRowId={(row) => row._id}

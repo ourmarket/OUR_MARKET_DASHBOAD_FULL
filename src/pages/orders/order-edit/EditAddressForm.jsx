@@ -1,9 +1,6 @@
-/* eslint-disable no-shadow */
-/* eslint-disable react/jsx-no-duplicate-props */
-/* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
-/* eslint-disable react/jsx-boolean-value */
-/* eslint-disable no-underscore-dangle */
+/* eslint-disable react/prop-types */
+
 import { useNavigate, useParams } from "react-router-dom";
 import { LoadingButton } from "@mui/lab";
 import { Alert, Box, Divider, MenuItem, TextField } from "@mui/material";
@@ -15,19 +12,16 @@ import MDTypography from "components/MDTypography";
 import { usePutOrderMutation, useDeleteOrderMutation } from "api/orderApi";
 import Swal from "sweetalert2";
 import { useSelector } from "react-redux";
-import { formatQuantity } from "utils/quantityFormat";
-import { usePutProductStockMutation } from "api/productApi";
 
 function EditAddressForm({ zones, deliveryTrucks, order }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const orderStore = useSelector((store) => store.order.order);
-  const originalStock = useSelector((store) => store.order.originalStock);
+  const { existStock } = useSelector((store) => store.order);
 
   const [editOrder, { isLoading: l1, isError: e1 }] = usePutOrderMutation();
-  const [deleteOrder, { isLoading: l2, isError: e2 }] = useDeleteOrderMutation();
-  const [editProductStock, { isLoading: l3, isError: e3 }] = usePutProductStockMutation();
-  console.log(order);
+  const [deleteOrder, { isLoading: l2, isError: e2 }] =
+    useDeleteOrderMutation();
 
   const formik = useFormik({
     initialValues: {
@@ -53,12 +47,34 @@ function EditAddressForm({ zones, deliveryTrucks, order }) {
       lng: order?.shippingAddress.lng || null,
     },
     onSubmit: async (values) => {
+      const orderItems = orderStore?.orderItems.map((product) => ({
+        uniqueId: product?.uniqueId || null,
+        productId: product.productId,
+        name: product.name,
+        unit: product.unit,
+        description: product?.description || null,
+        img: product.img,
+        totalQuantity: product.totalQuantity,
+        totalPrice: product.totalPrice,
+        unitPrice: product.unitPrice,
+        unitCost: product.unitCost,
+        stockId: null,
+        stockData: product.allStockData.map((stock) => ({
+          stockId: stock.stockId,
+          unitCost: stock.unitCost,
+          quantityOriginal: stock.quantity,
+          quantityNew: stock.stock,
+          quantityModify: stock.modify,
+          dateStock: stock.dateStock,
+        })),
+      }));
+
       const editOrderValues = {
         ...values,
-        orderItems: orderStore?.orderItems,
+        orderItems,
         tax: values.tax,
         subTotal: orderStore?.subTotal,
-        total: orderStore?.total,
+        total: orderStore?.subTotal + values.tax,
         shippingAddress: {
           name: values.name,
           lastName: values.lastName,
@@ -78,46 +94,24 @@ function EditAddressForm({ zones, deliveryTrucks, order }) {
           debt: values.debt,
         },
       };
-      // arr para editar stocks
-      const updateProductsStocks = originalStock.map((product) => ({
-        productId: product.productId,
-        // negativo devolución de stock
-        // positivo agregar mas stock
-        totalQuantity: product.newQuantity - product.totalQuantity,
-        stockId: product.stockId,
-      }));
+      console.log(editOrderValues);
 
-      updateProductsStocks.map(async (product) => {
-        if (product.totalQuantity !== 0) {
-          const updateData = {
-            stockId: product.stockId,
-            totalQuantity: formatQuantity(product.totalQuantity),
-          };
-          const id = product.productId;
-          await editProductStock({ id, ...updateData }).unwrap();
-        }
-      });
-
-      await editOrder({ id, ...editOrderValues }).unwrap();
-      Swal.fire({
-        position: "center",
-        icon: "success",
-        title: "Orden editado con éxito",
-        showConfirmButton: false,
-        timer: 2500,
-      });
-      navigate("/ordenes/lista");
+      const res = await editOrder({ id, ...editOrderValues }).unwrap();
+      if (res.ok) {
+        Swal.fire({
+          position: "center",
+          icon: "success",
+          title: "Orden editada con éxito",
+          showConfirmButton: false,
+          timer: 2500,
+        });
+        navigate("/ordenes/lista");
+      }
     },
     validationSchema: editOrderAddressSchema,
   });
 
   const handlerDelete = () => {
-    const updateProducts = order.orderItems.map((product) => ({
-      productId: product.productId,
-      totalQuantity: -product.totalQuantity, // negativo porque es una devolución de stock
-      stockId: product.stockId,
-    }));
-
     Swal.fire({
       title: "Deseas borrar esta orden?",
       text: "Al borrar esta orden el stock volverá como devolución.",
@@ -128,15 +122,6 @@ function EditAddressForm({ zones, deliveryTrucks, order }) {
       confirmButtonText: "Borrar",
     }).then(async (result) => {
       if (result.isConfirmed) {
-        updateProducts.map(async (product) => {
-          const updateData = {
-            stockId: product.stockId,
-            totalQuantity: formatQuantity(product.totalQuantity),
-          };
-          const id = product.productId;
-          await editProductStock({ id, ...updateData }).unwrap();
-        });
-
         await deleteOrder(id).unwrap();
         Swal.fire({
           position: "center",
@@ -438,6 +423,7 @@ function EditAddressForm({ zones, deliveryTrucks, order }) {
           type="submit"
           variant="contained"
           loading={l1}
+          disabled={!existStock}
           sx={{
             mt: 3,
             mb: 2,
@@ -451,7 +437,7 @@ function EditAddressForm({ zones, deliveryTrucks, order }) {
         </LoadingButton>
         <LoadingButton
           variant="contained"
-          loading={l2 || l3}
+          loading={l2}
           onClick={handlerDelete}
           sx={{
             mt: 0.5,
@@ -481,8 +467,12 @@ function EditAddressForm({ zones, deliveryTrucks, order }) {
           Cancelar
         </MDButton>
 
-        {e1 && <Alert severity="error">Ha ocurrido un error, orden no editada</Alert>}
-        {(e2 || e3) && <Alert severity="error">Ha ocurrido un error, orden no borrada</Alert>}
+        {e1 && (
+          <Alert severity="error">Ha ocurrido un error, orden no editada</Alert>
+        )}
+        {e2 && (
+          <Alert severity="error">Ha ocurrido un error, orden no borrada</Alert>
+        )}
       </Box>
     </Box>
   );

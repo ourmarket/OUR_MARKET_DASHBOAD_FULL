@@ -27,7 +27,7 @@ function OrderCreate() {
     setPage(newValue);
   };
 
-  const { data: oferts, isLoading: l1, isError: e1 } = useGetOfertsQuery();
+  const { data: oferts, isLoading: l1, isError: e1 } = useGetOfertsQuery(1);
   const {
     data: clientAddresses,
     isLoading: l2,

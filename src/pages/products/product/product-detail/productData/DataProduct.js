@@ -53,12 +53,7 @@ function DataProduct({
               <MDTypography variant="h6">Tipo de producto</MDTypography>
               <MDTypography variant="h6">{productById?.type}</MDTypography>
             </Box>
-            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-              <MDTypography variant="h6">Stock</MDTypography>
-              <MDTypography variant="h6">
-                {formatQuantity(stock)} kg
-              </MDTypography>
-            </Box>
+
             <Box sx={{ display: "flex", justifyContent: "space-between" }}>
               <MDTypography variant="h6">
                 Precio Actual ({productById.unit})

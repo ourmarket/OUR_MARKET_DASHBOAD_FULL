@@ -3,12 +3,14 @@
 /* eslint-disable no-else-return */
 /* eslint-disable arrow-body-style */
 import { createSlice } from "@reduxjs/toolkit";
+import { mergeArrays } from "utils/adjustStock";
 
 const orderSlice = createSlice({
   name: "order",
   initialState: {
     order: null,
     originalStock: null,
+    existStock: true,
   },
   reducers: {
     addOrder: (state, action) => {
@@ -26,6 +28,16 @@ const orderSlice = createSlice({
             totalQuantity: +action.payload.totalQuantity,
             unitPrice: +action.payload.unitPrice,
             unitCost: +action.payload.unitCost,
+            modifyStockData: action.payload.modifyStockData,
+            modifyAvailableStock: action.payload.modifyAvailableStock,
+            visible: action.payload.visible,
+            allStockData:
+              product.originalTotalQuantity > +action.payload.totalQuantity
+                ? action.payload.modifyStockData
+                : mergeArrays(
+                    action.payload.modifyStockData,
+                    action.payload.modifyAvailableStock
+                  ),
           };
         } else {
           return product;
@@ -52,7 +64,9 @@ const orderSlice = createSlice({
       });
     },
     deleteProductOrder: (state, action) => {
-      const orderItems = state.order.orderItems.filter((product) => action.payload !== product._id);
+      const orderItems = state.order.orderItems.filter(
+        (product) => action.payload !== product._id
+      );
 
       state.order = { ...state.order, orderItems };
 
@@ -63,9 +77,28 @@ const orderSlice = createSlice({
       state.order.total = state.order.subTotal + state.order.tax;
       state.order.numberOfItems = state.order.orderItems.length;
     },
+    errorStock: (state) => {
+      state.existStock = false;
+    },
+    clearErrorStock: (state) => {
+      state.existStock = true;
+    },
+    clearOrder: (state) => {
+      state.order = null;
+      state.originalStock = null;
+      state.existStock = true;
+    },
   },
 });
 
-export const { addOrder, updateOrder, deleteProductOrder, addStock, updateStock } =
-  orderSlice.actions;
+export const {
+  addOrder,
+  updateOrder,
+  deleteProductOrder,
+  addStock,
+  updateStock,
+  errorStock,
+  clearErrorStock,
+  clearOrder,
+} = orderSlice.actions;
 export default orderSlice.reducer;

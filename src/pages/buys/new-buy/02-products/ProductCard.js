@@ -4,6 +4,7 @@ import MDButton from "components/MDButton";
 import MDTypography from "components/MDTypography";
 import { useDispatch, useSelector } from "react-redux";
 import { addProduct } from "reduxToolkit/buySlice";
+import { v4 as uuidv4 } from "uuid";
 
 function ProductCard({ product }) {
   const dispatch = useDispatch();
@@ -13,6 +14,7 @@ function ProductCard({ product }) {
   const handleClick = () => {
     dispatch(
       addProduct({
+        stockId: uuidv4(),
         productId: product._id,
         name: product.name,
         img: product.img,

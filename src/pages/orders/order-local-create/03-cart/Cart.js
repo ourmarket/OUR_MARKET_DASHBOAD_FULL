@@ -36,12 +36,6 @@ function Cart() {
     usePutProductStockMutation();
 
   const handlerCreate = async () => {
-    /* return console.table({
-      efectivo: cash,
-      transferencia: transfer,
-      subTotal,
-      pagado: cash + transfer,
-    }); */
     const productsToEdit = products.map((product) => ({
       productId: product.stock.productId,
       stockId: product.stock._id,

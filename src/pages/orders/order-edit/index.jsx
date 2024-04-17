@@ -13,9 +13,21 @@ import Details from "./Details";
 function OrderEdit() {
   const { id } = useParams();
 
-  const { data: order, isLoading: l1, isError: e1 } = useGetOrderQuery(id);
-  const { data: deliveryZones, isLoading: l2, isError: e2 } = useGetDeliveryZonesQuery();
-  const { data: deliveryTrucks, isLoading: l3, isError: e3 } = useGetDeliveryTrucksQuery();
+  const {
+    data: order,
+    isLoading: l1,
+    isError: e1,
+  } = useGetOrderQuery({ id, stock: 1 });
+  const {
+    data: deliveryZones,
+    isLoading: l2,
+    isError: e2,
+  } = useGetDeliveryZonesQuery();
+  const {
+    data: deliveryTrucks,
+    isLoading: l3,
+    isError: e3,
+  } = useGetDeliveryTrucksQuery();
 
   return (
     <DashboardLayout>
@@ -39,10 +51,13 @@ function OrderEdit() {
             </MDBox>
             <MDBox pt={3} px={2}>
               {(l1 || l2 || l3) && <Loading />}
-              {(e1 || e2 || e3) && <Alert severity="error">Ha ocurrido un error</Alert>}
+              {(e1 || e2 || e3) && (
+                <Alert severity="error">Ha ocurrido un error</Alert>
+              )}
               {order && deliveryZones && deliveryTrucks && (
                 <Details
                   order={order.data.order}
+                  stock={order.data.stock}
                   deliveryZones={deliveryZones.data.deliveryZones}
                   deliveryTrucks={deliveryTrucks.data.deliveryTrucks}
                 />

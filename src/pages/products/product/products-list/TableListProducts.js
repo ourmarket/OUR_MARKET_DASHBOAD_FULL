@@ -122,7 +122,11 @@ function TableListProducts({ products }) {
       headerClassName: "super-app-theme--header",
 
       renderCell: ({ row: { _id } }) => (
-        <IconButton size="large" color="inherit" onClick={(e) => handleOpenMenu(_id, e)}>
+        <IconButton
+          size="large"
+          color="inherit"
+          onClick={(e) => handleOpenMenu(_id, e)}
+        >
           <MoreVertIcon />
         </IconButton>
       ),
@@ -132,8 +136,17 @@ function TableListProducts({ products }) {
   return (
     <>
       <Box m="20px">
-        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
-          <MDButton color="dark" variant="gradient" onClick={() => navigate("/productos/nuevo")}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          mb={5}
+        >
+          <MDButton
+            color="dark"
+            variant="gradient"
+            onClick={() => navigate("/productos/nuevo")}
+          >
             Nuevo producto
           </MDButton>
         </Stack>
@@ -152,7 +165,7 @@ function TableListProducts({ products }) {
               unit: product.unit,
               category: product?.category?.name,
               type: product.type,
-              stock: formatQuantity(product.stock.reduce((acc, curr) => acc + curr.stock, 0)),
+              stock: formatQuantity(product.stock),
               description: product.description,
             }))}
             columns={columns}
@@ -193,7 +206,11 @@ function TableListProducts({ products }) {
         </Box>
       </Box>
 
-      <MenuListUsers open={open} handleCloseMenu={handleCloseMenu} productId={productId} />
+      <MenuListUsers
+        open={open}
+        handleCloseMenu={handleCloseMenu}
+        productId={productId}
+      />
     </>
   );
 }

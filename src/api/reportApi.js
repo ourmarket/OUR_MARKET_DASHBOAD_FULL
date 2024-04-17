@@ -8,18 +8,20 @@ export const userApi = apiSlice.injectEndpoints({
   tagTypes: ["reports"],
 
   endpoints: (builder) => ({
+    //1. total general de ventas y pagos(efectivo, transferencia, deudas)
+    getTotalOrders: builder.query({
+      query: () => "/reports/orders",
+      extraOptions: { maxRetries: 5 },
+      providesTags: ["reports"],
+    }),
+
     getTotalOrderProductsByDay: builder.query({
       query: () => "/reports/totalOrderProductsByDay",
       // keepUnusedDataFor: 3,
       extraOptions: { maxRetries: 5 },
       providesTags: ["reports"],
     }),
-    getTotalOrders: builder.query({
-      query: () => "/reports/orders",
-      // keepUnusedDataFor: 3,
-      extraOptions: { maxRetries: 5 },
-      providesTags: ["reports"],
-    }),
+
     getTotalOrdersByMonth: builder.query({
       query: (client = "") => `/reports/ordersByMonth?client=${client}`,
       // keepUnusedDataFor: 3,
@@ -51,7 +53,7 @@ export const userApi = apiSlice.injectEndpoints({
       providesTags: ["reports"],
     }),
     getReportTotalClientBuy: builder.query({
-      query: () => "/reports/reportTotalClientBuy",
+      query: (limit) => `/reports/reportTotalClientBuy?limit=${limit}`,
       // keepUnusedDataFor: 3,
       extraOptions: { maxRetries: 5 },
       providesTags: ["reports"],
@@ -161,6 +163,28 @@ export const userApi = apiSlice.injectEndpoints({
       extraOptions: { maxRetries: 5 },
       providesTags: ["reports"],
     }),
+
+    getTotalCategoryExpensesReport: builder.query({
+      query: () => "/reports/reportTotalExpensesByCategory",
+      // keepUnusedDataFor: 3,
+      extraOptions: { maxRetries: 5 },
+      providesTags: ["reports"],
+    }),
+
+    getByMonthAndCategoryExpensesReport: builder.query({
+      query: () => "/reports/reportTotalExpensesByMonthAndCategory",
+      // keepUnusedDataFor: 3,
+      extraOptions: { maxRetries: 5 },
+      providesTags: ["reports"],
+    }),
+
+    // payments
+    paymentByLastXdayReport: builder.query({
+      query: (days) => `/reports/paymentByLastXdayReport?days=${days}`,
+      // keepUnusedDataFor: 3,
+      extraOptions: { maxRetries: 5 },
+      providesTags: ["reports"],
+    }),
   }),
 });
 
@@ -180,6 +204,9 @@ export const {
   useGetCategoryReportQuery,
   useGetCategoryReportByDayQuery,
   useGetReportTotalExpensesByMonthQuery,
+  useGetTotalCategoryExpensesReportQuery,
+  useGetByMonthAndCategoryExpensesReportQuery,
+  usePaymentByLastXdayReportQuery,
 
   usePostTotalOrderProductsByRangeMutation,
   usePostReportPaymentByRangeDayMutation,

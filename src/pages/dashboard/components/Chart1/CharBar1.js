@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/prop-types */
 import {
   Chart as ChartJS,
@@ -17,8 +18,7 @@ import Divider from "@mui/material/Divider";
 import Icon from "@mui/material/Icon";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
-import { dateToLocalDate } from "utils/dateFormat";
-import { getChartData } from "utils/getChartData";
+import { dateToLocalDate, dateToLocalDateMin } from "utils/dateFormat";
 
 ChartJS.register(
   CategoryScale,
@@ -96,20 +96,17 @@ export const options = {
 };
 
 function CharBar1({ ordersByDays }) {
-  const info = getChartData(ordersByDays);
-  const labels = info.dates;
-
   const data = {
-    labels,
+    labels: ordersByDays.map((date) => dateToLocalDateMin(date.date)),
     datasets: [
       {
         label: "Pagos",
-        data: info.totalPayment,
+        data: ordersByDays.map((report) => report.total - report.debtTotal),
         backgroundColor: "rgba(85, 230, 18, 0.7)",
       },
       {
         label: "Deudas",
-        data: info.totalDebt,
+        data: ordersByDays.map((report) => report.debtTotal),
         backgroundColor: "rgba(230, 18, 18, 0.7)",
       },
     ],
@@ -139,12 +136,22 @@ function CharBar1({ ordersByDays }) {
           <MDTypography variant="h6" textTransform="capitalize">
             Pagos y deudas
           </MDTypography>
-          <MDTypography component="div" variant="button" color="text" fontWeight="light">
-            Total de los últimos 7 días.
+          <MDTypography
+            component="div"
+            variant="button"
+            color="text"
+            fontWeight="light"
+          >
+            Total de los últimos 14 días.
           </MDTypography>
           <Divider />
           <MDBox display="flex" alignItems="center">
-            <MDTypography variant="button" color="text" lineHeight={1} sx={{ mt: 0.15, mr: 0.5 }}>
+            <MDTypography
+              variant="button"
+              color="text"
+              lineHeight={1}
+              sx={{ mt: 0.15, mr: 0.5 }}
+            >
               <Icon>schedule</Icon>
             </MDTypography>
             <MDTypography variant="button" color="text" fontWeight="light">

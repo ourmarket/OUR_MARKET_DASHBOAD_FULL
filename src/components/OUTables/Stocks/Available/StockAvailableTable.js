@@ -12,7 +12,7 @@ import { formatPrice } from "utils/formaPrice";
 import { formatQuantity } from "utils/quantityFormat";
 import MenuTableStocks from "../Menu/MenuTableStock";
 
-function StockAvailableTable({ products }) {
+function StockAvailableTable({ allStock }) {
   const [controller] = useMaterialUIController();
   const { darkMode } = controller;
 
@@ -29,9 +29,7 @@ function StockAvailableTable({ products }) {
     setProductsLotsId(null);
   };
 
-  const stocks = products
-    .reduce((acc, curr) => curr.stock.concat(acc), [])
-    .filter((product) => product.stock > 0);
+  const stocks = allStock.filter((product) => product.stock > 0);
 
   const columns = [
     {
@@ -229,11 +227,13 @@ function StockAvailableTable({ products }) {
             rows={stocks.map((productsLot) => ({
               ...productsLot,
               _id: productsLot._id,
+              product: productsLot.product.name,
+              img: productsLot.product.img,
               cost: `${formatPrice(productsLot.cost)}`,
               stock: `${formatQuantity(productsLot.stock)}`,
               quantity: `${formatQuantity(productsLot.quantity)}`,
               supplier: productsLot.supplier,
-              product: productsLot.name,
+
               cost_unit: `${formatPrice(productsLot.unityCost)}`,
               createdAt: dateToLocalDate(productsLot.createdStock),
               updatedAt: productsLot.updateStock

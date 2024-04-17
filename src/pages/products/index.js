@@ -9,16 +9,16 @@ import Loading from "components/DRLoading";
 import { Alert, Tab, Tabs } from "@mui/material";
 import { useGetProductsQuery } from "api/productApi";
 import { Box } from "@mui/system";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGetCategoriesQuery } from "api/categoryApi";
 import { useGetOfertsQuery } from "api/ofertApi";
 import TableListProducts from "./product/products-list/TableListProducts";
 import TableListCategories from "./category/category-list/TableListCategories";
-import TableListOferts from "./ofert/oferts-list/TableListOferts";
 import TableListOfertsLite from "./ofert/oferts-list/TableListOfertsLite";
 
 function Products() {
   const [page, setPage] = useState(0);
+  const [ofertWithStock, setOfertWithStock] = useState([]);
 
   const handleChange = (event, newValue) => {
     setPage(newValue);
@@ -27,13 +27,58 @@ function Products() {
     data: listProducts,
     isLoading: l1,
     error: e1,
-  } = useGetProductsQuery();
+  } = useGetProductsQuery(1);
   const {
     data: listCategories,
     isLoading: l2,
     error: e2,
   } = useGetCategoriesQuery();
   const { data: listOferts, isLoading: l3, error: e3 } = useGetOfertsQuery();
+
+  /* useEffect(() => {
+    if (listOferts && listProducts) {
+      const oferts = listOferts.data.oferts;
+      const products = listProducts.products;
+      const ofertsWithStockArr = [];
+      for (let i = 0; i < oferts.length; i++) {
+        for (let x = 0; x < products.length; x++) {
+          if (
+            oferts[i]?.product?._id.toString() === products[x]?._id.toString()
+          )
+            ofertsWithStockArr.push({
+              ...oferts[i],
+              stock: products[x].stock,
+            });
+        }
+      }
+
+      setOfertWithStock(ofertsWithStockArr);
+    }
+  }, [listOferts, listProducts]); */
+
+  useEffect(() => {
+    if (listOferts && listProducts) {
+      const oferts = listOferts.data.oferts;
+      const products = listProducts.products;
+
+      const ofertsWithStockArr = oferts.map((ofert) => {
+        const productWithStock = products.find(
+          (product) => ofert.product?._id.toString() === product?._id.toString()
+        );
+
+        if (productWithStock) {
+          return {
+            ...ofert,
+            stock: productWithStock.stock,
+          };
+        }
+
+        return ofert;
+      });
+
+      setOfertWithStock(ofertsWithStockArr);
+    }
+  }, [listOferts, listProducts]);
 
   return (
     <DashboardLayout>
@@ -103,8 +148,7 @@ function Products() {
               >
                 {l3 && <Loading />}
                 {e3 && <Alert severity="error">Ha ocurrido un error</Alert>}
-                {listOferts && <TableListOfertsLite oferts={listOferts} />}
-                {/* {listOferts && <TableListOferts oferts={listOferts} />} */}
+                {listOferts && <TableListOfertsLite oferts={ofertWithStock} />}
               </Card>
             )}
           </Grid>
