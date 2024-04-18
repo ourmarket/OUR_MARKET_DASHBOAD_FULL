@@ -54,6 +54,7 @@ import SalesDetail from "pages/sales/detail/SalesDetail";
 import NewBuy from "pages/buys/new-buy";
 import ListBuys from "pages/buys/list-buys";
 import BuyDetails from "pages/buys/details-buy";
+import BuyEdit from "pages/buys/edit-buy";
 
 export const routes_dr = [
   //dashboard
@@ -536,6 +537,14 @@ export const routes_dr = [
     component: (
       <RequireAuth>
         <BuyDetails />
+      </RequireAuth>
+    ),
+  },
+  {
+    route: "/compras/editar/:id",
+    component: (
+      <RequireAuth>
+        <BuyEdit />
       </RequireAuth>
     ),
   },

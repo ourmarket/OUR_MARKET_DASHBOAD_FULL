@@ -12,6 +12,7 @@ function ProductCard({ product }) {
         height: "75px",
         flexDirection: "row",
         alignItems: "center",
+        marginBottom: "15px",
       }}
     >
       <Box

@@ -76,7 +76,7 @@ function MenuBuys({ open, handleCloseMenu, menuId }) {
         <EditIcon sx={{ mr: 1 }} />
         Ver compra
       </MenuItem>
-      <MenuItem onClick={() => navigate(`/clientes/editar/${menuId}`)}>
+      <MenuItem onClick={() => navigate(`/compras/editar/${menuId}`)}>
         <EditIcon sx={{ mr: 1 }} />
         Editar compra
       </MenuItem>

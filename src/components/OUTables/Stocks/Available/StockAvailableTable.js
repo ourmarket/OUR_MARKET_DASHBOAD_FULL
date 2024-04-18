@@ -1,7 +1,5 @@
 /* eslint-disable react/prop-types */
-import { Avatar, Box, IconButton } from "@mui/material";
-import { useState } from "react";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { Avatar, Box } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import colors from "assets/theme-dark/base/colors";
 import { useMaterialUIController } from "context";
@@ -10,24 +8,10 @@ import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import { formatPrice } from "utils/formaPrice";
 import { formatQuantity } from "utils/quantityFormat";
-import MenuTableStocks from "../Menu/MenuTableStock";
 
 function StockAvailableTable({ allStock }) {
   const [controller] = useMaterialUIController();
   const { darkMode } = controller;
-
-  const [open, setOpen] = useState(null);
-  const [productsLotsId, setProductsLotsId] = useState(null);
-
-  const handleOpenMenu = (productId, id, event) => {
-    setOpen(event.currentTarget);
-    setProductsLotsId({ productId, id });
-  };
-
-  const handleCloseMenu = () => {
-    setOpen(null);
-    setProductsLotsId(null);
-  };
 
   const stocks = allStock.filter((product) => product.stock > 0);
 
@@ -198,22 +182,6 @@ function StockAvailableTable({ allStock }) {
       flex: 1.2,
       headerClassName: "super-app-theme--header",
     },
-
-    {
-      field: "accessLevel",
-      headerName: "Menu",
-      headerClassName: "super-app-theme--header",
-
-      renderCell: ({ row: { productId, _id } }) => (
-        <IconButton
-          size="large"
-          color="inherit"
-          onClick={(e) => handleOpenMenu(productId, _id, e)}
-        >
-          <MoreVertIcon />
-        </IconButton>
-      ),
-    },
   ];
 
   return (
@@ -281,12 +249,6 @@ function StockAvailableTable({ allStock }) {
           />
         </Box>
       </Box>
-
-      <MenuTableStocks
-        open={open}
-        handleCloseMenu={handleCloseMenu}
-        productsLotsId={productsLotsId}
-      />
     </>
   );
 }
