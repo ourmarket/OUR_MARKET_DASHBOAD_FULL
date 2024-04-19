@@ -1,7 +1,7 @@
 import { apiSlice } from "./apiSlice";
 
 export const ofertApi = apiSlice.injectEndpoints({
-  keepUnusedDataFor: 60, // duración de datos en cache
+  keepUnusedDataFor: 30, // duración de datos en cache
   refetchOnMountOrArgChange: true, // revalida al montar el componente
   refetchOnFocus: true, // revalida al cambiar de foco
   refetchOnReconnect: true, // revalida al reconectar
@@ -17,6 +17,12 @@ export const ofertApi = apiSlice.injectEndpoints({
 
     getOfert: builder.query({
       query: (id) => `/oferts/${id}`,
+      // keepUnusedDataFor: 3,
+      extraOptions: { maxRetries: 3 },
+      providesTags: ["oferts"],
+    }),
+    getOfertQuery: builder.query({
+      query: ({ id, stock }) => `/oferts/${id}?stock=${stock}`,
       // keepUnusedDataFor: 3,
       extraOptions: { maxRetries: 3 },
       providesTags: ["oferts"],
@@ -62,6 +68,7 @@ export const ofertApi = apiSlice.injectEndpoints({
 export const {
   useGetOfertsQuery,
   useGetOfertQuery,
+  useGetOfertQueryQuery,
   useGetOfertByProductIdQuery,
   usePostOfertMutation,
   usePutOfertMutation,

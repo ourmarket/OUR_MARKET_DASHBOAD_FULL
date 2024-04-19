@@ -4,7 +4,7 @@ import { Alert, Box, Card, Grid, Tab, Tabs } from "@mui/material";
 import { useGetClientAddressesQuery } from "api/clientsAddressApi";
 import { useGetDeliveryTrucksQuery } from "api/deliveryTruckApi";
 import { useGetDeliveryZonesQuery } from "api/deliveryZoneApi";
-import { useGetOfertsQuery } from "api/ofertApi";
+
 import Loading from "components/DRLoading";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
@@ -14,8 +14,9 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { clearCart } from "reduxToolkit/cartSlice";
 import Address from "../components/01-address-delivery/Address";
-import Oferts from "../components/02-oferts/Oferts";
+
 import Cart from "../components/03-cart/CartDelivery";
+import { Oferts_index } from "../components/02-oferts/Oferts_index";
 
 function OrderCreate() {
   const dispatch = useDispatch();
@@ -27,7 +28,6 @@ function OrderCreate() {
     setPage(newValue);
   };
 
-  const { data: oferts, isLoading: l1, isError: e1 } = useGetOfertsQuery(1);
   const {
     data: clientAddresses,
     isLoading: l2,
@@ -104,9 +104,7 @@ function OrderCreate() {
                   p: 2,
                 }}
               >
-                {l1 && <Loading />}
-                {e1 && <Alert severity="error">Ha ocurrido un error</Alert>}
-                {oferts && <Oferts oferts={oferts.data.oferts} />}
+                <Oferts_index />
               </Card>
             )}
             {page === 2 && (

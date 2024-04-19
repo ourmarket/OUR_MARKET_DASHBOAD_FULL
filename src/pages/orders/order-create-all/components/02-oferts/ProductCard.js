@@ -1,8 +1,12 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable react/prop-types */
+import { LoadingButton } from "@mui/lab";
 import { Box } from "@mui/material";
+import { useGetOfertQueryQuery } from "api/ofertApi";
+import colors from "assets/theme/base/colors";
 import MDButton from "components/MDButton";
 import MDTypography from "components/MDTypography";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addProduct } from "reduxToolkit/cartSlice";
 import { formatPrice } from "utils/formaPrice";
@@ -12,20 +16,35 @@ function ProductCard({ product }) {
   const dispatch = useDispatch();
   const { products } = useSelector((store) => store.cart);
   const itemCart = products.find((item) => item._id === product._id);
-  const productWithStock = product.stock.filter((item) => item.stock > 0);
 
   const totalStock = product.stock.reduce((acc, curr) => curr.stock + acc, 0);
 
-  const handlerClick = () => {
-    dispatch(
-      addProduct({
-        ...product,
+  const [id, setId] = useState(null);
+  const [skip, setSkip] = useState(true);
+  const { data: ofertData, isLoading } = useGetOfertQueryQuery(
+    { id, stock: 1 },
+    { skip }
+  );
 
-        finalPrice: product.basePrice,
-        finalQuantity: 1,
-      })
-    );
+  const handlerClick = (id) => {
+    setId(id);
+    setSkip(false);
   };
+
+  useEffect(() => {
+    if (ofertData) {
+      const data = {
+        ...ofertData.data.ofert,
+        finalPrice: ofertData.data.ofert.basePrice,
+        finalQuantity: 1,
+        stock: ofertData.data.stock,
+      };
+      console.log(data);
+      dispatch(addProduct(data));
+    }
+    setSkip(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ofertData]);
 
   return (
     <Box
@@ -104,20 +123,7 @@ function ProductCard({ product }) {
             {formatQuantity(totalStock)} unid.
           </MDTypography>
         </Box>
-        {productWithStock.length === 0 && (
-          <MDTypography
-            variant="h6"
-            color="error"
-            sx={{
-              width: "20%",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            Sin stock
-          </MDTypography>
-        )}
+
         <Box
           sx={{
             width: "20%",
@@ -132,14 +138,18 @@ function ProductCard({ product }) {
             </MDButton>
           )}
           {product.stock.length > 0 && (
-            <MDButton
-              color="dark"
-              variant="gradient"
-              onClick={handlerClick}
+            <LoadingButton
+              variant="contained"
+              loading={isLoading}
+              onClick={() => handlerClick(product._id)}
               disabled={!!itemCart}
+              sx={{
+                backgroundColor: `${colors.dark.main}`,
+                color: "white !important",
+              }}
             >
               {!itemCart ? "Agregar" : "Agregado"}
-            </MDButton>
+            </LoadingButton>
           )}
         </Box>
       </Box>
