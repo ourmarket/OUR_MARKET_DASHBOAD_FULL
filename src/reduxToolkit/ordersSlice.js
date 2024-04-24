@@ -51,6 +51,28 @@ const orderSlice = createSlice({
 
       state.order.total = state.order.subTotal + state.order.tax;
     },
+    updateOrderValue: (state, action) => {
+      const orderItems = state.order.orderItems.map((product) => {
+        if (product._id === action.payload.id) {
+          return {
+            ...product,
+            totalPrice: +action.payload.totalPrice,
+            totalQuantity: +action.payload.totalQuantity,
+            unitPrice: +action.payload.unitPrice,
+            unitCost: +action.payload.unitCost,
+          };
+        } else {
+          return product;
+        }
+      });
+      state.order = { ...state.order, orderItems };
+
+      state.order.subTotal = state.order.orderItems.reduce((acc, cur) => {
+        return acc + cur.totalPrice;
+      }, 0);
+
+      state.order.total = state.order.subTotal + state.order.tax;
+    },
     updateStock: (state, action) => {
       state.originalStock = state.originalStock.map((item) => {
         if (item.stockId === action.payload.stockId) {
@@ -94,6 +116,7 @@ const orderSlice = createSlice({
 export const {
   addOrder,
   updateOrder,
+  updateOrderValue,
   deleteProductOrder,
   addStock,
   updateStock,

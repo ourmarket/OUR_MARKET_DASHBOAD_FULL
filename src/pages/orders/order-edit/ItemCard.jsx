@@ -11,6 +11,7 @@ import {
   updateOrder,
   errorStock,
   clearErrorStock,
+  updateOrderValue,
 } from "reduxToolkit/ordersSlice";
 import { adjustStock } from "utils/adjustStock";
 
@@ -65,7 +66,7 @@ function ItemCard({ product }) {
     setValue(e.target.value);
 
     dispatch(
-      updateOrder({
+      updateOrderValue({
         id: product._id,
         totalQuantity: quantity,
         totalPrice: e.target.value * quantity,
