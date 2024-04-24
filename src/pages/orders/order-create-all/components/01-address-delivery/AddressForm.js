@@ -35,6 +35,7 @@ function AddressForm({ setManualForm, setPage, zones, deliveryTrucks }) {
       deliveryTruck: "",
       lat: client?.lat || undefined,
       lng: client?.lng || undefined,
+      active: false,
     },
     onSubmit: async (values) => {
       console.log(values);
@@ -255,6 +256,21 @@ function AddressForm({ setManualForm, setPage, zones, deliveryTrucks }) {
               {delivery.truckId}
             </MenuItem>
           ))}
+        </TextField>
+        <TextField
+          margin="normal"
+          required
+          select
+          name="active"
+          fullWidth
+          label="Enviar orden a repartidor"
+          value={formik.values.active}
+          error={!!formik.errors.active}
+          helperText={formik.errors.active}
+          onChange={formik.handleChange}
+        >
+          <MenuItem value={false}>No</MenuItem>
+          <MenuItem value={true}>Si</MenuItem>
         </TextField>
 
         <LoadingButton

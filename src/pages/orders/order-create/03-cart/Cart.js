@@ -1,5 +1,4 @@
 /* eslint-disable no-underscore-dangle */
-/* eslint-disable no-unused-vars */
 import { Alert, Box, Card, Divider } from "@mui/material";
 import MDTypography from "components/MDTypography";
 import { useDispatch, useSelector } from "react-redux";
@@ -10,41 +9,6 @@ import { usePostOrderMutation } from "api/orderApi";
 import { useNavigate } from "react-router-dom";
 import { clearCart } from "reduxToolkit/cartSlice";
 import ItemCart from "./ItemCart";
-
-/* function calculateAverageUnityCost(stockArray) {
-  let totalQuantity = 0;
-  let totalUnityCost = 0;
-  let totalCount = 0;
-
-  stockArray.forEach((item) => {
-    if (item.quantity !== item.stock) {
-      totalQuantity += item.quantity - item.stock;
-      totalUnityCost += (item.quantity - item.stock) * item.unityCost;
-      totalCount += item.quantity - item.stock;
-    }
-  });
-
-  if (totalCount === 0) {
-    return 0; // Para evitar dividir por cero
-  } else {
-    const averageUnityCost = totalUnityCost / totalQuantity;
-    return parseFloat(averageUnityCost.toFixed(2)); // Limitar a 2 decimales
-  }
-} */
-function calculateAverageUnityCost(stockArray) {
-  let totalUnityCost = [];
-  let totalCount = 0;
-  const filterArr = stockArray.filter((stock) => stock.modify);
-
-  filterArr.forEach((item) => {
-    totalCount += item.modify;
-    totalUnityCost.push(item.unityCost * item.modify);
-  });
-
-  const totalProm =
-    totalUnityCost.reduce((acc, curr) => acc + curr, 0) / totalCount;
-  return parseFloat(totalProm.toFixed(2));
-}
 
 function Cart() {
   const {
@@ -81,18 +45,9 @@ function Cart() {
       totalQuantity: item.finalQuantity,
       totalPrice: item.finalPrice,
       unitPrice: item.basePrice,
-      unitCost: calculateAverageUnityCost(item.stockModify),
+      unitCost: 0, // calculado por el backend
       stockId: null,
-      stockData: item.stockModify
-        .filter((stock) => stock.quantity !== stock.stock)
-        .map((stock) => ({
-          stockId: stock._id,
-          quantityOriginal: stock.quantity,
-          quantityNew: stock.stock,
-          quantityModify: stock.modify,
-          unitCost: stock.unityCost,
-          dateStock: stock.createdAt,
-        })),
+      stockData: [], // creado por el backend
     }));
 
     const newOrder = {

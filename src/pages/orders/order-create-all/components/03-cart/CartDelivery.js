@@ -1,5 +1,4 @@
 /* eslint-disable no-underscore-dangle */
-/* eslint-disable no-unused-vars */
 import { Alert, Box, Card, Divider } from "@mui/material";
 import MDTypography from "components/MDTypography";
 import { useDispatch, useSelector } from "react-redux";
@@ -10,7 +9,6 @@ import { usePostOrderMutation } from "api/orderApi";
 import { useNavigate } from "react-router-dom";
 import { clearCart } from "reduxToolkit/cartSlice";
 import ItemCart from "./ItemCart";
-import { calculateAverageUnityCost } from "utils/adjustStock";
 
 function CartDelivery() {
   const {
@@ -47,18 +45,9 @@ function CartDelivery() {
       totalQuantity: item.finalQuantity,
       totalPrice: item.finalPrice,
       unitPrice: item.basePrice,
-      unitCost: calculateAverageUnityCost(item.stockModify),
+      unitCost: 0,
       stockId: null,
-      stockData: item.stockModify
-        .filter((stock) => stock.quantity !== stock.stock)
-        .map((stock) => ({
-          stockId: stock._id,
-          quantityOriginal: stock.quantity,
-          quantityNew: stock.stock,
-          quantityModify: stock.modify,
-          unitCost: stock.unityCost,
-          dateStock: stock.createdAt,
-        })),
+      stockData: [],
     }));
 
     const newOrder = {
@@ -74,6 +63,7 @@ function CartDelivery() {
       subTotal,
       total: +shippingCost + subTotal,
       status: "Pendiente",
+      active: shippingAddress.active,
     };
 
     console.log(newOrder);
@@ -196,6 +186,12 @@ function CartDelivery() {
           <Box display="flex" justifyContent="space-between">
             <MDTypography variant="body2">Repartidor</MDTypography>
             <MDTypography variant="h6">{deliveryTruckSlit[1]}</MDTypography>
+          </Box>
+          <Box display="flex" justifyContent="space-between">
+            <MDTypography variant="body2">Enviar a repartidor</MDTypography>
+            <MDTypography variant="h6">
+              {shippingAddress.active === true ? "Si" : "No"}
+            </MDTypography>
           </Box>
           <LoadingButton
             type="submit"

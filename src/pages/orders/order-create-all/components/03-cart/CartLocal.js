@@ -13,7 +13,6 @@ import MDButton from "components/MDButton";
 import { usePostOrderLocalMutation } from "api/orderApi";
 import ItemCart from "./ItemCart";
 import Receipt from "../receipt/Receipt";
-import { calculateAverageUnityCost } from "utils/adjustStock";
 
 function CartLocal() {
   const { products, subTotal, client, receiptId, validStockQuantity } =
@@ -40,18 +39,9 @@ function CartLocal() {
       totalQuantity: item.finalQuantity,
       totalPrice: item.finalPrice,
       unitPrice: item.basePrice,
-      unitCost: calculateAverageUnityCost(item.stockModify),
+      unitCost: 0,
       stockId: null,
-      stockData: item.stockModify
-        .filter((stock) => stock.quantity !== stock.stock)
-        .map((stock) => ({
-          stockId: stock._id,
-          quantityOriginal: stock.quantity,
-          quantityNew: stock.stock,
-          quantityModify: stock.modify,
-          unitCost: stock.unityCost,
-          dateStock: stock.createdAt,
-        })),
+      stockData: [],
     }));
 
     const newOrder = {
