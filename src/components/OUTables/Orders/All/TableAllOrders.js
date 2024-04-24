@@ -86,6 +86,21 @@ function TableAllOrders() {
 
   const columns = [
     {
+      field: "accessLevel",
+      headerName: "Menu",
+      headerClassName: "super-app-theme--header",
+
+      renderCell: ({ row: { _id, active, paid, clientIdrow } }) => (
+        <IconButton
+          size="large"
+          color="inherit"
+          onClick={(e) => handleOpenMenu(_id, e, active, paid, clientIdrow)}
+        >
+          <MoreVertIcon />
+        </IconButton>
+      ),
+    },
+    {
       field: "createdAt",
       headerName: "Creada",
       flex: 1.2,
@@ -331,22 +346,6 @@ function TableAllOrders() {
         <div style={{ fontWeight: "bold", color: "red" }}>
           {formatPrice(params.row.debt)}
         </div>
-      ),
-    },
-
-    {
-      field: "accessLevel",
-      headerName: "Menu",
-      headerClassName: "super-app-theme--header",
-
-      renderCell: ({ row: { _id, active, paid, clientIdrow } }) => (
-        <IconButton
-          size="large"
-          color="inherit"
-          onClick={(e) => handleOpenMenu(_id, e, active, paid, clientIdrow)}
-        >
-          <MoreVertIcon />
-        </IconButton>
       ),
     },
   ];

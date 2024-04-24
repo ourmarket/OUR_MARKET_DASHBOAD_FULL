@@ -75,14 +75,14 @@ function StockMain() {
               }}
             >
               <Tabs value={page} onChange={handleChange} centered>
-                <Tab label="Stock disponible" />
                 <Tab label="Stock total" />
+                <Tab label="Stock disponible" />
                 <Tab label="Historial de compras" />
                 <Tab label="Agregar stock" />
                 {/*  <Tab label="Agregar stock subproducto" /> */}
               </Tabs>
             </Box>
-            {page === 0 && (
+            {page === 1 && (
               <Card>
                 {l4 && <Loading />}
                 {e4 && <Alert severity="error">Ha ocurrido un error</Alert>}
@@ -91,7 +91,7 @@ function StockMain() {
                 )}
               </Card>
             )}
-            {page === 1 && (
+            {page === 0 && (
               <Card>
                 {l5 && <Loading />}
                 {e5 && <Alert severity="error">Ha ocurrido un error</Alert>}

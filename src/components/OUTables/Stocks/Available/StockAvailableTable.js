@@ -168,26 +168,12 @@ function StockAvailableTable({ allStock }) {
       flex: 0.8,
       headerClassName: "super-app-theme--header",
     },
-
-    {
-      field: "createdAt",
-      headerName: "Comprado",
-      flex: 1.2,
-      headerClassName: "super-app-theme--header",
-    },
-
-    {
-      field: "updatedAt",
-      headerName: "Modificado",
-      flex: 1.2,
-      headerClassName: "super-app-theme--header",
-    },
   ];
 
   return (
     <>
       <Box m="20px" sx={{ overflowX: "scroll" }}>
-        <Box m="10px 0 0 0" height="75vh" width="2000px">
+        <Box m="10px 0 0 0" height="75vh" width="auto">
           <DataGrid
             checkboxSelection
             disableSelectionOnClick
