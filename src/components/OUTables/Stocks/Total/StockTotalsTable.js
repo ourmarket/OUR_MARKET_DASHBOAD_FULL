@@ -10,7 +10,20 @@ import colors from "assets/theme-dark/base/colors";
 import { useMaterialUIController } from "context";
 import { formatQuantity } from "utils/quantityFormat";
 
-function StockTotalTable({ actualStock: stock }) {
+function StockTotalTable({ actualStock: dataStock, totalProductsSellToday }) {
+  const stock = dataStock.map((item) => {
+    const sellProducts = totalProductsSellToday.find(
+      (product) => product.productId.toString() === item.productId.toString()
+    );
+    if (sellProducts) {
+      return {
+        ...item,
+        sellToday: sellProducts.count,
+      };
+    }
+    return { ...item, sellToday: 0 };
+  });
+
   const [controller] = useMaterialUIController();
   const { darkMode } = controller;
 
@@ -28,7 +41,7 @@ function StockTotalTable({ actualStock: stock }) {
     {
       field: "name",
       headerName: "Producto",
-      flex: 2,
+      flex: 1.5,
       cellClassName: "name-column--cell",
       headerClassName: "super-app-theme--header",
     },
@@ -96,6 +109,41 @@ function StockTotalTable({ actualStock: stock }) {
               background: "#49a3f1",
               height: "19px",
               width: `${Math.trunc((actualStock * 100) / quantityBuy)}%`,
+              top: 0,
+              left: 0,
+            }}
+          />
+        </div>
+      ),
+    },
+    {
+      field: "sellToday",
+      headerName: "Vendidos hoy",
+      flex: 0.9,
+      headerClassName: "super-app-theme--header",
+      renderCell: ({ row: { sellToday, quantityBuy } }) => (
+        <div
+          style={{
+            height: "20px",
+            width: "100%",
+            position: "relative",
+            color: "black",
+            fontWeight: 700,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            border: "1px solid #49a3f1",
+            backgroundColor: "#eee",
+            marginRight: "40px",
+          }}
+        >
+          <p style={{ zIndex: "2" }}>{sellToday}</p>
+          <span
+            style={{
+              position: "absolute",
+              background: "#49a3f1",
+              height: "19px",
+              width: `${Math.trunc((sellToday * 100) / quantityBuy)}%`,
               top: 0,
               left: 0,
             }}

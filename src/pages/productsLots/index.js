@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
@@ -7,7 +8,7 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Loading from "components/DRLoading";
 import { Alert, Box, Tab, Tabs } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGetProductsQuery } from "api/productApi";
 import { useGetSuppliersQuery } from "api/supplierApi";
 import AddStock from "components/OUForms/Stock/Add-Stock/AddStock";
@@ -16,9 +17,11 @@ import StockTotalTable from "components/OUTables/Stocks/Total/StockTotalsTable";
 import StockAllTable from "components/OUTables/Stocks/All/StockAllTable";
 import AddStockManufacture from "components/OUForms/Stock/Add-Stock-Manufacture/AddStockManufacture";
 import { useGetAvailableStocksQuery, useGetStocksQuery } from "api/stockApi";
+import { usePostTotalOrderProductsByRangeMutation } from "api/reportApi";
 
 function StockMain() {
   const [page, setPage] = useState(0);
+  const [totalProductsSellToday, setTotalProductsSellToday] = useState(null);
 
   const handleChange = (event, newValue) => {
     setPage(newValue);
@@ -32,16 +35,34 @@ function StockMain() {
 
   const {
     data: ListSuppliers,
-    isLoading: l3,
-    isError: e3,
+    isLoading: l2,
+    isError: e2,
   } = useGetSuppliersQuery();
 
-  const { data: allStock, isLoading: l4, isError: e4 } = useGetStocksQuery();
   const {
     data: allAvailableStock,
-    isLoading: l5,
-    isError: e5,
+    isLoading: l3,
+    isError: e3,
   } = useGetAvailableStocksQuery();
+
+  const { data: allStock, isLoading: l4, isError: e4 } = useGetStocksQuery();
+
+  const [getTotalsOrders, { isLoading: l5, isError: e5, isSuccess: s5 }] =
+    usePostTotalOrderProductsByRangeMutation();
+
+  useEffect(() => {
+    const from = new Date().setHours(0, 0, 0, 0);
+    const to = new Date().setHours(23, 59, 59, 0);
+
+    console.log(from);
+    console.log(to);
+
+    const getData = async () => {
+      const res = await getTotalsOrders({ from, to });
+      setTotalProductsSellToday(res.data.data.report);
+    };
+    getData();
+  }, []);
 
   return (
     <DashboardLayout>
@@ -93,10 +114,15 @@ function StockMain() {
             )}
             {page === 0 && (
               <Card>
-                {l5 && <Loading />}
-                {e5 && <Alert severity="error">Ha ocurrido un error</Alert>}
-                {allAvailableStock && (
-                  <StockTotalTable actualStock={allAvailableStock.data.stock} />
+                {l5 && l3 && <Loading />}
+                {e5 && e3 && (
+                  <Alert severity="error">Ha ocurrido un error</Alert>
+                )}
+                {allAvailableStock && totalProductsSellToday && (
+                  <StockTotalTable
+                    actualStock={allAvailableStock.data.stock}
+                    totalProductsSellToday={totalProductsSellToday}
+                  />
                 )}
               </Card>
             )}
@@ -114,10 +140,7 @@ function StockMain() {
                   <Alert severity="error">Ha ocurrido un error</Alert>
                 )}
                 {dataProducts && ListSuppliers && (
-                  <AddStock
-                    listProducts={dataProducts}
-                    ListSuppliers={ListSuppliers}
-                  />
+                  <AddStock listProducts={dataProducts} />
                 )}
               </Card>
             )}

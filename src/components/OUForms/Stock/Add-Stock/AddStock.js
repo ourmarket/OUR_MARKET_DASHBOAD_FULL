@@ -14,7 +14,7 @@ import { formatPrice } from "utils/formaPrice";
 import { usePostStockMutation } from "api/stockApi";
 import { v4 as uuidv4 } from "uuid";
 
-function AddStock({ listProducts, ListSuppliers }) {
+function AddStock({ listProducts }) {
   const navigate = useNavigate();
 
   const [addStock, { isLoading, isError }] = usePostStockMutation();
@@ -94,13 +94,6 @@ function AddStock({ listProducts, ListSuppliers }) {
             onSubmit={formik.handleSubmit}
             sx={{ width: "100%" }}
           >
-            {ListSuppliers.data.suppliers.length === 0 && (
-              <Alert severity="warning" sx={{ marginBottom: "30px" }}>
-                No hay proveedores en la lista, agregue uno antes de cargar el
-                stock.
-              </Alert>
-            )}
-
             <Autocomplete
               options={products}
               getOptionLabel={(options) => options.product}
