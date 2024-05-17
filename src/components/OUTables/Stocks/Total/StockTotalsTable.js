@@ -137,7 +137,7 @@ function StockTotalTable({ actualStock: dataStock, totalProductsSellToday }) {
             marginRight: "40px",
           }}
         >
-          <p style={{ zIndex: "2" }}>{sellToday}</p>
+          <p style={{ zIndex: "2" }}>{sellToday} Unid.</p>
           <span
             style={{
               position: "absolute",
