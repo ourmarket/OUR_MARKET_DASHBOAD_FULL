@@ -404,9 +404,26 @@ export const menuList_lite = [
     ],
   },
   {
-    name: "Ordenes",
-    icon: "view_list_icon",
-    key: "ordenes",
+    name: "Compras",
+    icon: "add_business_icon",
+    key: "compras",
+    subRoutes: [
+      {
+        name: "Nueva compra",
+        icon: "add_circle_outline_icon",
+        url: "/compras/nueva",
+      },
+      {
+        name: "Lista compras",
+        icon: "format_list_bulleted_icon",
+        url: "/compras/lista",
+      },
+    ],
+  },
+  {
+    name: "Ventas",
+    icon: "add_shopping_cart_icon",
+    key: "ventas",
     subRoutes: [
       {
         name: "Crear orden local",

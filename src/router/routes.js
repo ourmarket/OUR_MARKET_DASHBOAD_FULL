@@ -981,6 +981,39 @@ export const routes_full = [
       </RequireAuth>
     ),
   },
+  //buys
+  {
+    route: "/compras/lista",
+    component: (
+      <RequireAuth>
+        <ListBuys />
+      </RequireAuth>
+    ),
+  },
+  {
+    route: "/compras/nueva",
+    component: (
+      <RequireAuth>
+        <NewBuy />
+      </RequireAuth>
+    ),
+  },
+  {
+    route: "/compras/detalle/:id",
+    component: (
+      <RequireAuth>
+        <BuyDetails />
+      </RequireAuth>
+    ),
+  },
+  {
+    route: "/compras/editar/:id",
+    component: (
+      <RequireAuth>
+        <BuyEdit />
+      </RequireAuth>
+    ),
+  },
 ];
 export const routes_lite = [
   //dashboard
@@ -1306,6 +1339,39 @@ export const routes_lite = [
     component: (
       <RequireAuth>
         <EditExpenses />
+      </RequireAuth>
+    ),
+  },
+  //buys
+  {
+    route: "/compras/lista",
+    component: (
+      <RequireAuth>
+        <ListBuys />
+      </RequireAuth>
+    ),
+  },
+  {
+    route: "/compras/nueva",
+    component: (
+      <RequireAuth>
+        <NewBuy />
+      </RequireAuth>
+    ),
+  },
+  {
+    route: "/compras/detalle/:id",
+    component: (
+      <RequireAuth>
+        <BuyDetails />
+      </RequireAuth>
+    ),
+  },
+  {
+    route: "/compras/editar/:id",
+    component: (
+      <RequireAuth>
+        <BuyEdit />
       </RequireAuth>
     ),
   },
