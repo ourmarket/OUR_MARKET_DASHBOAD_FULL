@@ -40,6 +40,7 @@ function Details({ buy }) {
         transfer,
         debt,
       },
+      paid: cash + transfer === buy.total ? true : false,
     };
 
     const res = await editBuyOrder({ id, ...data });

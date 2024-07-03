@@ -28,11 +28,15 @@ function DashboardTotals({
   reportTotalClientBuy,
   dataCategory,
   dataExpenses,
+  dataBuys,
 }) {
   const { version } = useSelector((store) => store.auth);
   const [updateDate, setUpdateDate] = useState(null);
 
-  console.log(clients);
+  console.log(dataBuys);
+
+  const totalBuy = dataBuys.reduce((acc, curr) => acc + curr.totals, 0);
+  const totalBuyUnpaid = dataBuys.find((buy) => buy.paid === false).totals;
 
   useEffect(() => {
     setUpdateDate(dateToLocalDate(new Date()));
@@ -41,26 +45,11 @@ function DashboardTotals({
   return (
     <MDBox py={3} mt={2}>
       <Grid container spacing={3}>
-        <Grid item xs={12} md={6} lg={3}>
-          <MDBox mb={1.5}>
-            <ComplexStatisticsCard
-              color="dark"
-              icon="person_add"
-              title="Clientes Activos"
-              count={clients?.active}
-              percentage={{
-                color: "success",
-                amount: "",
-                label: `Total clientes ${clients?.total}`,
-              }}
-            />
-          </MDBox>
-        </Grid>
-        <Grid item xs={12} md={6} lg={3}>
+        <Grid item xs={12} md={4} lg={4}>
           <MDBox mb={1.5}>
             <ComplexStatisticsCard
               icon="leaderboard"
-              title="Ventas"
+              title="Total Ventas"
               count={formatPrice(orders[0]?.totalSales || 0)}
               percentage={{
                 color: "success",
@@ -70,7 +59,7 @@ function DashboardTotals({
             />
           </MDBox>
         </Grid>
-        <Grid item xs={12} md={6} lg={3}>
+        <Grid item xs={12} md={4} lg={4}>
           <MDBox mb={1.5}>
             <ComplexStatisticsCard
               color="success"
@@ -89,7 +78,7 @@ function DashboardTotals({
             />
           </MDBox>
         </Grid>
-        <Grid item xs={12} md={6} lg={3}>
+        <Grid item xs={12} md={4} lg={4}>
           <MDBox mb={1.5}>
             <ComplexStatisticsCard
               color="primary"
@@ -105,6 +94,56 @@ function DashboardTotals({
           </MDBox>
         </Grid>
       </Grid>
+      <MDBox mt={4.5}>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={4} lg={4}>
+            <MDBox mb={1.5}>
+              <ComplexStatisticsCard
+                color="dark"
+                icon="person_add"
+                title="Clientes Activos"
+                count={clients?.active}
+                percentage={{
+                  color: "success",
+                  amount: "",
+                  label: `Total clientes ${clients?.total}`,
+                }}
+              />
+            </MDBox>
+          </Grid>
+
+          <Grid item xs={12} md={4} lg={4}>
+            <MDBox mb={1.5}>
+              <ComplexStatisticsCard
+                color="success"
+                icon="add_business_icon"
+                title="Compras a proveedores"
+                count={formatPrice(totalBuy || 0)}
+                percentage={{
+                  color: "success",
+                  amount: "",
+                  label: `Actualizado ${updateDate}hs`,
+                }}
+              />
+            </MDBox>
+          </Grid>
+          <Grid item xs={12} md={4} lg={4}>
+            <MDBox mb={1.5}>
+              <ComplexStatisticsCard
+                color="primary"
+                icon="priority_high_icon"
+                title="Deuda con proveedores"
+                count={formatPrice(totalBuyUnpaid || 0)}
+                percentage={{
+                  color: "success",
+                  amount: "",
+                  label: `Actualizado ${updateDate}hs`,
+                }}
+              />
+            </MDBox>
+          </Grid>
+        </Grid>
+      </MDBox>
       {version === "dr" && (
         <Grid container spacing={3} mt={1}>
           <Grid item xs={12} md={4} lg={4}>

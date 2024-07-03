@@ -185,6 +185,14 @@ export const userApi = apiSlice.injectEndpoints({
       extraOptions: { maxRetries: 5 },
       providesTags: ["reports"],
     }),
+
+    // buys
+    getTotalBuysReport: builder.query({
+      query: () => "/reports/totalBuys",
+      // keepUnusedDataFor: 3,
+      extraOptions: { maxRetries: 5 },
+      providesTags: ["reports"],
+    }),
   }),
 });
 
@@ -207,6 +215,7 @@ export const {
   useGetTotalCategoryExpensesReportQuery,
   useGetByMonthAndCategoryExpensesReportQuery,
   usePaymentByLastXdayReportQuery,
+  useGetTotalBuysReportQuery,
 
   usePostTotalOrderProductsByRangeMutation,
   usePostReportPaymentByRangeDayMutation,

@@ -16,6 +16,7 @@ import {
   useGetCategoryReportQuery,
   useGetReportTotalExpensesByMonthQuery,
   usePaymentByLastXdayReportQuery,
+  useGetTotalBuysReportQuery,
 } from "api/reportApi";
 import { useEffect, useState } from "react";
 import DashboardTotals from "./components/OrdersOverview/DashboardTotals";
@@ -99,6 +100,12 @@ function Dashboard1() {
     isLoading: l11,
     isError: e11,
   } = useGetReportTotalExpensesByMonthQuery();
+  // total compras pagas e impagas
+  const {
+    data: dataBuys,
+    isLoading: l12,
+    isError: e12,
+  } = useGetTotalBuysReportQuery();
 
   useEffect(() => {
     const getData = async () => {
@@ -115,12 +122,30 @@ function Dashboard1() {
   return (
     <DashboardLayout>
       <DashboardNavbar />
-      {(l1 || l2 || l3 || l4 || l5 || l6 || l7 || l8 || l9 || l10 || l11) && (
-        <Loading />
-      )}
-      {(e1 || e2 || e3 || e4 || e5 || e6 || e7 || e8 || e9 || e10 || e11) && (
-        <Alert severity="error">Ha ocurrido un error</Alert>
-      )}
+      {(l1 ||
+        l2 ||
+        l3 ||
+        l4 ||
+        l5 ||
+        l6 ||
+        l7 ||
+        l8 ||
+        l9 ||
+        l10 ||
+        l11 ||
+        l12) && <Loading />}
+      {(e1 ||
+        e2 ||
+        e3 ||
+        e4 ||
+        e5 ||
+        e6 ||
+        e7 ||
+        e8 ||
+        e9 ||
+        e10 ||
+        e11 ||
+        e12) && <Alert severity="error">Ha ocurrido un error</Alert>}
       {dataOrders &&
         clientsQuantity &&
         paymentByLastXday &&
@@ -131,6 +156,7 @@ function Dashboard1() {
         dataClientsBuy &&
         dataClientsDebs &&
         dataExpenses &&
+        dataBuys &&
         dataCategory && (
           <Box sx={{ minHeight: "100vh" }}>
             <DashboardTotals
@@ -145,6 +171,7 @@ function Dashboard1() {
               reportTotalClientBuy={dataClientsBuy.data}
               dataCategory={dataCategory.data.report}
               dataExpenses={dataExpenses.data.report}
+              dataBuys={dataBuys.data.report}
             />
           </Box>
         )}
