@@ -15,6 +15,7 @@ import CharBar1 from "../Chart1/CharBar1";
 import { useSelector } from "react-redux";
 import InactiveTotalClientsProfits from "../ClientProfit/InactiveTotalClientProfit";
 import ActiveTotalClientsBuy from "../ClientBuy/ActiveTotalClientBuy";
+import CharBar4 from "../Chart4/CharBar4";
 
 function DashboardTotals({
   orders,
@@ -223,7 +224,7 @@ function DashboardTotals({
           </Grid>
           <Grid item xs={12} md={6} lg={6}>
             <MDBox mb={3}>
-              <CharBar3 reports={dataOrdersByMonth} expenses={dataExpenses} />
+              <CharBar4 reports={dataOrdersByMonth} expenses={dataExpenses} />
             </MDBox>
           </Grid>
         </Grid>
