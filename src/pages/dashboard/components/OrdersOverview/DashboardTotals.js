@@ -37,7 +37,8 @@ function DashboardTotals({
   console.log(dataBuys);
 
   const totalBuy = dataBuys.reduce((acc, curr) => acc + curr.totals, 0);
-  const totalBuyUnpaid = dataBuys.find((buy) => buy.paid === false).totals;
+  const totalBuyUnpaid =
+    dataBuys.find((buy) => buy.paid === false)?.totals || 0;
 
   useEffect(() => {
     setUpdateDate(dateToLocalDate(new Date()));
