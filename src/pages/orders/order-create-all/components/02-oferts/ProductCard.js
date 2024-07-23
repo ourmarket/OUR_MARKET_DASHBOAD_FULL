@@ -61,6 +61,7 @@ function ProductCard({ product }) {
       <Box
         sx={{
           width: 60,
+          height: 60,
           mr: 2,
           display: "flex",
           alignItems: "center",
@@ -73,6 +74,7 @@ function ProductCard({ product }) {
           alt=""
           style={{
             width: "100%",
+            height: "100%",
           }}
         />
       </Box>

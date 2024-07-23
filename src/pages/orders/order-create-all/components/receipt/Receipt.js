@@ -12,6 +12,7 @@ import Barcode from "react-barcode";
 function Receipt() {
   let componentRef = useRef();
   const cart = useSelector((store) => store.cart);
+  const { superUserData } = useSelector((store) => store.auth);
   return (
     <div>
       {/* button to trigger printing of target component */}
@@ -39,6 +40,7 @@ function Receipt() {
           subTotal={cart?.subTotal}
           client={cart?.client.user}
           receiptId={cart?.receiptId}
+          superUserData={superUserData || null}
         />
       </div>
     </div>
@@ -53,9 +55,17 @@ class Ticket extends React.Component {
       <div className="container-ticket">
         <div className="ticket">
           <div className="head-ticket">
-            <p className="x-bold">Avícola Martina</p>
-            <p className="bold">San Miguel</p>
-            <p className="bold">Av.Balbin 4872</p>
+            <p className="x-bold">
+              {this.props.superUserData
+                ? this.props.superUserData.businessName
+                : ""}
+            </p>
+            <p className="bold">
+              {this.props.superUserData ? this.props.superUserData.city : ""}
+            </p>
+            <p className="bold">
+              {this.props.superUserData ? this.props.superUserData.address : ""}
+            </p>
 
             <br />
             <p className="bold">Ticket interno</p>
