@@ -13,6 +13,7 @@ import MDTypography from "components/MDTypography";
 import { formatPrice } from "utils/formaPrice";
 import { usePostStockMutation } from "api/stockApi";
 import { v4 as uuidv4 } from "uuid";
+import { formatQuantity } from "utils/quantityFormat";
 
 function AddStock({ listProducts }) {
   const navigate = useNavigate();
@@ -62,17 +63,32 @@ function AddStock({ listProducts }) {
         updateStock: new Date(),
       };
 
-      const res = await addStock(newStock).unwrap();
+      Swal.fire({
+        title: `Agregando stock`,
+        text: `Verifica si el costo ${formatPrice(
+          values.unityCost
+        )} por unidad es correcto`,
+        icon: "danger",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Aceptar",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          const res = await addStock(newStock).unwrap();
 
-      if (res) {
-        Swal.fire({
-          position: "center",
-          icon: "success",
-          title: "Stock cargado con éxito",
-          showConfirmButton: false,
-          timer: 2500,
-        });
-      }
+          if (res) {
+            Swal.fire({
+              position: "center",
+              icon: "success",
+              title: "Stock cargado con éxito",
+              showConfirmButton: false,
+              timer: 2500,
+            });
+            navigate("/productos/stock/lista");
+          }
+        }
+      });
     },
     validationSchema: creteProductLotsSchema,
   });
@@ -134,12 +150,20 @@ function AddStock({ listProducts }) {
               onChange={formik.handleChange}
             />
             {formik.values.unityCost && formik.values.quantity && (
-              <MDTypography variant="h6">
-                Costo total:{" "}
-                {formatPrice(
-                  +formik.values.unityCost * +formik.values.quantity
-                )}
-              </MDTypography>
+              <div>
+                <MDTypography variant="h6">
+                  Cantidad: {formatQuantity(formik.values.quantity)}
+                </MDTypography>
+                <MDTypography variant="h6">
+                  Costo Unidad: {formatPrice(formik.values.unityCost)}
+                </MDTypography>
+                <MDTypography variant="h6">
+                  Costo total (cantidad x costo):{" "}
+                  {formatPrice(
+                    +formik.values.unityCost * +formik.values.quantity
+                  )}
+                </MDTypography>
+              </div>
             )}
 
             <LoadingButton
