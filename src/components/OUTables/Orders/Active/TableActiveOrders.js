@@ -17,6 +17,7 @@ import { Stack } from "@mui/system";
 import Swal from "sweetalert2";
 import { LoadingButton } from "@mui/lab";
 import MenuTableOrders from "../Menu/MenuTable";
+import { formatQuantity } from "utils/quantityFormat";
 
 const PAGE_SIZE = 10;
 
@@ -358,6 +359,90 @@ function TableActiveOrders() {
         </div>
       ),
     },
+    {
+      field: "profit",
+      headerName: "Ganancia",
+      flex: 1.2,
+      headerClassName: "super-app-theme--header",
+      renderCell: (params) => (
+        <>
+          {params.row.profit >= 0 && (
+            <div
+              style={{
+                fontWeight: "bold",
+                color: "white",
+                backgroundColor: "green",
+                width: "160px",
+                height: "40px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {formatPrice(params.row.profit)}
+            </div>
+          )}
+          {params.row.profit < 0 && (
+            <div
+              style={{
+                fontWeight: "bold",
+                color: "white",
+                backgroundColor: "red",
+                width: "160px",
+                height: "40px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {formatPrice(params.row.profit)}
+            </div>
+          )}
+        </>
+      ),
+    },
+    {
+      field: "profitPercentage",
+      headerName: "Ganancia %",
+      flex: 1.2,
+      headerClassName: "super-app-theme--header",
+      renderCell: (params) => (
+        <>
+          {params.row.profit >= 0 && (
+            <div
+              style={{
+                fontWeight: "bold",
+                color: "white",
+                backgroundColor: "green",
+                width: "160px",
+                height: "40px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {`${formatQuantity(params.row.profitPercentage)}%`}
+            </div>
+          )}
+          {params.row.profit < 0 && (
+            <div
+              style={{
+                fontWeight: "bold",
+                color: "white",
+                backgroundColor: "red",
+                width: "160px",
+                height: "40px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {`${formatQuantity(params.row.profitPercentage)}%`}
+            </div>
+          )}
+        </>
+      ),
+    },
   ];
 
   const handleActive = async () => {
@@ -410,22 +495,39 @@ function TableActiveOrders() {
             checkboxSelection
             disableSelectionOnClick
             components={{ Toolbar: GridToolbar }}
-            rows={pageState.data.map((order) => ({
-              ...order,
-              createdAt: dateToLocalDate(order.createdAt),
-              deliveryDate: order.deliveryDate
-                ? dateToLocalDate(order.deliveryDate)
-                : "No entregada",
-              client: `${order.shippingAddress.name} ${order.shippingAddress.lastName}`,
-              address: order?.shippingAddress?.address || "Venta Local",
-              zone: order?.deliveryZone?.name || "n/a",
-              deliveryTruck: order?.deliveryTruck?.truckId || "n/a",
-              cash: order?.payment?.cash || 0,
-              transfer: order?.payment?.transfer || 0,
-              debt: order?.payment?.debt || 0,
-              paid: order.paid,
-              clientIdrow: order?.client,
-            }))}
+            rows={pageState.data.map((order) => {
+              const profit = order.orderItems
+                .map(
+                  (item) => item.totalPrice - item.unitCost * item.totalQuantity
+                )
+                .reduce((acc, curr) => acc + curr, 0);
+
+              const totalRevenue = order.orderItems
+                .map((item) => item.totalPrice)
+                .reduce((acc, curr) => acc + curr, 0);
+
+              const profitPercentage =
+                totalRevenue > 0 ? (profit / totalRevenue) * 100 : 0;
+
+              return {
+                ...order,
+                createdAt: dateToLocalDate(order.createdAt),
+                deliveryDate: order.deliveryDate
+                  ? dateToLocalDate(order.deliveryDate)
+                  : "No entregada",
+                client: `${order.shippingAddress.name} ${order.shippingAddress.lastName}`,
+                address: order?.shippingAddress?.address || "Venta Local",
+                zone: order?.deliveryZone?.name || "n/a",
+                deliveryTruck: order?.deliveryTruck?.truckId || "n/a",
+                cash: order?.payment?.cash || 0,
+                transfer: order?.payment?.transfer || 0,
+                debt: order?.payment?.debt || 0,
+                paid: order.paid,
+                clientIdrow: order?.client,
+                profit: profit,
+                profitPercentage: profitPercentage,
+              };
+            })}
             columns={columns}
             getRowId={(row) => row._id}
             sx={{
