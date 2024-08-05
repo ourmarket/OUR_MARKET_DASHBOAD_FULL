@@ -254,25 +254,48 @@ export const menuList_full = [
       },
     ],
   },
+
   {
-    name: "Ordenes",
-    icon: "view_list_icon",
-    key: "ordenes",
+    name: "Compras",
+    icon: "add_business_icon",
+    key: "compras",
     subRoutes: [
       {
-        name: "Crear orden local",
+        name: "Nueva compra",
+        icon: "add_circle_outline_icon",
+        url: "/compras/nueva",
+      },
+      {
+        name: "Lista compras",
+        icon: "format_list_bulleted_icon",
+        url: "/compras/lista",
+      },
+    ],
+  },
+  {
+    name: "Ventas",
+    icon: "add_shopping_cart_icon",
+    key: "ventas",
+    subRoutes: [
+      {
+        name: "Nueva venta local",
         icon: "add_circle_outline_icon",
         url: "/ordenes/nueva-local",
       },
       {
-        name: "Crear orden reparto",
+        name: "Nueva venta reparto",
         icon: "add_circle_outline_icon",
         url: "/ordenes/nueva",
       },
       {
-        name: "Lista ordenes",
+        name: "Lista ventas",
         icon: "format_list_bulleted_icon",
         url: "/ordenes/lista",
+      },
+      {
+        name: "Resumen caja",
+        icon: "format_list_bulleted_icon",
+        url: "/ventas",
       },
     ],
   },
@@ -314,11 +337,11 @@ export const menuList_full = [
         icon: "home_work_icon",
         url: "/distribucion/zonas/lista",
       },
-      /*  {
+      {
         name: "SubZonas reparto",
         icon: "home_work_icon",
         url: "/distribucion/sub-zonas/lista",
-      }, */
+      },
     ],
   },
   {

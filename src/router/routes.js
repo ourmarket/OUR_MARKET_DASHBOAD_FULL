@@ -567,7 +567,14 @@ export const routes_full = [
       </RequireAuth>
     ),
   },
-
+  {
+    route: "/dashboard/cajones_de_pollo",
+    component: (
+      <RequireAuth>
+        <Dashboard3 />
+      </RequireAuth>
+    ),
+  },
   /* usuario  */
   {
     route: "/usuarios/lista",
@@ -981,6 +988,26 @@ export const routes_full = [
       </RequireAuth>
     ),
   },
+
+  //sales
+
+  {
+    route: "/ventas",
+    component: (
+      <RequireAuth>
+        <Sales />
+      </RequireAuth>
+    ),
+  },
+  {
+    route: "/ventas/:id",
+    component: (
+      <RequireAuth>
+        <SalesDetail />
+      </RequireAuth>
+    ),
+  },
+
   //buys
   {
     route: "/compras/lista",
