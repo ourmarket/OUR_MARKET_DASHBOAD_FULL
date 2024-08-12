@@ -1,24 +1,26 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/jsx-boolean-value */
 /* eslint-disable no-underscore-dangle */
-import { useState } from "react";
+
 import { useNavigate } from "react-router-dom";
 import { LoadingButton } from "@mui/lab";
-import { Box, MenuItem, TextField } from "@mui/material";
+import { Alert, Box, MenuItem, TextField } from "@mui/material";
 import { useFormik } from "formik";
-import apiRequest from "api/apiRequest";
 import { creteUserSchema } from "validations/users/createUserYup";
 import MDBox from "components/MDBox";
 import MDButton from "components/MDButton";
 import colors from "assets/theme/base/colors";
 import { useSelector } from "react-redux";
+import { usePostUserMutation } from "api/userApi";
+import Swal from "sweetalert2";
 
 function UserCreate({ roles }) {
   const navigate = useNavigate();
   const { superUser } = useSelector((store) => store.auth);
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState([]);
+  const [createUser, { isLoading, isError, error }] = usePostUserMutation();
+
+  console.log(error);
 
   const formik = useFormik({
     initialValues: {
@@ -30,34 +32,28 @@ function UserCreate({ roles }) {
       role: "",
     },
     onSubmit: async ({ name, lastName, email, password, phone, role }) => {
-      setIsLoading(true);
-      try {
-        const { data } = await apiRequest.post("/user", {
-          name,
-          lastName,
-          email,
-          phone,
-          password,
-          role,
-          verified: true,
-          superUser,
-        });
-        if (data.ok) {
-          /*  Swal.fire({
-            position: "top-end",
-            icon: "success",
-            title: "Usuario creado",
-            showConfirmButton: false,
-            timer: 2000,
-          }); */
-          setError([]);
-          navigate("/usuarios/lista");
-        }
-        setIsLoading(false);
-      } catch (err) {
-        await setError(err.response.data);
+      const data = {
+        name,
+        lastName,
+        email,
+        phone,
+        password,
+        role,
+        verified: true,
+        superUser,
+      };
 
-        setIsLoading(false);
+      const res = await createUser(data).unwrap();
+      if (res.ok) {
+        Swal.fire({
+          position: "top-end",
+          icon: "success",
+          title: "Usuario creado",
+          showConfirmButton: false,
+          timer: 2000,
+        });
+
+        navigate("/usuarios/lista");
       }
     },
     validationSchema: creteUserSchema,
@@ -106,8 +102,8 @@ function UserCreate({ roles }) {
               fullWidth
               label="Email"
               name="email"
-              error={!!formik.errors.email || error.email?.msg}
-              helperText={formik.errors.email || error.email?.msg}
+              error={!!formik.errors.email || error?.data?.email?.msg}
+              helperText={formik.errors.email || error?.data?.email?.msg}
               onChange={formik.handleChange}
             />
             <TextField
@@ -116,8 +112,8 @@ function UserCreate({ roles }) {
               fullWidth
               name="phone"
               label="Telefono"
-              error={!!formik.errors.phone || error.phone?.msg}
-              helperText={formik.errors.phone || error.phone?.msg}
+              error={!!formik.errors.phone || error?.data?.phone?.msg}
+              helperText={formik.errors.phone || error?.data?.phone?.msg}
               onChange={formik.handleChange}
             />
             <TextField
@@ -175,6 +171,11 @@ function UserCreate({ roles }) {
             >
               Cancelar
             </MDButton>
+            {isError && (
+              <Alert severity="error">
+                Ha ocurrido un error, usuario no creado
+              </Alert>
+            )}
           </Box>
         </Box>
       </Box>
