@@ -53,9 +53,9 @@ class Ticket extends React.Component {
       <div className="container-ticket">
         <div className="ticket">
           <div className="head-ticket">
-            <p className="x-bold">Avícola Martina</p>
+            <p className="x-bold">Ringo Agromarket</p>
             <p className="bold">San Miguel</p>
-            <p className="bold">Av.Balbin 4872</p>
+            <p className="bold">Av.Balbin 5049</p>
 
             <br />
             <p className="bold">Ticket interno</p>
