@@ -8,7 +8,7 @@ import Swal from "sweetalert2";
 import { useEffect } from "react";
 import { useDeleteClientSimpleMutation } from "api/clientsApi";
 
-function MenuClients({ open, handleCloseMenu, menuId }) {
+function MenuClients({ open, handleCloseMenu, menuId,  menuUserId }) {
   const navigate = useNavigate();
 
   const [deleteClient, { isError, isSuccess }] =
@@ -79,6 +79,10 @@ function MenuClients({ open, handleCloseMenu, menuId }) {
       <MenuItem onClick={() => navigate(`/clientes/editar/${menuId}`)}>
         <EditIcon sx={{ mr: 1 }} />
         Editar cliente
+      </MenuItem>
+      <MenuItem onClick={() => navigate(`/usuarios/editar/${menuUserId}`)}>
+        <EditIcon sx={{ mr: 1 }} />
+        Editar usuario
       </MenuItem>
 
       <MenuItem sx={{ color: "error.main" }} onClick={handlerDelete}>
