@@ -14,21 +14,25 @@ import CloseIcon from "@mui/icons-material/Close";
 import MenuClients from "../Menu/MenuClients";
 
 function TableListClients({ clients }) {
+  console.log(clients)
   const [controller] = useMaterialUIController();
   const { darkMode } = controller;
 
   const navigate = useNavigate();
   const [open, setOpen] = useState(null);
   const [menuId, setMenuId] = useState(null);
+  const [menuUserId, setMenuUserId] = useState(null);
 
-  const handleOpenMenu = (id, event) => {
+  const handleOpenMenu = (id, userId, event) => {
     setOpen(event.currentTarget);
     setMenuId(id);
+    setMenuUserId(userId)
   };
 
   const handleCloseMenu = () => {
     setOpen(null);
     setMenuId(null);
+     setMenuUserId(null)
   };
 
   const columns = [
@@ -120,11 +124,11 @@ function TableListClients({ clients }) {
       headerName: "Menu",
       headerClassName: "super-app-theme--header",
 
-      renderCell: ({ row: { _id } }) => (
+      renderCell: ({ row: { _id, userId } }) => (
         <IconButton
           size="large"
           color="inherit"
-          onClick={(e) => handleOpenMenu(_id, e)}
+          onClick={(e) => handleOpenMenu(_id,userId, e)}
         >
           <MoreVertIcon />
         </IconButton>
@@ -158,6 +162,7 @@ function TableListClients({ clients }) {
               type: client.clientType.clientType,
               category: client.clientCategory.clientCategory,
               points: client.points || 0,
+              userId: client.user?._id
             }))}
             columns={columns}
             getRowId={(row) => row._id}
@@ -201,6 +206,7 @@ function TableListClients({ clients }) {
         open={open}
         handleCloseMenu={handleCloseMenu}
         menuId={menuId}
+        menuUserId={menuUserId}
       />
     </>
   );
