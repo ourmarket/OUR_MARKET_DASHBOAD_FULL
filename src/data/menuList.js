@@ -77,6 +77,24 @@ export const menuList_dr = [
       },
     ],
   },
+  {
+    name: "Negocios",
+    icon: "perm_contact_calendar_icon",
+    key: "negocios",
+    subRoutes: [
+      {
+        name: "Nuevo negocio",
+        icon: "person_add_alt1_icon",
+        url: "/negocios/nuevo",
+      },
+      {
+        name: "Lista negocios",
+        icon: "format_list_bulleted_icon",
+        url: "/negocios/lista",
+      },
+
+    ],
+  },
 
   {
     name: "Compras",

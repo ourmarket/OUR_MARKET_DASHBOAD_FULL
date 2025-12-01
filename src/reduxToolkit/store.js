@@ -12,6 +12,7 @@ import buyReducer from "./buySlice";
 import orderReducer from "./ordersSlice";
 import positionsReducer from "./positionSlice";
 import mapAutocompleteReducer from "./mapAutocomplete";
+import mapReducer from "./mapSlice";
 
 export const store = configureStore({
   reducer: {
@@ -21,6 +22,7 @@ export const store = configureStore({
     order: orderReducer,
     positions: positionsReducer,
     mapAutocomplete: mapAutocompleteReducer,
+    map: mapReducer,
     [userApi.reducerPath]: userApi.reducer,
     [productApi.reducerPath]: productApi.reducer,
     [categoryApi.reducerPath]: categoryApi.reducer,

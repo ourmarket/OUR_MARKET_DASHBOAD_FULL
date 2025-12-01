@@ -1,0 +1,140 @@
+.container {
+  min-height: calc(100vh + 20px);
+
+  background-color: var(--color-grey);
+  position: relative;
+  text-align: center;
+}
+.welcome_text {
+  padding-top: 20px;
+  padding-inline: 10px;
+  color: var(--color-white);
+}
+.welcome_text h2 {
+  font-size: 25px;
+  margin-bottom: 10px;
+}
+.logo__img {
+  width: 100px;
+}
+
+.btn_container {
+  padding: 10px;
+  margin-top: 40px;
+  background-color: var(--color-white);
+  height: auto;
+  border-top-left-radius: 30px;
+  border-top-right-radius: 30px;
+
+  padding-top: 30px;
+  padding-bottom: 130px;
+}
+.btn {
+  width: 95%;
+  color: var(--color-white);
+  background-color: var(--color-grey);
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 20px;
+  letter-spacing: 1px;
+}
+
+.input__container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 16px 0;
+  width: 100%;
+}
+.input__container label {
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+.input__container input,
+.input__container select,
+.input__container textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  background-color: "white";
+}
+
+.checkbox_container {
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+}
+.checkbox_container label {
+  font-weight: 500;
+}
+.checkbox_container input {
+  width: 20px;
+  height: 20px;
+}
+
+h4 {
+  margin-bottom: 25px;
+  margin-top: 30px;
+  font-size: 18px;
+}
+
+.back_button {
+  position: absolute;
+  top: 28px;
+  left: 10px;
+  font-size: 24px;
+  color: var(--color-white);
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+}
+
+.mapBtn {
+  margin-top: 6px;
+  padding: 8px 12px;
+  background: var(--color-red);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 90%;
+}
+.mapBtnCheck {
+  margin-top: 6px;
+  padding: 8px 12px;
+  background: green;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 90%;
+}
+
+.coords {
+  font-size: 13px;
+  color: #333;
+  margin-top: 4px;
+}
+
+.mobileMap {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobileMap {
+    display: block;
+    height: 70vh;
+    width: 100%;
+  }
+}
+.mapBtn_container {
+  width: 100%;
+}
+.icon {
+  position: relative;
+  top: 10px;
+  margin-left: 5px;
+}

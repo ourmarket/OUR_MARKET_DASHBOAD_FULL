@@ -55,6 +55,9 @@ import NewBuy from "pages/buys/new-buy";
 import ListBuys from "pages/buys/list-buys";
 import BuyDetails from "pages/buys/details-buy";
 import BuyEdit from "pages/buys/edit-buy";
+import CrearNuevoNegocio from "pages/negocios/nuevo-negocio";
+import ListaNegocios from "pages/negocios/lista-negocios";
+import EditarNegocioPage from "pages/negocios/editar-negocio";
 
 export const routes_dr = [
   //dashboard
@@ -545,6 +548,42 @@ export const routes_dr = [
     component: (
       <RequireAuth>
         <BuyEdit />
+      </RequireAuth>
+    ),
+  },
+
+  /* negocios */
+
+  {
+    route: "/negocios/lista",
+    component: (
+      <RequireAuth>
+        <ListaNegocios />
+      </RequireAuth>
+    ),
+  },
+  {
+    route: "/negocios/nuevo",
+    component: (
+      <RequireAuth>
+        <CrearNuevoNegocio />
+      </RequireAuth>
+    ),
+  },
+
+  {
+    route: "/negocios/editar/:id",
+    component: (
+      <RequireAuth>
+        <EditarNegocioPage />
+      </RequireAuth>
+    ),
+  },
+  {
+    route: "/negocios/detalle/:id",
+    component: (
+      <RequireAuth>
+        <DetailsClients />
       </RequireAuth>
     ),
   },
