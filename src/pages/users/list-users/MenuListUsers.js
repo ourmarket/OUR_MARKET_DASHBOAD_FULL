@@ -70,10 +70,7 @@ function MenuListUsers({ open, handleCloseMenu, userId }) {
         },
       }}
     >
-      <MenuItem onClick={() => navigate(`/usuarios/editar/password/${userId}`)}>
-        <EditIcon sx={{ mr: 1 }} />
-        Cambiar contraseña
-      </MenuItem>
+      
       <MenuItem onClick={() => navigate(`/usuarios/editar/${userId}`)}>
         <EditIcon sx={{ mr: 1 }} />
         Editar Usuario

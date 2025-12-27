@@ -32,9 +32,23 @@ function ListSuppliers() {
                 borderRadius="lg"
                 coloredShadow="info"
               >
-                <MDTypography variant="h6" color="white">
-                  Lista de Proveedores
-                </MDTypography>
+                <MDBox>
+                  <MDTypography
+                    variant="h6"
+                    color="white"
+                    textTransform="uppercase"
+                  >
+                    Gestión de Proveedores
+                  </MDTypography>
+                  <MDTypography
+                    variant="button"
+                    color="white"
+                    fontWeight="regular"
+                    opacity={0.8}
+                  >
+                    Lista de contactos de proveedores
+                  </MDTypography>
+                </MDBox>
               </MDBox>
               <MDBox pt={3}>
                 {isLoading && <Loading />}

@@ -7,7 +7,7 @@ const colors = {
 
   text: {
     main: "#ffffffcc",
-    focus: "#ffffffcc",
+    focus: "#ffffff", // Blanco puro para resaltar
   },
 
   transparent: {
@@ -25,9 +25,10 @@ const colors = {
     focus: "#000000",
   },
 
+  // ADAPTADO AL LOGO: Amarillo Ringo
   primary: {
-    main: "#e91e63",
-    focus: "#e91e63",
+    main: "#ffcc33",
+    focus: "#e6b82d",
   },
 
   secondary: {
@@ -36,8 +37,8 @@ const colors = {
   },
 
   info: {
-    main: "#F44335",
-    focus: "#f65f53",
+    main: "#009fc7",
+    focus: "#0181a1",
   },
 
   success: {
@@ -51,8 +52,8 @@ const colors = {
   },
 
   error: {
-    main: "#1A73E8",
-    focus: "#1662C4",
+    main: "#f44336",
+    focus: "#d32f2f",
   },
 
   light: {
@@ -78,9 +79,10 @@ const colors = {
   },
 
   gradients: {
+    // Gradiente basado en el logo (Amarillo a Naranja Girasol)
     primary: {
-      main: "#EC407A",
-      state: "#D81B60",
+      main: "#ffcc33",
+      state: "#ffb300",
     },
 
     secondary: {
@@ -89,8 +91,8 @@ const colors = {
     },
 
     info: {
-      main: "#EF5350",
-      state: "#E53935",
+      main: "#009fc7",
+      state: "#0181a1",
     },
 
     success: {
@@ -104,8 +106,8 @@ const colors = {
     },
 
     error: {
-      main: "#49a3f1",
-      state: "#1A73E8",
+      main: "#f44335",
+      state: "#e53935",
     },
 
     light: {
@@ -120,125 +122,45 @@ const colors = {
   },
 
   socialMediaColors: {
-    facebook: {
-      main: "#3b5998",
-      dark: "#344e86",
-    },
-
-    twitter: {
-      main: "#55acee",
-      dark: "#3ea1ec",
-    },
-
-    instagram: {
-      main: "#125688",
-      dark: "#0e456d",
-    },
-
-    linkedin: {
-      main: "#0077b5",
-      dark: "#00669c",
-    },
-
-    pinterest: {
-      main: "#cc2127",
-      dark: "#b21d22",
-    },
-
-    youtube: {
-      main: "#e52d27",
-      dark: "#d41f1a",
-    },
-
-    vimeo: {
-      main: "#1ab7ea",
-      dark: "#13a3d2",
-    },
-
-    slack: {
-      main: "#3aaf85",
-      dark: "#329874",
-    },
-
-    dribbble: {
-      main: "#ea4c89",
-      dark: "#e73177",
-    },
-
-    github: {
-      main: "#24292e",
-      dark: "#171a1d",
-    },
-
-    reddit: {
-      main: "#ff4500",
-      dark: "#e03d00",
-    },
-
-    tumblr: {
-      main: "#35465c",
-      dark: "#2a3749",
-    },
+    facebook: { main: "#3b5998", dark: "#344e86" },
+    twitter: { main: "#55acee", dark: "#3ea1ec" },
+    instagram: { main: "#125688", dark: "#0e456d" },
+    linkedin: { main: "#0077b5", dark: "#00669c" },
+    pinterest: { main: "#cc2127", dark: "#b21d22" },
+    youtube: { main: "#e52d27", dark: "#d41f1a" },
+    slack: { main: "#3aaf85", dark: "#329874" },
+    github: { main: "#24292e", dark: "#171a1d" },
   },
 
   badgeColors: {
     primary: {
-      background: "#f8b3ca",
-      text: "#cc084b",
+      background: "#ffcc3333", // Amarillo con transparencia para badges
+      text: "#ffcc33",
     },
-
-    secondary: {
-      background: "#d7d9e1",
-      text: "#6c757d",
-    },
-
-    info: {
-      background: "#aecef7",
-      text: "#095bc6",
-    },
-
-    success: {
-      background: "#bce2be",
-      text: "#339537",
-    },
-
-    warning: {
-      background: "#ffd59f",
-      text: "#c87000",
-    },
-
-    error: {
-      background: "#fcd3d0",
-      text: "#f61200",
-    },
-
-    light: {
-      background: "#ffffff",
-      text: "#c7d3de",
-    },
-
-    dark: {
-      background: "#8097bf",
-      text: "#1e2e4a",
-    },
+    secondary: { background: "#d7d9e1", text: "#6c757d" },
+    info: { background: "#aecef7", text: "#095bc6" },
+    success: { background: "#bce2be", text: "#339537" },
+    warning: { background: "#ffd59f", text: "#c87000" },
+    error: { background: "#fcd3d0", text: "#f61200" },
+    light: { background: "#ffffff", text: "#c7d3de" },
+    dark: { background: "#8097bf", text: "#1e2e4a" },
   },
 
   coloredShadows: {
-    primary: "#e91e62",
+    primary: "#ffcc33",
     secondary: "#110e0e",
-    info: "#f44336",
-    /*  info: "#00bbd4", */
+    info: "#009fc7",
     success: "#4caf4f",
     warning: "#ff9900",
-    error: "#00bbd4",
+    error: "#f44336",
     light: "#adb5bd",
     dark: "#404040",
   },
 
-  inputBorderColor: "#d2d6da",
+  inputBorderColor: "#4f5b7d", // Color más acorde al fondo oscuro del card
 
   tabs: {
-    indicator: { boxShadow: "#ddd" },
+    indicator: { boxShadow: "#ffcc33" },
   },
 };
 

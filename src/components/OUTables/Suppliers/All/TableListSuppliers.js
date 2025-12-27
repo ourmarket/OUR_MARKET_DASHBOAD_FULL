@@ -1,16 +1,17 @@
 /* eslint-disable react/prop-types */
-/* eslint-disable no-underscore-dangle */
-import { Box, IconButton, Stack } from "@mui/material";
+import { Box, IconButton, Stack, Typography, Chip, Tooltip } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import EmailIcon from "@mui/icons-material/Email";
+import PhoneIcon from "@mui/icons-material/Phone";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import MDButton from "components/MDButton";
 import colors from "assets/theme-dark/base/colors";
 import { useMaterialUIController } from "context";
 import MenuListSuppliers from "../Menu/MenuListSuppliers";
 
-function TableListOferts({ suppliers }) {
+function TableListSuppliers({ suppliers }) {
   const [controller] = useMaterialUIController();
   const { darkMode } = controller;
 
@@ -31,126 +32,140 @@ function TableListOferts({ suppliers }) {
   const columns = [
     {
       field: "businessName",
-      headerName: "Razón social",
+      headerName: "Proveedor",
+      flex: 2,
+      renderCell: (params) => (
+        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", height: "100%" }}>
+          <Typography variant="button" fontWeight="medium" sx={{ color: darkMode ? "#fff" : "#344767" }}>
+            {params.row.businessName}
+          </Typography>
+          <Typography variant="caption" color="secondary">
+            CUIT: {params.row.cuit}
+          </Typography>
+        </Box>
+      ),
+    },
+    {
+      field: "contact",
+      headerName: "Contacto",
+      flex: 2,
+      renderCell: (params) => (
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <PhoneIcon sx={{ fontSize: "14px", color: darkMode ? "#bbb" : "#7b809a" }} />
+            <Typography variant="caption">{params.row.phone || "S/N"}</Typography>
+          </Stack>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <EmailIcon sx={{ fontSize: "14px", color: darkMode ? "#bbb" : "#7b809a" }} />
+            <Typography variant="caption" sx={{ textDecoration: "underline", cursor: "pointer" }}>
+              {params.row.email}
+            </Typography>
+          </Stack>
+        </Box>
+      ),
+    },
+    {
+      field: "location",
+      headerName: "Ubicación",
+      flex: 2,
+      renderCell: (params) => (
+        <Box>
+          <Typography variant="caption" fontWeight="medium" display="block">
+            {params.row.province}
+          </Typography>
+          <Typography variant="caption" color="secondary">
+            {params.row.city} ({params.row.zip})
+          </Typography>
+        </Box>
+      ),
+    },
+    {
+      field: "status",
+      headerName: "Estado",
       flex: 1,
-      cellClassName: "name-column--cell",
-      headerClassName: "super-app-theme--header",
-    },
-
-    {
-      field: "cuit",
-      headerName: "CUIT",
-      flex: 1,
-      headerClassName: "super-app-theme--header",
-    },
-    {
-      field: "phone",
-      headerName: "Teléfono",
-      flex: 1,
-      headerClassName: "super-app-theme--header",
+      renderCell: () => (
+        <Chip 
+          label="Activo" 
+          size="small" 
+          color="success" 
+          variant="outlined" 
+          sx={{ fontWeight: "bold", fontSize: "10px" }}
+        />
+      ),
     },
     {
-      field: "email",
-      headerName: "Email",
-      flex: 1,
-      headerClassName: "super-app-theme--header",
-    },
-    {
-      field: "province",
-      headerName: "Provincia",
-      flex: 1,
-      headerClassName: "super-app-theme--header",
-    },
-    {
-      field: "city",
-      headerName: "Ciudad",
-      flex: 1,
-      headerClassName: "super-app-theme--header",
-    },
-    {
-      field: "zip",
-      headerName: "CP",
-      flex: 0.4,
-      headerClassName: "super-app-theme--header",
-    },
-
-    {
-      field: "accessLevel",
-      headerName: "Menu",
-      headerClassName: "super-app-theme--header",
-
-      renderCell: ({ row: { _id } }) => (
-        <IconButton
-          size="large"
-          color="inherit"
-          onClick={(e) => handleOpenMenu(_id, e)}
-        >
-          <MoreVertIcon />
-        </IconButton>
+      field: "actions",
+      headerName: "Opciones",
+      width: 100,
+      sortable: false,
+      renderCell: (params) => (
+        <Tooltip title="Más acciones">
+          <IconButton
+            size="medium"
+            color="inherit"
+            onClick={(e) => handleOpenMenu(params.row._id, e)}
+          >
+            <MoreVertIcon />
+          </IconButton>
+        </Tooltip>
       ),
     },
   ];
 
   return (
     <>
-      <Box m="20px" sx={{ overflowX: "scroll" }}>
+      <Box m="20px">
         <Stack
           direction="row"
           alignItems="center"
           justifyContent="space-between"
-          mb={5}
+          mb={4}
         >
+          <Box>
+            <Typography variant="h5" fontWeight="bold"> Proveedores </Typography>
+            <Typography variant="button" color="text"> Gestión de contactos y razones sociales </Typography>
+          </Box>
+          
           <MDButton
             color="dark"
             variant="gradient"
             onClick={() => navigate("/productos/proveedores/nuevo")}
           >
-            Crear
+            Nuevo Proveedor
           </MDButton>
         </Stack>
-        <Box m="40px 0 0 0" height="75vh" width="1500px">
+
+        <Box 
+          height="75vh" 
+          sx={{
+            "& .MuiDataGrid-root": { border: "none" },
+            "& .MuiDataGrid-cell": { 
+                borderBottom: darkMode ? "1px solid #384158" : "1px solid #f0f2f5",
+                display: "flex",
+                alignItems: "center"
+            },
+            "& .MuiDataGrid-columnHeaders": {
+              backgroundColor: darkMode ? "#1f283e" : "#f8f9fa",
+              borderBottom: "none",
+            },
+            "& .MuiDataGrid-footerContainer": {
+              borderTop: "none",
+              backgroundColor: darkMode ? "#1f283e" : "#f8f9fa",
+            },
+            "& .MuiDataGrid-row:hover": {
+              backgroundColor: darkMode ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.02)",
+            },
+          }}
+        >
           <DataGrid
+            rows={suppliers.map((s) => ({ ...s, email: s?.email || "Sin email" }))}
+            columns={columns}
+            getRowId={(row) => row._id}
             checkboxSelection
             disableSelectionOnClick
             components={{ Toolbar: GridToolbar }}
-            rows={suppliers.map((supplier) => ({
-              ...supplier,
-              email: supplier?.email || "No cargado",
-            }))}
-            columns={columns}
-            getRowId={(row) => row._id}
-            sx={{
-              "& .MuiDataGrid-cellContent": {
-                color: `${darkMode ? "#fff" : "#222"} `,
-              },
-              "& .MuiDataGrid-row.Mui-selected": {
-                backgroundColor: "rgba(0, 100, 255, 0.1)",
-              },
-              "& .MuiDataGrid-row.Mui-selected:hover": {
-                backgroundColor: "rgba(0, 100, 255, 0.2)",
-              },
-              "& .super-app-theme--header": {
-                color: `${darkMode ? "#fff" : "#222"} `,
-              },
-              "& .MuiTablePagination-root": {
-                color: `${darkMode ? "#fff" : "#222"} `,
-              },
-              "& .MuiButtonBase-root": {
-                color: `${darkMode ? "#fff" : "#222"} `,
-              },
-              "& .MuiDataGrid-selectedRowCount": {
-                color: `${darkMode ? "#fff" : "#222"} `,
-              },
-            }}
-            componentsProps={{
-              basePopper: {
-                sx: {
-                  "& .MuiPaper-root": {
-                    backgroundColor: `${darkMode && colors.background.default}`,
-                  },
-                },
-              },
-            }}
+            pageSize={10}
+            rowsPerPageOptions={[5, 10, 20]}
           />
         </Box>
       </Box>
@@ -164,4 +179,4 @@ function TableListOferts({ suppliers }) {
   );
 }
 
-export default TableListOferts;
+export default TableListSuppliers;

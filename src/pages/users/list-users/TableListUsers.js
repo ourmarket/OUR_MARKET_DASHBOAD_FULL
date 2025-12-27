@@ -1,25 +1,29 @@
 /* eslint-disable react/prop-types */
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-underscore-dangle */
-import { Avatar, Box, IconButton, Stack } from "@mui/material";
+import {
+  Avatar,
+  Box,
+  IconButton,
+  Stack,
+  Typography,
+  Chip,
+  Tooltip,
+} from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import VerifiedIcon from "@mui/icons-material/Verified";
+import BlockIcon from "@mui/icons-material/Block";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import MDButton from "components/MDButton";
-import colors from "assets/theme-dark/base/colors";
 import { useMaterialUIController } from "context";
-import CheckIcon from "@mui/icons-material/Check";
-import CloseIcon from "@mui/icons-material/Close";
 import MenuListUsers from "./MenuListUsers";
+import ExternalTableSearch from "components/ExternalTableSearch";
 
-function TableListUsers({ users }) {
+function Table({ users }) {
   const [controller] = useMaterialUIController();
   const { darkMode } = controller;
   const [pageSize, setPageSize] = useState(50);
-  const listUsers = users;
 
-  const navigate = useNavigate();
   const [open, setOpen] = useState(null);
   const [userId, setUserId] = useState(null);
 
@@ -35,127 +39,86 @@ function TableListUsers({ users }) {
 
   const columns = [
     {
-      field: "avatar",
-      headerName: "Avatar",
-      width: 100,
-      renderCell: (params) => <Avatar src={params.row.avatar} />,
-      sortable: false,
-      filterable: false,
-      headerClassName: "super-app-theme--header",
+      field: "user",
+      headerName: "Usuario",
+      flex: 2,
+      renderCell: (params) => (
+        <Box sx={{ display: "flex", alignItems: "center", py: 1 }}>
+          <Avatar
+            src={params.row.avatar}
+            sx={{ width: 36, height: 36, mr: 2, boxShadow: 1 }}
+          />
+          <Box sx={{ display: "flex", flexDirection: "column" }}>
+            <Typography
+              variant="button"
+              fontWeight="medium"
+              sx={{ color: darkMode ? "#fff" : "#344767", lineHeight: 1 }}
+            >
+              {params.row.name}
+            </Typography>
+            <Typography variant="caption" color="text">
+              {params.row.email}
+            </Typography>
+          </Box>
+        </Box>
+      ),
     },
-    {
-      field: "name",
-      headerName: "Nombre",
-      flex: 1,
-      cellClassName: "name-column--cell",
-      headerClassName: "super-app-theme--header",
-    },
-
     {
       field: "phone",
-      headerName: "Telefono",
+      headerName: "Teléfono",
       flex: 1,
-      headerClassName: "super-app-theme--header",
-    },
-    {
-      field: "email",
-      headerName: "Email",
-      flex: 2,
-      headerClassName: "super-app-theme--header",
-    },
-
-    {
-      field: "verified",
-      headerName: "Verificado",
-      flex: 0.6,
-      headerClassName: "super-app-theme--header",
-      renderCell: (params) =>
-        params.row.verified ? (
-          <div
-            style={{
-              height: "30px",
-              width: "30px",
-              borderRadius: "50%",
-              backgroundColor: "green",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "white",
-            }}
-          >
-            <CheckIcon />
-          </div>
-        ) : (
-          <div
-            style={{
-              height: "30px",
-              width: "30px",
-              borderRadius: "50%",
-              backgroundColor: "red",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "white",
-            }}
-          >
-            <CloseIcon />
-          </div>
-        ),
-    },
-    {
-      field: "google",
-      headerName: "Google",
-      flex: 0.6,
-      headerClassName: "super-app-theme--header",
-      renderCell: (params) =>
-        params.row.google ? (
-          <div
-            style={{
-              height: "30px",
-              width: "30px",
-              borderRadius: "50%",
-              backgroundColor: "green",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "white",
-            }}
-          >
-            <CheckIcon />
-          </div>
-        ) : (
-          <div
-            style={{
-              height: "30px",
-              width: "30px",
-              borderRadius: "50%",
-              backgroundColor: "red",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "white",
-            }}
-          >
-            <CloseIcon />
-          </div>
-        ),
+      renderCell: (params) => (
+        <Typography variant="caption" fontWeight="medium">
+          {params.row.phone || "---"}
+        </Typography>
+      ),
     },
     {
       field: "role",
       headerName: "Rol",
       flex: 1,
-      headerClassName: "super-app-theme--header",
+      renderCell: (params) => (
+        <Chip
+          label={params.row.role || "Cliente"}
+          size="small"
+          variant="outlined"
+          sx={{
+            fontWeight: "bold",
+            textTransform: "uppercase",
+            fontSize: "10px",
+            borderColor: darkMode ? "#555" : "#ddd",
+          }}
+        />
+      ),
     },
     {
-      field: "accessLevel",
-      headerName: "Menu",
-      headerClassName: "super-app-theme--header",
-
-      renderCell: ({ row: { _id } }) => (
+      field: "verified",
+      headerName: "Estado",
+      flex: 0.8,
+      align: "center",
+      headerAlign: "center",
+      renderCell: (params) =>
+        params.row.verified ? (
+          <Tooltip title="Usuario Verificado (Clerk)">
+            <VerifiedIcon color="info" fontSize="small" />
+          </Tooltip>
+        ) : (
+          <Tooltip title="No Verificado">
+            <BlockIcon color="error" fontSize="small" />
+          </Tooltip>
+        ),
+    },
+    {
+      field: "actions",
+      headerName: "Acciones",
+      width: 100,
+      sortable: false,
+      align: "right",
+      renderCell: (params) => (
         <IconButton
-          size="large"
+          size="medium"
           color="inherit"
-          onClick={(e) => handleOpenMenu(_id, e)}
+          onClick={(e) => handleOpenMenu(params.row._id, e)}
         >
           <MoreVertIcon />
         </IconButton>
@@ -165,80 +128,47 @@ function TableListUsers({ users }) {
 
   return (
     <>
-      <Box m="20px">
-        <Stack
-          direction="row"
-          alignItems="center"
-          justifyContent="space-between"
-          mb={5}
-        >
-          <MDButton
-            color="dark"
-            variant="gradient"
-            onClick={() => navigate("/usuarios/nuevo")}
-          >
-            Crear
-          </MDButton>
-        </Stack>
-        <Box m="40px 0 0 0" height="75vh">
-          <DataGrid
-            checkboxSelection
-            disableSelectionOnClick
-            components={{ Toolbar: GridToolbar }}
-            rows={listUsers.map((user) => ({
-              _id: user._id,
-              name: `${user.name}  ${user.lastName}`,
-              email: user.email,
-              phone: user.phone,
-              avatar:
-                user.avatar ===
-                "https://ik.imagekit.io/mrprwema7/user_default_nUfUA9Fxa.png?ik-sdk-version=javascript-1.4.3&updatedAt=1668611498443"
-                  ? "https://ik.imagekit.io/mrprwema7/OurMarket/pngwing.com%20(3)%20(2)_HuAjhlJK-.png?updatedAt=1695995911119"
-                  : user.avatar,
-              role: user.role?.es,
-              google: user?.google,
-              verified: user?.verified || false,
-            }))}
-            columns={columns}
-            getRowId={(row) => row._id}
-            pageSize={pageSize}
-            onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-            rowsPerPageOptions={[50, 100, 200]}
-            pagination
-            sx={{
-              "& .MuiDataGrid-cellContent": {
-                color: `${darkMode ? "#fff" : "#222"} `,
-              },
-              "& .MuiDataGrid-row.Mui-selected": {
-                backgroundColor: "rgba(0, 100, 255, 0.1)",
-              },
-              "& .MuiDataGrid-row.Mui-selected:hover": {
-                backgroundColor: "rgba(0, 100, 255, 0.2)",
-              },
-              "& .super-app-theme--header": {
-                color: `${darkMode ? "#fff" : "#222"} `,
-              },
-              "& .MuiTablePagination-root": {
-                color: `${darkMode ? "#fff" : "#222"} `,
-              },
-              "& .MuiButtonBase-root": {
-                color: `${darkMode ? "#fff" : "#222"} `,
-              },
-              "& .MuiDataGrid-selectedRowCount": {
-                color: `${darkMode ? "#fff" : "#222"} `,
-              },
-            }}
-            componentsProps={{
-              basePopper: {
-                sx: {
-                  "& .MuiPaper-root": {
-                    backgroundColor: `${darkMode && colors.background.default}`,
-                  },
-                },
-              },
-            }}
-          />
-        </Box>
+      <Box
+        height="75vh"
+        sx={{
+          "& .MuiDataGrid-root": { border: "none" },
+          "& .MuiDataGrid-cell": {
+            borderBottom: darkMode ? "1px solid #384158" : "1px solid #f0f2f5",
+            display: "flex",
+            alignItems: "center",
+          },
+          "& .MuiDataGrid-columnHeaders": {
+            backgroundColor: darkMode ? "#1f283e" : "#f8f9fa",
+            borderBottom: "none",
+          },
+          "& .MuiDataGrid-footerContainer": {
+            borderTop: "none",
+            backgroundColor: darkMode ? "#1f283e" : "#f8f9fa",
+          },
+        }}
+      >
+        <DataGrid
+          rows={users.map((user) => ({
+            _id: user._id,
+            name: `${user.name} ${user.lastName}`,
+            email: user.email,
+            phone: user.phone,
+            avatar: user.avatar?.includes("user_default")
+              ? "https://ik.imagekit.io/mrprwema7/OurMarket/pngwing.com%20(3)%20(2)_HuAjhlJK-.png"
+              : user.avatar,
+            role: user.role?.es,
+            verified: !!user.clerkId,
+          }))}
+          columns={columns}
+          getRowId={(row) => row._id}
+          pageSize={pageSize}
+          onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
+          rowsPerPageOptions={[50, 100, 200]}
+          pagination
+          checkboxSelection
+          disableSelectionOnClick
+          components={{ Toolbar: GridToolbar }}
+        />
       </Box>
 
       <MenuListUsers
@@ -247,6 +177,46 @@ function TableListUsers({ users }) {
         userId={userId}
       />
     </>
+  );
+}
+
+function TableListUsers({ users }) {
+  const navigate = useNavigate();
+  return (
+    <Box p={4} pt={1}>
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="space-between"
+        mb={4}
+      >
+        <Box>
+          <Typography variant="h5" fontWeight="bold">
+            Gestión de Usuarios
+          </Typography>
+          <Typography variant="button" color="text">
+            Control de acceso y roles del sistema
+          </Typography>
+        </Box>
+        <MDButton
+          color="dark"
+          variant="gradient"
+          onClick={() => navigate("/usuarios/nuevo")}
+        >
+          Nuevo Usuario
+        </MDButton>
+      </Stack>
+      <ExternalTableSearch
+        data={users}
+        fields={[
+          { key: "name", label: "Nombre" },
+          { key: "phone", label: "Teléfono" },
+          { key: "email", label: "Email" },
+        ]}
+      >
+        {(filteredUsers) => <Table users={filteredUsers} />}
+      </ExternalTableSearch>
+    </Box>
   );
 }
 

@@ -35,6 +35,8 @@ function Dashboard2() {
     }
   }, [isLoaded]);
 
+  console.log(dataZones)
+
   return (
     <DashboardLayout>
       <DashboardNavbar />

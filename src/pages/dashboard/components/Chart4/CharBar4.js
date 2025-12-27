@@ -161,6 +161,7 @@ const labels = [
 ];
 
 function CharBar4({ reports, expenses }) {
+  console.log(reports)
   const date = new Date();
   const yearDate = date.getFullYear();
   const reportYears = reports.map((item) => item.year);

@@ -1,62 +1,62 @@
 import { apiSlice } from "./apiSlice";
 
 export const buyApi = apiSlice.injectEndpoints({
-  keepUnusedDataFor: 60, // duración de datos en cache
-  refetchOnMountOrArgChange: true, // revalida al montar el componente
-  refetchOnFocus: true, // revalida al cambiar de foco
-  refetchOnReconnect: true, // revalida al reconectar
-  tagTypes: ["buy"],
+  tagTypes: ["Buy"],
 
   endpoints: (builder) => ({
+    // LIST
     getBuys: builder.query({
       query: () => "/buy",
-      // keepUnusedDataFor: 3,
-      extraOptions: { maxRetries: 5 },
-      providesTags: ["buy"],
+      providesTags: ["Buy"],
+    }),
+    getBuysPending: builder.query({
+      query: () => "/buy/pending",
+      providesTags: ["Buy"],
     }),
 
-    getBuy: builder.query({
+    // DETAIL
+    getBuyById: builder.query({
       query: (id) => `/buy/${id}`,
-      // keepUnusedDataFor: 3,
-      extraOptions: { maxRetries: 3 },
-      providesTags: ["buy"],
+      providesTags: ["Buy"],
+    }),
+    // PAYMENTS
+    getBuyPayments: builder.query({
+      query: () => `/buy/payments`,
+      providesTags: ["Buy"],
+    }),
+    getBuyPaymentById: builder.query({
+      query: (id) => `/buy/payments/${id}`,
+      providesTags: ["Buy"],
     }),
 
-    postBuy: builder.mutation({
-      query: (newBuys) => ({
+    // CREATE (desde GoodsReceipt normalmente)
+    createBuy: builder.mutation({
+      query: (payload) => ({
         url: "/buy",
-        method: "post",
-        body: newBuys,
+        method: "POST",
+        body: payload,
       }),
-      invalidatesTags: ["buy"],
-      extraOptions: { maxRetries: 0 },
+      invalidatesTags: ["Buy"],
     }),
 
-    putBuy: builder.mutation({
-      query: ({ id, ...editBuys }) => ({
-        url: `/buy/${id}`,
-        method: "put",
-        body: editBuys,
+    // REGISTER PAYMENT (acción de dominio)
+    registerBuyPayment: builder.mutation({
+      query: ({ id, payment }) => ({
+        url: `/buy/${id}/payments`,
+        method: "POST",
+        body: payment,
       }),
-      invalidatesTags: ["buy"],
-      extraOptions: { maxRetries: 0 },
-    }),
-
-    deleteBuy: builder.mutation({
-      query: (id) => ({
-        url: `/buy/${id}`,
-        method: "delete",
-      }),
-      invalidatesTags: ["buy"],
-      extraOptions: { maxRetries: 0 },
+      invalidatesTags: ["Buy"],
     }),
   }),
 });
 
 export const {
   useGetBuysQuery,
-  useGetBuyQuery,
-  usePostBuyMutation,
-  usePutBuyMutation,
-  useDeleteBuyMutation,
+  useGetBuyByIdQuery,
+  useCreateBuyMutation,
+  useRegisterBuyPaymentMutation,
+  useGetBuyPaymentsQuery,
+  useGetBuyPaymentByIdQuery,
+  useGetBuysPendingQuery,
 } = buyApi;

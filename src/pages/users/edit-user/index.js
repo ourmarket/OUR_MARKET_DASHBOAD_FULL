@@ -1,4 +1,4 @@
-import { Alert } from "@mui/material";
+import { Alert, Card } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { useGetRolesQuery } from "api/roleApi";
 import { useGetUserQuery } from "api/userApi";
@@ -18,31 +18,51 @@ function EditUser() {
   return (
     <DashboardLayout>
       <DashboardNavbar />
-      <MDBox pt={6} pb={1}>
+      <MDBox pt={6} pb={3}>
         <Grid container spacing={6}>
           <Grid item xs={12}>
-            <MDBox
-              mx={2}
-              mt={-3}
-              py={3}
-              px={2}
-              variant="gradient"
-              bgColor="info"
-              borderRadius="lg"
-              coloredShadow="info"
-            >
-              <MDTypography variant="h6" color="white">
-                Editar usuario
-              </MDTypography>
-            </MDBox>
-            <MDBox px={3}>
-              {/*  <UserEdit /> */}
-              {(l1 || l2) && <Loading />}
-              {(e1 || e2) && <Alert severity="error">Ha ocurrido un error</Alert>}
-              {listRoles && user && (
-                <UserEdit listRoles={listRoles.data.roles} user={user.data.user} />
-              )}
-            </MDBox>
+            <Card>
+              <MDBox
+                mx={2}
+                mt={-3}
+                py={3}
+                px={2}
+                variant="gradient"
+                bgColor="info"
+                borderRadius="lg"
+                coloredShadow="info"
+              >
+                <MDBox>
+                  <MDTypography
+                    variant="h6"
+                    color="white"
+                    textTransform="uppercase"
+                  >
+                    Gestión de Usuarios
+                  </MDTypography>
+                  <MDTypography
+                    variant="button"
+                    color="white"
+                    fontWeight="regular"
+                    opacity={0.8}
+                  >
+                    Edición de Usuario
+                  </MDTypography>
+                </MDBox>
+              </MDBox>
+              <MDBox>
+                {(l1 || l2) && <Loading />}
+                {(e1 || e2) && (
+                  <Alert severity="error">Ha ocurrido un error</Alert>
+                )}
+                {listRoles && user && (
+                  <UserEdit
+                    listRoles={listRoles.data.roles}
+                    user={user.data.user}
+                  />
+                )}
+              </MDBox>
+            </Card>
           </Grid>
         </Grid>
       </MDBox>

@@ -10,7 +10,8 @@ import { formatPrice } from "utils/formaPrice";
 import { Link } from "react-router-dom";
 import PollIcon from "@mui/icons-material/Poll";
 
-function ActiveTotalClientsBuy({ active }) {
+function ActiveTotalClientsBuy({ clients }) {
+  const active = clients?.topActiveProfits;
   return (
     <Card>
       <MDBox sx={{ flex: 1, padding: 3 }}>
@@ -18,7 +19,7 @@ function ActiveTotalClientsBuy({ active }) {
           variant="h6"
           sx={{ display: "flex", alignItems: "center" }}
         >
-          <PollIcon fontSize="large" /> {`Top ${active.length} Clientes`}
+          <PollIcon fontSize="large" /> {`Top ${active && active.length} Clientes`}
           <span style={{ color: "green", margin: " 0 5px" }}>Activos</span> con
           más ganancia
         </MDTypography>
@@ -27,10 +28,10 @@ function ActiveTotalClientsBuy({ active }) {
         </MDTypography>
         <Divider />
 
-        {active.map((client) => (
+        {active && active.map((client) => (
           <Link
-            to={`/clientes/detalle/${client.clientId}`}
-            key={client.clientId}
+            to={`/clientes/detalle/${client.client._id}`}
+            key={client.client._id}
           >
             <MDBox
               mb={1}
@@ -59,7 +60,7 @@ function ActiveTotalClientsBuy({ active }) {
                   }
                 />
                 <MDTypography variant="body2">
-                  {client.name} {client.lastName}
+                  {client.client.user.name} {client.client.user.lastName}
                 </MDTypography>
               </MDBox>
 

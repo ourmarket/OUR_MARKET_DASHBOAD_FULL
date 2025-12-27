@@ -1,199 +1,213 @@
 export const menuList_dr = [
   {
     name: "Dashboard",
-    icon: "loyalty",
+    icon: "dashboard", // Icono clásico de tablero
     key: "dashboard",
     subRoutes: [
       {
         name: "Totales",
-        icon: "signal_cellular_alt_icon",
+        icon: "analytics", // Para análisis de datos generales
         url: "/dashboard/totales",
       },
       {
         name: "Reparto",
-        icon: "signal_cellular_alt_icon",
+        icon: "query_stats", // Estadísticas de movimiento
         url: "/dashboard/reparto",
       },
       {
         name: "Cajones de pollo",
-        icon: "signal_cellular_alt_icon",
+        icon: "leaderboard", // Para visualización de métricas/cantidades
         url: "/dashboard/cajones_de_pollo",
       },
     ],
   },
   {
     name: "Usuarios",
-    icon: "person",
+    icon: "people", // Plural para gestión de grupos
     key: "usuarios",
     subRoutes: [
       {
         name: "Lista usuarios",
-        icon: "format_list_bulleted_icon",
+        icon: "manage_accounts", // Configuración de perfiles
         url: "/usuarios/lista",
       },
     ],
   },
   {
     name: "Productos",
-    icon: "shoppingCartIcon",
+    icon: "inventory_2", // Representa una caja/producto físico
     key: "productos",
     subRoutes: [
       {
         name: "Productos",
-        icon: "format_list_bulleted_icon",
+        icon: "category", // Categorización de ítems
         url: "/productos",
       },
       {
         name: "Proveedores",
-        icon: "factory",
+        icon: "storefront", // Representa el local del proveedor
         url: "/productos/proveedores/lista",
       },
       {
         name: "Stock",
-        icon: "list_alt",
+        icon: "warehouse", // Almacenamiento/Existencias
         url: "/productos/stock/lista",
       },
     ],
   },
   {
     name: "Clientes",
-    icon: "perm_contact_calendar_icon",
+    icon: "groups", // Grupo de personas
     key: "clientes",
     subRoutes: [
       {
         name: "Nuevo cliente",
-        icon: "person_add_alt1_icon",
+        icon: "person_add", 
         url: "/clientes/nuevo",
       },
       {
         name: "Lista clientes",
-        icon: "format_list_bulleted_icon",
+        icon: "contact_page", // Fichas de contactos
         url: "/clientes/lista",
       },
       {
         name: "Direcciones",
-        icon: "holiday_village_icon",
+        icon: "place", // Ubicación/Puntero de mapa
         url: "/clientes/direcciones/lista",
       },
     ],
   },
   {
     name: "Negocios",
-    icon: "perm_contact_calendar_icon",
+    icon: "business", // Edificio corporativo
     key: "negocios",
     subRoutes: [
       {
         name: "Nuevo negocio",
-        icon: "person_add_alt1_icon",
+        icon: "add_business",
         url: "/negocios/nuevo",
       },
       {
         name: "Lista negocios",
-        icon: "format_list_bulleted_icon",
+        icon: "domain", // Estructura de dominios/negocios
         url: "/negocios/lista",
       },
-
     ],
   },
-
   {
     name: "Compras",
-    icon: "add_business_icon",
+    icon: "shopping_bag", // Bolsa de compra (proveedor)
     key: "compras",
     subRoutes: [
       {
         name: "Nueva compra",
-        icon: "add_circle_outline_icon",
+        icon: "add_shopping_cart",
         url: "/compras/nueva",
       },
       {
         name: "Lista compras",
-        icon: "format_list_bulleted_icon",
+        icon: "receipt_long", // Lista de facturas de compra
         url: "/compras/lista",
       },
     ],
   },
   {
     name: "Ventas",
-    icon: "add_shopping_cart_icon",
+    icon: "sell", // Etiqueta de venta
     key: "ventas",
     subRoutes: [
       {
         name: "Nueva venta local",
-        icon: "add_circle_outline_icon",
+        icon: "point_of_sale", // TPV / Caja rápida
         url: "/ordenes/nueva-local",
       },
       {
         name: "Nueva venta reparto",
-        icon: "add_circle_outline_icon",
+        icon: "local_mall", // Venta para llevar/enviar
         url: "/ordenes/nueva",
       },
       {
         name: "Lista ventas",
-        icon: "format_list_bulleted_icon",
+        icon: "list_alt", 
         url: "/ordenes/lista",
       },
       {
         name: "Resumen caja",
-        icon: "format_list_bulleted_icon",
+        icon: "account_balance_wallet", // Dinero/Caja diaria
         url: "/ventas",
       },
     ],
   },
   {
     name: "Gastos",
-    icon: "assignment_returned_icon",
+    icon: "payments", // Salida de billetes
     key: "gastos",
     subRoutes: [
       {
         name: "Nuevo gasto",
-        icon: "add_circle_outline_icon",
+        icon: "money_off", // Representa pérdida o gasto de dinero
         url: "/gastos/nuevo",
       },
-
       {
         name: "Lista gastos",
-        icon: "format_list_bulleted_icon",
+        icon: "history_edu", // Registro de gastos
         url: "/gastos/lista",
       },
     ],
   },
   {
     name: "Distribución",
-    icon: "local_shipping_icon",
+    icon: "local_shipping", // Camión de reparto
     key: "distribucion",
     subRoutes: [
-      /* {
-        name: "Distribuidoras",
-        icon: "store_icon",
-        url: "/distribucion/distribuidoras/lista",
-      }, */
       {
         name: "Repartidores",
-        icon: "local_shipping_icon",
+        icon: "badge", // Identificación de empleados
         url: "/distribucion/repartidores/lista",
       },
       {
         name: "Zonas reparto",
-        icon: "home_work_icon",
+        icon: "map", // Mapa general de zonas
         url: "/distribucion/zonas/lista",
       },
       {
         name: "SubZonas reparto",
-        icon: "home_work_icon",
+        icon: "edit_location_alt", // Localizaciones específicas
         url: "/distribucion/sub-zonas/lista",
       },
     ],
   },
   {
     name: "Reportes",
-    icon: "assessment_icon",
+    icon: "assessment", // Reporte de evaluación
     key: "reportes",
     subRoutes: [
       {
         name: "Rango de ventas",
-        icon: "format_list_bulleted_icon",
+        icon: "date_range", // Filtro por fechas
         url: "/reportes/productos-vendidos-por-rango",
+      },
+    ],
+  },
+  {
+    name: "Operaciones",
+    icon: "assessment", // Reporte de evaluación
+    key: "operaciones",
+    subRoutes: [
+      {
+        name: "Ventas",
+        icon: "date_range", // Filtro por fechas
+        url: "/ventas",
+      },
+      {
+        name: "Compras",
+        icon: "date_range", // Filtro por fechas
+        url: "/compras",
+      },
+      {
+        name: "Pagos",
+        icon: "date_range", // Filtro por fechas
+        url: "/pagos",
       },
     ],
   },

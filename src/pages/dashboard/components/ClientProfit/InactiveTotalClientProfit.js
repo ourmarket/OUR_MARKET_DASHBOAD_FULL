@@ -9,7 +9,8 @@ import { formatPrice } from "utils/formaPrice";
 import { Link } from "react-router-dom";
 import PollIcon from "@mui/icons-material/Poll";
 
-function InactiveTotalClientsProfits({ inactive }) {
+function InactiveTotalClientsProfits({ clients }) {
+  const inactive = clients?.topInactiveProfits;
   return (
     <Card>
       <Box sx={{ flex: 1, padding: 3 }}>
@@ -18,7 +19,7 @@ function InactiveTotalClientsProfits({ inactive }) {
           sx={{ display: "flex", alignItems: "center" }}
         >
           <PollIcon fontSize="large" />
-          {`Top ${inactive.length} Clientes`}
+          {`Top ${inactive && inactive.length} Clientes`}
           <span style={{ color: "red", margin: "0 5px" }}>Inactivos</span> con
           mas ganancia
         </MDTypography>
@@ -27,7 +28,7 @@ function InactiveTotalClientsProfits({ inactive }) {
         </MDTypography>
         <Divider />
 
-        {inactive.map((client) => (
+        {inactive && inactive.map((client) => (
           <Link
             to={`/clientes/detalle/${client.clientId}`}
             key={client.clientId}
@@ -59,7 +60,7 @@ function InactiveTotalClientsProfits({ inactive }) {
                   }
                 />
                 <MDTypography variant="body2">
-                  {client.name} {client.lastName}
+                  {client.client.user.name} {client.client.user.lastName}
                 </MDTypography>
               </MDBox>
 

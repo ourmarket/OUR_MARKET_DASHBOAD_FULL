@@ -27,7 +27,7 @@ import { logOut } from "reduxToolkit/authSlice";
 import { useDispatch } from "react-redux";
 import { apiSlice } from "api/apiSlice";
 import { useNavigate } from "react-router-dom/dist";
-import { useLogoutMutation } from "api/authApi";
+import { UserButton } from "@clerk/clerk-react";
 
 function DashboardNavbar({ absolute, light, isMini }) {
   const dispatch1 = useDispatch();
@@ -38,8 +38,6 @@ function DashboardNavbar({ absolute, light, isMini }) {
     controller;
   const [openMenu, setOpenMenu] = useState(false);
   const route = useLocation().pathname.split("/").slice(1);
-
-  const [apiLogOut] = useLogoutMutation();
 
   useEffect(() => {
     setNavbarType("sticky");
@@ -96,7 +94,6 @@ function DashboardNavbar({ absolute, light, isMini }) {
           dispatch1(apiSlice.util.resetApiState());
           dispatch1(logOut());
           navigate("/authentication/sign-in");
-          apiLogOut();
         }}
       />
     </Menu>
@@ -142,7 +139,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
         {isMini ? null : (
           <MDBox sx={(theme) => navbarRow(theme, { isMini })}>
             <MDBox color={light ? "white" : "inherit"}>
-              <IconButton
+              {/* <IconButton
                 size="small"
                 disableRipple
                 color="inherit"
@@ -154,17 +151,10 @@ function DashboardNavbar({ absolute, light, isMini }) {
               >
                 <Icon sx={iconsStyle}>account_circle</Icon>
               </IconButton>
-              {renderMenu()}
+              {renderMenu()} */}
+              <UserButton />
 
-              <IconButton
-                size="small"
-                disableRipple
-                color="inherit"
-                sx={navbarIconButton}
-                onClick={handleConfiguratorOpen}
-              >
-                <Icon sx={iconsStyle}>settings</Icon>
-              </IconButton>
+              
               <IconButton
                 size="small"
                 disableRipple

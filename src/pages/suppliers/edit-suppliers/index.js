@@ -32,9 +32,23 @@ function EditSupplier() {
                 borderRadius="lg"
                 coloredShadow="info"
               >
-                <MDTypography variant="h6" color="white">
-                  Editar proveedor
-                </MDTypography>
+                <MDBox>
+                  <MDTypography
+                    variant="h6"
+                    color="white"
+                    textTransform="uppercase"
+                  >
+                    Gestión de Proveedores
+                  </MDTypography>
+                  <MDTypography
+                    variant="button"
+                    color="white"
+                    fontWeight="regular"
+                    opacity={0.8}
+                  >
+                    Editar Proveedor
+                  </MDTypography>
+                </MDBox>
               </MDBox>
               <MDBox>
                 {isLoading && <Loading />}

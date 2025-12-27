@@ -6,85 +6,40 @@ import MDTypography from "components/MDTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Loading from "components/DRLoading";
-import { Alert, Tab, Tabs } from "@mui/material";
+import { Alert, Divider, Tab, Tabs } from "@mui/material";
 import { useGetProductsQuery } from "api/productApi";
 import { Box } from "@mui/system";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useGetCategoriesQuery } from "api/categoryApi";
-import { useGetOfertsQuery } from "api/ofertApi";
-import TableListProducts from "./product/products-list/TableListProducts";
 import TableListCategories from "./category/category-list/TableListCategories";
-import TableListOfertsLite from "./ofert/oferts-list/TableListOfertsLite";
+import TableProductsLite from "./product/products-list/TableListProductsNew";
 
 function Products() {
-  const [page, setPage] = useState(0);
-  const [ofertWithStock, setOfertWithStock] = useState([]);
+  const [tabIndex, setTabIndex] = useState(0);
 
-  const handleChange = (event, newValue) => {
-    setPage(newValue);
+  const handleTabChange = (event, newValue) => {
+    setTabIndex(newValue);
   };
+  // Queries
   const {
     data: listProducts,
     isLoading: l1,
     error: e1,
-  } = useGetProductsQuery(1);
+  } = useGetProductsQuery();
   const {
     data: listCategories,
     isLoading: l2,
     error: e2,
   } = useGetCategoriesQuery();
-  const { data: listOferts, isLoading: l3, error: e3 } = useGetOfertsQuery();
 
-  /* useEffect(() => {
-    if (listOferts && listProducts) {
-      const oferts = listOferts.data.oferts;
-      const products = listProducts.products;
-      const ofertsWithStockArr = [];
-      for (let i = 0; i < oferts.length; i++) {
-        for (let x = 0; x < products.length; x++) {
-          if (
-            oferts[i]?.product?._id.toString() === products[x]?._id.toString()
-          )
-            ofertsWithStockArr.push({
-              ...oferts[i],
-              stock: products[x].stock,
-            });
-        }
-      }
-
-      setOfertWithStock(ofertsWithStockArr);
-    }
-  }, [listOferts, listProducts]); */
-
-  useEffect(() => {
-    if (listOferts && listProducts) {
-      const oferts = listOferts.data.oferts;
-      const products = listProducts.products;
-
-      const ofertsWithStockArr = oferts.map((ofert) => {
-        const productWithStock = products.find(
-          (product) => ofert.product?._id.toString() === product?._id.toString()
-        );
-
-        if (productWithStock) {
-          return {
-            ...ofert,
-            stock: productWithStock.stock,
-          };
-        }
-
-        return ofert;
-      });
-
-      setOfertWithStock(ofertsWithStockArr);
-    }
-  }, [listOferts, listProducts]);
+  const isLoading = l1 || l2;
+  const hasError = e1 || e2;
 
   return (
-    <DashboardLayout>
+   /*  <DashboardLayout>
       <DashboardNavbar />
       <MDBox pt={6} pb={3}>
-        <Grid container spacing={6}>
+         <Grid container justifyContent="center">
           <Grid item xs={12}>
             <MDBox
               mx={2}
@@ -113,7 +68,6 @@ function Products() {
               <Tabs value={page} onChange={handleChange} centered>
                 <Tab label="Productos" />
                 <Tab label="Categorías" />
-                <Tab label="Ofertas" />
               </Tabs>
             </Box>
             {page === 0 && (
@@ -124,7 +78,7 @@ function Products() {
               >
                 {l1 && <Loading />}
                 {e1 && <Alert severity="error">Ha ocurrido un error</Alert>}
-                {listProducts && <TableListProducts products={listProducts} />}
+                {listProducts && <TableProductsLite products={listProducts} />}
               </Card>
             )}
             {page === 1 && (
@@ -140,21 +94,94 @@ function Products() {
                 )}
               </Card>
             )}
-            {page === 2 && (
-              <Card
-                sx={{
-                  mx: 2.5,
-                }}
-              >
-                {l3 && <Loading />}
-                {e3 && <Alert severity="error">Ha ocurrido un error</Alert>}
-                {listOferts && <TableListOfertsLite oferts={ofertWithStock} />}
-              </Card>
-            )}
           </Grid>
         </Grid>
       </MDBox>
-    </DashboardLayout>
+    </DashboardLayout> */
+     <DashboardLayout>
+          <DashboardNavbar />
+          <MDBox pt={6} pb={3}>
+            <Grid container justifyContent="center">
+              <Grid item xs={12} lg={12}>
+                <Card sx={{ overflow: "visible" }}>
+                  {/* Header con gradiente integrado */}
+                  <MDBox
+                    variant="gradient"
+                    bgColor="info"
+                    borderRadius="lg"
+                    coloredShadow="info"
+                    mx={2}
+                    mt={-3}
+                    p={3}
+                    mb={2}
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                  >
+                    <MDBox>
+                      <MDTypography variant="h6" color="white" textTransform="uppercase">
+                        Producto y Categorías
+                      </MDTypography>
+                      <MDTypography variant="button" color="white" fontWeight="regular" opacity={0.8}>
+                        Lista de todos los productos y categorias
+                      </MDTypography>
+                    </MDBox>
+                  </MDBox>
+    
+                  {/* Selector de pestañas más moderno */}
+                  <MDBox px={2} mt={1}>
+                    <Tabs 
+                      value={tabIndex} 
+                      onChange={handleTabChange} 
+                      variant="standard"
+                      sx={{
+                        background: "transparent",
+                        "& .MuiTabs-indicator": { backgroundColor: ({ palette: { info } }) => info.main }
+                      }}
+                    >
+                      <Tab label="Catálogo de Productos" sx={{ fontWeight: "bold" }} />
+                      <Tab label="Categorías de Productos" sx={{ fontWeight: "bold" }} />
+                    </Tabs>
+                    <Divider sx={{ mt: 0, mb: 3 }} />
+                  </MDBox>
+    
+                  {/* Área de Contenido */}
+                  <MDBox pb={3} px={3}>
+                    {isLoading && (
+                      <MDBox display="flex" justifyContent="center" py={5}>
+                        <Loading />
+                      </MDBox>
+                    )}
+    
+                    {hasError && (
+                      <MDBox mb={2}>
+                        <Alert severity="error" variant="filled" sx={{ color: "white" }}>
+                          No se pudo cargar la información del producto. Inténtelo más tarde.
+                        </Alert>
+                      </MDBox>
+                    )}
+    
+                    {!isLoading && !hasError && (
+                      <>
+                        {tabIndex === 0 && listProducts && (
+                          <MDBox animate={{ opacity: 1 }}>
+                            <TableProductsLite products={listProducts} />
+                          </MDBox>
+                        )}
+    
+                        {tabIndex === 1 && listCategories && (
+                          <MDBox animate={{ opacity: 1 }}>
+                            <TableListCategories categories={listCategories.categories} />
+                          </MDBox>
+                        )}
+                      </>
+                    )}
+                  </MDBox>
+                </Card>
+              </Grid>
+            </Grid>
+          </MDBox>
+        </DashboardLayout>
   );
 }
 

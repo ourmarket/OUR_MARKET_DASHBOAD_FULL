@@ -7,14 +7,14 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { useEffect } from "react";
 
-import { useDeleteBuyMutation } from "api/buyApi";
+/* import { useDeleteBuyMutation } from "api/buyApi"; */
 
 function MenuBuys({ open, handleCloseMenu, menuId }) {
   const navigate = useNavigate();
 
-  const [deleteBuy, { isError, isSuccess }] = useDeleteBuyMutation();
+  /*  const [deleteBuy, { isError, isSuccess }] = useDeleteBuyMutation(); */
 
-  const handlerDelete = () => {
+  /*   const handlerDelete = () => {
     handleCloseMenu();
     Swal.fire({
       title: "Deseas borrar esta compra?",
@@ -29,8 +29,8 @@ function MenuBuys({ open, handleCloseMenu, menuId }) {
       }
     });
   };
-
-  useEffect(() => {
+ */
+  /*  useEffect(() => {
     if (isError)
       Swal.fire({
         position: "center",
@@ -50,7 +50,7 @@ function MenuBuys({ open, handleCloseMenu, menuId }) {
         showConfirmButton: false,
         timer: 2500,
       });
-  }, [isSuccess]);
+  }, [isSuccess]); */
 
   return (
     <Popover
@@ -81,10 +81,10 @@ function MenuBuys({ open, handleCloseMenu, menuId }) {
         Editar compra
       </MenuItem>
 
-      <MenuItem sx={{ color: "error.main" }} onClick={handlerDelete}>
+      {/* <MenuItem sx={{ color: "error.main" }} onClick={handlerDelete}>
         <DeleteIcon sx={{ mr: 1 }} />
         Borrar compra
-      </MenuItem>
+      </MenuItem> */}
     </Popover>
   );
 }

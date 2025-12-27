@@ -20,21 +20,19 @@ import CharBar4 from "../Chart4/CharBar4";
 function DashboardTotals({
   orders,
   clients,
-  ordersByDays,
-  reports,
   totalProducts,
-  totalProducts2103,
-  dataOrdersByMonth,
-  dataClientsDebs,
-  reportTotalClientBuy,
   dataCategory,
   dataExpenses,
   dataBuys,
+  clientsTopSummary,
+  chart1,
+  chart2,
+  chartDaily,
 }) {
   const { version } = useSelector((store) => store.auth);
   const [updateDate, setUpdateDate] = useState(null);
 
-  console.log(dataBuys);
+  console.log(clientsTopSummary);
 
   const totalBuy = dataBuys.reduce((acc, curr) => acc + curr.totals, 0);
   const totalBuyUnpaid =
@@ -202,16 +200,17 @@ function DashboardTotals({
           </Grid>
         </Grid>
       )}
+
       <MDBox mt={4.5}>
         <Grid container spacing={3}>
           <Grid item xs={12} md={6} lg={6}>
             <MDBox mb={3}>
-              <CharBar1 ordersByDays={ordersByDays} />
+              <CharBar1 data={chart1} />
             </MDBox>
           </Grid>
           <Grid item xs={12} md={6} lg={6}>
             <MDBox mb={3}>
-              <CharBar2 reports={reports} />
+              <CharBar2 data={chart2} />
             </MDBox>
           </Grid>
         </Grid>
@@ -220,12 +219,12 @@ function DashboardTotals({
         <Grid container spacing={3}>
           <Grid item xs={12} md={6} lg={6}>
             <MDBox mb={3}>
-              <CharBar3 reports={dataOrdersByMonth} expenses={dataExpenses} />
+              <CharBar3 reports={chartDaily} expenses={dataExpenses} />
             </MDBox>
           </Grid>
           <Grid item xs={12} md={6} lg={6}>
             <MDBox mb={3}>
-              <CharBar4 reports={dataOrdersByMonth} expenses={dataExpenses} />
+              <CharBar4 reports={chartDaily} expenses={dataExpenses} />
             </MDBox>
           </Grid>
         </Grid>
@@ -236,22 +235,20 @@ function DashboardTotals({
             <TotalProducts totalProducts={totalProducts} />
           </Grid>
           <Grid item xs={12} md={6} lg={6}>
-            <TotalProductsProfit totalProducts={totalProducts2103} />
+            <TotalProductsProfit totalProducts={totalProducts} />
           </Grid>
         </Grid>
       </MDBox>
       <MDBox mt={3}>
         <Grid container spacing={3}>
           <Grid item xs={12} md={6} lg={4}>
-            <TotalClientsDebt clients={dataClientsDebs} />
+            <TotalClientsDebt clients={clientsTopSummary} />
           </Grid>
           <Grid item xs={12} md={6} lg={4}>
-            <ActiveTotalClientsBuy active={reportTotalClientBuy.active} />
+            <ActiveTotalClientsBuy clients={clientsTopSummary} />
           </Grid>
           <Grid item xs={12} md={6} lg={4}>
-            <InactiveTotalClientsProfits
-              inactive={reportTotalClientBuy.inactive}
-            />
+            <InactiveTotalClientsProfits clients={clientsTopSummary} />
           </Grid>
         </Grid>
       </MDBox>

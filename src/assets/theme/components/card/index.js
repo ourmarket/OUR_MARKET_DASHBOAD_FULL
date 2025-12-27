@@ -8,7 +8,7 @@ import rgba from "assets/theme/functions/rgba";
 
 const { black, white } = colors;
 const { borderWidth, borderRadius } = borders;
-const { md } = boxShadows;
+const { xs } = boxShadows;
 
 const card = {
   styleOverrides: {
@@ -20,9 +20,9 @@ const card = {
       wordWrap: "break-word",
       backgroundColor: white.main,
       backgroundClip: "border-box",
-      border: `${borderWidth[0]} solid ${rgba(black.main, 0.125)}`,
-      borderRadius: borderRadius.xl,
-      boxShadow: md,
+      border: `${borderWidth[1]} solid ${rgba(black.main, 0.125)}`,
+      borderRadius: "5px",
+      boxShadow: xs,
       overflow: "visible",
     },
   },

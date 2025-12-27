@@ -13,7 +13,7 @@ export const creteUserSchema = yup.object().shape({
     .required("Requerido")
     .matches(lettersAndSpaces, "Solo letras"),
   email: yup.string().email("Formato incorrecto").required("Requerido"),
-  password: yup.string().min(6, "6 caracteres mínimo").required("Requerido"),
+
   phone: yup
     .string()
     .required("Requerido")

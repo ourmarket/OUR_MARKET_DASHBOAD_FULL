@@ -11,7 +11,7 @@ import { Link } from "react-router-dom";
 import PollIcon from "@mui/icons-material/Poll";
 
 function TotalClientsDebt({ clients }) {
-  const sliceClients = clients.slice(0, 12);
+  const sliceClients = clients?.topDebt
 
   return (
     <Card>
@@ -27,7 +27,7 @@ function TotalClientsDebt({ clients }) {
         </MDTypography>
         <Divider />
 
-        {sliceClients.map((client) => (
+        {sliceClients && sliceClients.map((client) => (
           <Link
             to={`/clientes/detalle/${client.clientId}`}
             key={client.clientId}
@@ -59,7 +59,7 @@ function TotalClientsDebt({ clients }) {
                   }
                 />
                 <MDTypography variant="body2">
-                  {client.name} {client.lastName}
+                   {client.client.user.name} {client.client.user.lastName}
                 </MDTypography>
               </MDBox>
 
@@ -68,7 +68,7 @@ function TotalClientsDebt({ clients }) {
                 mr={1}
                 sx={{ width: "25%", textAlign: "right" }}
               >
-                {formatPrice(client?.totalDebt)}
+                {formatPrice(client?.payment.debt)}
               </MDTypography>
             </MDBox>
           </Link>

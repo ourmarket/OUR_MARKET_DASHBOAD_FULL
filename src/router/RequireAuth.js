@@ -1,18 +1,20 @@
-/* eslint-disable react/prop-types */
-/* eslint-disable react/function-component-definition */
-import { useLocation, Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { selectCurrentToken } from "reduxToolkit/authSlice";
+import Loading from "components/DRLoading";
 
-const RequireAuth = ({ children }) => {
-  const token = useSelector(selectCurrentToken);
-  const location = useLocation();
-  console.log(token);
+export default function RequireAuth({ children }) {
+  const { user, loaded } = useSelector((state) => state.auth);
 
-  return token ? (
-    children
-  ) : (
-    <Navigate to="/authentication/sign-in" state={{ from: location }} replace />
-  );
-};
-export default RequireAuth;
+  // Todavía no sabemos si está logueado
+  if (!loaded) {
+    return <Loading />;
+  }
+
+  // Ya cargó y NO está logueado
+  if (!user) {
+    return <Navigate to="/authentication/sign-in" replace />;
+  }
+
+  // OK
+  return children;
+}

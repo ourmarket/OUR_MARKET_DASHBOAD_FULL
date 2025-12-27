@@ -5,27 +5,25 @@ const authSlice = createSlice({
   name: "auth",
   initialState: {
     user: null,
-    token: null,
     superUser: null,
     version: null,
     superUserData: null,
+    loaded: false,
   },
   reducers: {
     setCredentials: (state, action) => {
-      const { id, accessToken, superUser, version, superUserData } =
-        action.payload;
-      state.user = id;
-      state.token = accessToken;
-      state.superUser = superUser;
-      state.version = version;
-      state.superUserData = superUserData;
+      state.user = action.payload.user;
+      state.superUser = action.payload.superUser;
+      state.version = action.payload.version;
+      state.superUserData = action.payload.superUserData;
+      state.loaded = true;
     },
     logOut: (state) => {
       state.user = null;
-      state.token = null;
       state.superUser = null;
       state.version = null;
       state.superUserData = null;
+      state.loaded = true;
     },
   },
 });

@@ -19,7 +19,14 @@ import MDTypography from "components/MDTypography";
 import { dateToLocalDate, dateToLocalDateMin } from "utils/dateFormat";
 import colors from "assets/theme/base/colors";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 export const options = {
   responsive: true,
@@ -85,8 +92,10 @@ export const options = {
   },
 };
 
-function CharBar2({ reports }) {
-  const arr = reports
+function CharBar2({ data }) {
+  console.log(data);
+
+  const arr = data
     .map((item) => ({
       date: new Date(item.date),
       totalProfit: item.totalProfits,
@@ -94,11 +103,13 @@ function CharBar2({ reports }) {
     .sort((a, b) => a.date - b.date);
 
   // const info = getChartData(ordersByDays);
-  const labels = arr.map((label) => dateToLocalDateMin(label.date)).slice(1, arr.length);
+  const labels = arr
+    .map((label) => dateToLocalDateMin(label.date))
+    .slice(1, arr.length);
 
   const profits = arr.map((profit) => profit.totalProfit).slice(1, arr.length);
 
-  const data = {
+  const dataFormated = {
     labels,
     datasets: [
       {
@@ -124,7 +135,7 @@ function CharBar2({ reports }) {
                 background: "linear-gradient(0deg, #464b55 0%, #73809b 100%)",
               }}
             >
-              <Bar options={options} data={data} />
+              <Bar options={options} data={dataFormated} />
             </MDBox>
           ),
           []
@@ -133,12 +144,22 @@ function CharBar2({ reports }) {
           <MDTypography variant="h6" textTransform="capitalize">
             Ganancias
           </MDTypography>
-          <MDTypography component="div" variant="button" color="text" fontWeight="light">
+          <MDTypography
+            component="div"
+            variant="button"
+            color="text"
+            fontWeight="light"
+          >
             Total de los últimos 30 días.
           </MDTypography>
           <Divider />
           <MDBox display="flex" alignItems="center">
-            <MDTypography variant="button" color="text" lineHeight={1} sx={{ mt: 0.15, mr: 0.5 }}>
+            <MDTypography
+              variant="button"
+              color="text"
+              lineHeight={1}
+              sx={{ mt: 0.15, mr: 0.5 }}
+            >
               <Icon>schedule</Icon>
             </MDTypography>
             <MDTypography variant="button" color="text" fontWeight="light">

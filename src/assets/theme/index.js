@@ -34,17 +34,16 @@ import menu from "assets/theme/components/menu";
 import menuItem from "assets/theme/components/menu/menuItem";
 import switchButton from "assets/theme/components/form/switchButton";
 import divider from "assets/theme/components/divider";
-import tableContainer from "assets/theme/components/table/tableContainer";
+/* import tableContainer from "assets/theme/components/table/tableContainer";
 import tableHead from "assets/theme/components/table/tableHead";
-import tableCell from "assets/theme/components/table/tableCell";
+import tableCell from "assets/theme/components/table/tableCell"; */
 import linearProgress from "assets/theme/components/linearProgress";
 import breadcrumbs from "assets/theme/components/breadcrumbs";
 import slider from "assets/theme/components/slider";
 import avatar from "assets/theme/components/avatar";
 import tooltip from "assets/theme/components/tooltip";
-import appBar from "assets/theme/components/appBar";
-import tabs from "assets/theme/components/tabs";
-import tab from "assets/theme/components/tabs/tab";
+import appBar from "assets/theme/components/appBar"; /* import tabs from "assets/theme/components/tabs";
+import tab from "assets/theme/components/tabs/tab"; */
 import stepper from "assets/theme/components/stepper";
 import step from "assets/theme/components/stepper/step";
 import stepConnector from "assets/theme/components/stepper/stepConnector";
@@ -96,7 +95,7 @@ export default createTheme({
     MuiCard: { ...card },
     MuiCardMedia: { ...cardMedia },
     MuiCardContent: { ...cardContent },
-    MuiButton: { ...button },
+    /*  MuiButton: { ...button }, */
     MuiIconButton: { ...iconButton },
     MuiInput: { ...input },
     MuiInputLabel: { ...inputLabel },
@@ -106,17 +105,17 @@ export default createTheme({
     MuiMenuItem: { ...menuItem },
     MuiSwitch: { ...switchButton },
     MuiDivider: { ...divider },
-    MuiTableContainer: { ...tableContainer },
+    /* MuiTableContainer: { ...tableContainer },
     MuiTableHead: { ...tableHead },
-    MuiTableCell: { ...tableCell },
+    MuiTableCell: { ...tableCell }, */
     MuiLinearProgress: { ...linearProgress },
     MuiBreadcrumbs: { ...breadcrumbs },
     MuiSlider: { ...slider },
     MuiAvatar: { ...avatar },
     MuiTooltip: { ...tooltip },
     MuiAppBar: { ...appBar },
-    MuiTabs: { ...tabs },
-    MuiTab: { ...tab },
+    /* MuiTabs: { ...tabs },
+    MuiTab: { ...tab }, */
     MuiStepper: { ...stepper },
     MuiStep: { ...step },
     MuiStepConnector: { ...stepConnector },

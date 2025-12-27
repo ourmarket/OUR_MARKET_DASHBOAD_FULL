@@ -6,6 +6,9 @@ import MDBox from "components/MDBox";
 import { useMaterialUIController, setLayout } from "context";
 import { Box } from "@mui/system";
 import Footer from "examples/Footer";
+import { useDispatch, useSelector } from "react-redux";
+import { hideFeedback } from "reduxToolkit/uiSlice";
+import MDSnackbar from "components/MDSnackbar";
 
 function DashboardLayout({ children }) {
   const [controller, dispatch] = useMaterialUIController();
@@ -15,6 +18,9 @@ function DashboardLayout({ children }) {
   useEffect(() => {
     setLayout(dispatch, "dashboard");
   }, [pathname]);
+
+  const dispatch1 = useDispatch();
+  const { feedback } = useSelector((state) => state.ui);
 
   return (
     <MDBox
@@ -33,6 +39,20 @@ function DashboardLayout({ children }) {
       })}
     >
       <Box sx={{ minHeight: "90vh" }}>{children}</Box>
+      {feedback && feedback.open && (
+        <MDSnackbar
+          open={feedback.open}
+          color={feedback.color}
+          icon={feedback.icon}
+          title={feedback.title}
+          content={feedback.content}
+          dateTime={feedback.dateTime}
+          close={() => dispatch1(hideFeedback())}
+          sx={{
+            zIndex: (theme) => theme.zIndex.modal + 999999999999,
+          }}
+        />
+      )}
       <Footer />
     </MDBox>
   );

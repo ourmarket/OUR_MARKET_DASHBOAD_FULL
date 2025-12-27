@@ -8,20 +8,6 @@ export const userApi = apiSlice.injectEndpoints({
   tagTypes: ["reports"],
 
   endpoints: (builder) => ({
-    //1. total general de ventas y pagos(efectivo, transferencia, deudas)
-    getTotalOrders: builder.query({
-      query: () => "/reports/orders",
-      extraOptions: { maxRetries: 5 },
-      providesTags: ["reports"],
-    }),
-
-    getTotalOrderProductsByDay: builder.query({
-      query: () => "/reports/totalOrderProductsByDay",
-      // keepUnusedDataFor: 3,
-      extraOptions: { maxRetries: 5 },
-      providesTags: ["reports"],
-    }),
-
     getTotalOrdersByMonth: builder.query({
       query: (client = "") => `/reports/ordersByMonth?client=${client}`,
       // keepUnusedDataFor: 3,
@@ -34,18 +20,7 @@ export const userApi = apiSlice.injectEndpoints({
       extraOptions: { maxRetries: 5 },
       providesTags: ["reports"],
     }),
-    getTotalOrdersProducts2103: builder.query({
-      query: () => "/reports/totalOrderProducts21_03",
-      // keepUnusedDataFor: 3,
-      extraOptions: { maxRetries: 5 },
-      providesTags: ["reports"],
-    }),
-    getTotalStock: builder.query({
-      query: () => "/reports/reportTotalStock",
-      // keepUnusedDataFor: 3,
-      extraOptions: { maxRetries: 5 },
-      providesTags: ["reports"],
-    }),
+
     getReportTotalClientDebt: builder.query({
       query: () => "/reports/reportTotalClientDebt",
       // keepUnusedDataFor: 3,
@@ -67,22 +42,6 @@ export const userApi = apiSlice.injectEndpoints({
     }),
     getReportTotalClientBuyIndividualByDay: builder.query({
       query: (id) => `/reports/reportTotalClientBuyByDay/${id}`,
-
-      // keepUnusedDataFor: 3,
-      extraOptions: { maxRetries: 5 },
-      providesTags: ["reports"],
-    }),
-    getTotalIndividualProduct: builder.query({
-      query: ({ id, client = "" }) =>
-        `/reports/totalIndividualProduct/${id}?client=${client}`,
-
-      // keepUnusedDataFor: 3,
-      extraOptions: { maxRetries: 5 },
-      providesTags: ["reports"],
-    }),
-    getTotalIndividualProductLast30Days: builder.query({
-      query: ({ id, client = "" }) =>
-        `/reports/totalIndividualProductLast30days/${id}?client=${client}`,
 
       // keepUnusedDataFor: 3,
       extraOptions: { maxRetries: 5 },
@@ -170,57 +129,24 @@ export const userApi = apiSlice.injectEndpoints({
       extraOptions: { maxRetries: 5 },
       providesTags: ["reports"],
     }),
-
-    getByMonthAndCategoryExpensesReport: builder.query({
-      query: () => "/reports/reportTotalExpensesByMonthAndCategory",
-      // keepUnusedDataFor: 3,
-      extraOptions: { maxRetries: 5 },
-      providesTags: ["reports"],
-    }),
-
-    // payments
-    paymentByLastXdayReport: builder.query({
-      query: (days) => `/reports/paymentByLastXdayReport?days=${days}`,
-      // keepUnusedDataFor: 3,
-      extraOptions: { maxRetries: 5 },
-      providesTags: ["reports"],
-    }),
-
-    // buys
-    getTotalBuysReport: builder.query({
-      query: () => "/reports/totalBuys",
-      // keepUnusedDataFor: 3,
-      extraOptions: { maxRetries: 5 },
-      providesTags: ["reports"],
-    }),
   }),
 });
 
 export const {
-  useGetTotalOrderProductsByDayQuery,
-  useGetTotalOrdersQuery,
   useGetTotalOrdersByMonthQuery,
-  useGetTotalStockQuery,
   useGetReportTotalClientDebtQuery,
   useGetReportTotalClientBuyQuery,
   useGetReportTotalClientBuyIndividualQuery,
   useGetReportTotalClientBuyIndividualByDayQuery,
   useGetTotalOrdersProductsQuery,
-  useGetTotalOrdersProducts2103Query,
-  useGetTotalIndividualProductQuery,
-  useGetTotalIndividualProductLast30DaysQuery,
+
   useGetCategoryReportQuery,
   useGetCategoryReportByDayQuery,
   useGetReportTotalExpensesByMonthQuery,
   useGetTotalCategoryExpensesReportQuery,
-  useGetByMonthAndCategoryExpensesReportQuery,
-  usePaymentByLastXdayReportQuery,
-  useGetTotalBuysReportQuery,
-
   usePostTotalOrderProductsByRangeMutation,
   usePostReportPaymentByRangeDayMutation,
   usePostReportSellByRangeDayMutation,
   usePostReportClientBuyByRangeDayMutation,
-
   usePostDeliveryOrdersMutation,
 } = userApi;

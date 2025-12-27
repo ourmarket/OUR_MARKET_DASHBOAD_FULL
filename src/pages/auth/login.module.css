@@ -1,0 +1,383 @@
+/* Complete modern redesign with sophisticated styling */
+.container {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animated Background Pattern */
+.bgPattern {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 20% 50%, rgba(6, 182, 212, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.06) 0%, transparent 50%);
+  animation: pulse 8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 580px;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+/* Logo Section */
+.logoSection {
+  display: flex;
+  justify-content: center;
+}
+
+.logoMark {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logoText {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.logoBars {
+  display: flex;
+  gap: 4px;
+  align-items: flex-end;
+}
+
+.logoBars span {
+  width: 6px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #06b6d4 0%, #0891b2 100%);
+}
+
+.logoBars span:nth-child(1) {
+  height: 20px;
+  animation: bar1 1.5s ease-in-out infinite;
+}
+
+.logoBars span:nth-child(2) {
+  height: 28px;
+  animation: bar2 1.5s ease-in-out infinite 0.2s;
+}
+
+.logoBars span:nth-child(3) {
+  height: 24px;
+  animation: bar3 1.5s ease-in-out infinite 0.4s;
+}
+
+@keyframes bar1 {
+  0%,
+  100% {
+    height: 20px;
+    opacity: 1;
+  }
+  50% {
+    height: 16px;
+    opacity: 0.7;
+  }
+}
+
+@keyframes bar2 {
+  0%,
+  100% {
+    height: 28px;
+    opacity: 1;
+  }
+  50% {
+    height: 24px;
+    opacity: 0.7;
+  }
+}
+
+@keyframes bar3 {
+  0%,
+  100% {
+    height: 24px;
+    opacity: 1;
+  }
+  50% {
+    height: 20px;
+    opacity: 0.7;
+  }
+}
+
+/* Main Card */
+.card {
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 3rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2), inset 0 1px 0 0
+    rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.cardHeader {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.75rem;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+/* Features Grid */
+.features {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.featureItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem 1rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.featureItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #06b6d4;
+}
+
+.featureIcon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+}
+
+.featureLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #334155;
+  text-align: center;
+}
+
+/* CTA Button */
+.ctaButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1.125rem 2rem;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(6, 182, 212, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.ctaButton::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.ctaButton:hover::before {
+  opacity: 1;
+}
+
+.ctaButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(6, 182, 212, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+}
+
+.ctaButton:active {
+  transform: translateY(0);
+}
+
+.ctaButton svg {
+  transition: transform 0.3s;
+}
+
+.ctaButton:hover svg {
+  transform: translateX(4px);
+}
+
+.footerText {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.link {
+  color: #0891b2;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.link:hover {
+  color: #06b6d4;
+  text-decoration: underline;
+}
+
+/* Badge */
+.badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  font-size: 0.875rem;
+  color: #cbd5e1;
+  font-weight: 500;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+.badgeDot {
+  width: 8px;
+  height: 8px;
+  background: #06b6d4;
+  border-radius: 50%;
+  animation: pulse-dot 2s ease-in-out infinite;
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.6);
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(0.9);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .container {
+    padding: 1.5rem;
+  }
+
+  .content {
+    gap: 2rem;
+  }
+
+  .logoText {
+    font-size: 1.5rem;
+  }
+
+  .card {
+    padding: 2rem 1.5rem;
+  }
+
+  .title {
+    font-size: 1.625rem;
+  }
+
+  .subtitle {
+    font-size: 0.9375rem;
+  }
+
+  .features {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .featureItem {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 1rem;
+  }
+
+  .featureIcon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .featureLabel {
+    text-align: left;
+  }
+
+  .ctaButton {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  .badge {
+    font-size: 0.8125rem;
+    padding: 0.625rem 1.25rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .card {
+    padding: 1.5rem 1rem;
+  }
+
+  .title {
+    font-size: 1.375rem;
+  }
+}

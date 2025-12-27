@@ -24,9 +24,23 @@ function NewCategory() {
                 borderRadius="lg"
                 coloredShadow="info"
               >
-                <MDTypography variant="h6" color="white">
-                  Crear nueva categoria
-                </MDTypography>
+                <MDBox>
+                  <MDTypography
+                    variant="h6"
+                    color="white"
+                    textTransform="uppercase"
+                  >
+                    Agregar categoria
+                  </MDTypography>
+                  <MDTypography
+                    variant="button"
+                    color="white"
+                    fontWeight="regular"
+                    opacity={0.8}
+                  >
+                   Define el nombre y la imagen de presentación para el catálogo
+                  </MDTypography>
+                </MDBox>
               </MDBox>
               <MDBox>
                 <AddCategoryForm />

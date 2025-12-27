@@ -2,44 +2,37 @@
 /* eslint-disable react/jsx-boolean-value */
 /* eslint-disable no-underscore-dangle */
 
-import { LoadingButton } from "@mui/lab";
-import { Alert, Box, Card, Grid, MenuItem, TextField } from "@mui/material";
+import { Alert, Box, Grid, MenuItem, Icon } from "@mui/material";
 import MDBox from "components/MDBox";
 import { useFormik } from "formik";
 import { useNavigate, useParams } from "react-router-dom";
 import { editUserSchema } from "validations/users/editUserYup";
-import Swal from "sweetalert2";
-import colors from "assets/theme/base/colors";
+
+
+import MDInput from "components/MDInput";
 import MDButton from "components/MDButton";
 import MDTypography from "components/MDTypography";
 import { usePutUserMutation } from "api/userApi";
-import AvatarUpload from "./AvatarUpload";
+import { useDispatch } from "react-redux";
+import { showFeedback } from "reduxToolkit/uiSlice";
 
-function UserEdit({ listRoles, user: editUser }) {
+function UserEdit({ listRoles: roles, user: editUser }) {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { id } = useParams();
 
-  const [editUserMutation, { isLoading, isError }] = usePutUserMutation();
+  const [editUserMutation, { isLoading, isError, error }] =
+    usePutUserMutation();
 
   const formik = useFormik({
     initialValues: {
       name: editUser?.name,
       lastName: editUser?.lastName,
       email: editUser?.email,
-      // password: editUser?.password,
       phone: editUser?.phone,
       role: editUser?.role || "",
-      verified: editUser?.verified || "",
     },
-    onSubmit: async ({
-      name,
-      lastName,
-      email,
-      password,
-      phone,
-      role,
-      verified,
-    }) => {
+    onSubmit: async ({ name, lastName, email, password, phone, role }) => {
       const editUserValues = {
         name,
         lastName,
@@ -47,7 +40,6 @@ function UserEdit({ listRoles, user: editUser }) {
         phone,
         password,
         role,
-        verified,
       };
 
       const { data } = await editUserMutation({
@@ -55,13 +47,15 @@ function UserEdit({ listRoles, user: editUser }) {
         ...editUserValues,
       }).unwrap();
       if (data) {
-        Swal.fire({
-          position: "center",
-          icon: "success",
-          title: "Usuario editado con éxito",
-          showConfirmButton: false,
-          timer: 2500,
-        });
+        dispatch(
+          showFeedback({
+            title: "Usuario Editado",
+            content:
+              "El usuario ha sido editado correctamente.",
+            color: "success",
+            dateTime: null,
+          })
+        );
         navigate("/usuarios/lista");
       }
     },
@@ -70,233 +64,202 @@ function UserEdit({ listRoles, user: editUser }) {
   });
 
   return (
-    <MDBox px={3} py={3}>
-      <MDBox
-        sx={{
-          display: "flex",
-          gap: 5,
-        }}
-      >
-        <Grid sx={4}>
-          <AvatarUpload user={editUser} />
-        </Grid>
+    <MDBox
+      component="form"
+      onSubmit={formik.handleSubmit}
+      autoComplete="off"
+      sx={{ p: 3 }}
+    >
+      <Grid container spacing={3}>
+        {/* COLUMNA IZQUIERDA: FORMULARIO */}
+        <Grid item xs={12} md={8}>
+          {/* SECCIÓN 1: INFORMACIÓN PERSONAL */}
+          <Box sx={{ p: 3, mb: 3, borderRadius: "12px" }}>
+            <MDBox display="flex" alignItems="center" mb={3}>
+              <Icon fontSize="medium" color="info" sx={{ mr: 1 }}>
+                person
+              </Icon>
+              <MDTypography variant="h6" fontWeight="bold">
+                Información General
+              </MDTypography>
+            </MDBox>
 
-        <Grid sx={4}>
-          <Card>
-            <Box
-              component="form"
-              noValidate
-              onSubmit={formik.handleSubmit}
-              sx={{ p: 5, display: "flex", gap: 3, width: "100%" }}
-            >
-              <MDBox sx={{ width: "100%" }}>
-                <MDTypography>Datos personales</MDTypography>
-                <TextField
-                  margin="normal"
-                  required
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <MDInput
                   fullWidth
-                  id="user_name"
                   label="Nombre/s"
                   name="name"
                   value={formik.values.name}
-                  error={!!formik.errors.name}
-                  helperText={formik.errors.name}
                   onChange={formik.handleChange}
+                  error={formik.touched.name && !!formik.errors.name}
+                  helperText={formik.touched.name && formik.errors.name}
                 />
-                <TextField
-                  margin="normal"
-                  required
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <MDInput
                   fullWidth
-                  name="lastName"
                   label="Apellido"
-                  id="User_lastName"
+                  name="lastName"
                   value={formik.values.lastName}
-                  error={!!formik.errors.lastName}
-                  helperText={formik.errors.lastName}
                   onChange={formik.handleChange}
+                  error={formik.touched.lastName && !!formik.errors.lastName}
+                  helperText={formik.touched.lastName && formik.errors.lastName}
                 />
-                <TextField
-                  margin="normal"
-                  required
+              </Grid>
+              <Grid item xs={12}>
+                <MDInput
                   fullWidth
-                  id="user_email"
-                  label="Email"
+                  label="Email (Google, Facebook o Apple)"
                   name="email"
-                  autoComplete="email"
                   value={formik.values.email}
-                  error={!!formik.errors.email}
-                  helperText={formik.errors.email}
                   onChange={formik.handleChange}
+                  error={
+                    (formik.touched.email && !!formik.errors.email) ||
+                    !!error?.data?.email
+                  }
+                  helperText={
+                    (formik.touched.email && formik.errors.email) ||
+                    error?.data?.email?.msg
+                  }
                 />
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
-                  name="phone"
-                  label="Telefono"
-                  id="user_phone"
-                  value={formik.values.phone}
-                  error={!!formik.errors.phone}
-                  helperText={formik.errors.phone}
-                  onChange={formik.handleChange}
-                />
-                {}
-
-                <TextField
-                  id="user_role"
-                  margin="normal"
-                  select
-                  required
-                  name="role"
-                  fullWidth
-                  label="Rol"
-                  value={formik.values.role}
-                  error={!!formik.errors.role}
-                  helperText={formik.errors.role}
-                  onChange={formik.handleChange}
+                <Alert
+                  severity="info"
+                  sx={{ borderRadius: "12px", mt: 2, fontSize: "12px" }}
                 >
-                  {listRoles.map((option) => (
-                    <MenuItem
-                      key={option._id}
-                      value={option._id}
-                      selected={formik.values.role === option._id}
-                    >
+                  Al cambiar el email, el usuario deberá iniciar sesión
+                  nuevamente por Google, Facebook o Apple para validarse en el
+                  sistema.
+                </Alert>
+              </Grid>
+            </Grid>
+          </Box>
+
+          {/* SECCIÓN 2: CONTACTO Y ROL */}
+          <Box sx={{ p: 3, borderRadius: "12px" }}>
+            <MDBox display="flex" alignItems="center" mb={3}>
+              <Icon fontSize="medium" color="info" sx={{ mr: 1 }}>
+                settings
+              </Icon>
+              <MDTypography variant="h6" fontWeight="bold">
+                Configuración de Cuenta
+              </MDTypography>
+            </MDBox>
+
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <MDInput
+                  fullWidth
+                  label="Teléfono"
+                  name="phone"
+                  value={formik.values.phone}
+                  onChange={formik.handleChange}
+                  error={
+                    (formik.touched.phone && !!formik.errors.phone) ||
+                    !!error?.data?.phone
+                  }
+                  helperText={
+                    (formik.touched.phone && formik.errors.phone) ||
+                    error?.data?.phone?.msg
+                  }
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <MDInput
+                  select
+                  fullWidth
+                  label="Rol asignado"
+                  name="role"
+                  value={formik.values.role}
+                  onChange={formik.handleChange}
+                  error={formik.touched.role && !!formik.errors.role}
+                  helperText={formik.touched.role && formik.errors.role}
+                >
+                  {roles.map((option) => (
+                    <MenuItem key={option._id} value={option._id}>
                       {option.es}
                     </MenuItem>
                   ))}
-                </TextField>
-                <TextField
-                  margin="normal"
-                  select
-                  required
-                  name="verified"
-                  fullWidth
-                  label="Verificado"
-                  value={formik.values.verified}
-                  error={!!formik.errors.verified}
-                  helperText={formik.errors.verified}
-                  onChange={formik.handleChange}
-                >
-                  <MenuItem
-                    value={true}
-                    selected={formik.values.verified === true}
-                  >
-                    Si
-                  </MenuItem>
-                  <MenuItem
-                    value={false}
-                    selected={formik.values.verified === false}
-                  >
-                    No
-                  </MenuItem>
-                </TextField>
-                <LoadingButton
-                  type="submit"
-                  variant="contained"
-                  loading={isLoading}
-                  sx={{
-                    mt: 3,
-                    mb: 2,
-                    mr: 2,
-                    backgroundColor: `${colors.info.main}`,
-                    color: "white !important",
-                    "&:hover": { backgroundColor: colors.info.state },
-                  }}
-                >
-                  Editar
-                </LoadingButton>
-                <MDButton
-                  variant="outlined"
-                  color="info"
-                  onClick={() => navigate(-1)}
-                  sx={{
-                    mt: 3,
-                    mb: 2,
-                  }}
-                >
-                  Cancelar
-                </MDButton>
-                {isError && (
-                  <Alert severity="error">
-                    Ha ocurrido un error, usuario no editado
-                  </Alert>
-                )}
-              </MDBox>
-
-              {/*  <MDBox sx={{ width: "50%" }}>
-                <MDTypography>Dirección</MDTypography>
-                <TextField
-                  margin="normal"
-                  fullWidth
-                  name="address"
-                  label="Dirección"
-                  id="user_address"
-                  value={formik.values.address}
-                  error={!!formik.errors.address}
-                  helperText={formik.errors.address}
-                  onChange={formik.handleChange}
-                />
-                <TextField
-                  margin="normal"
-                  fullWidth
-                  name="flor"
-                  label="Piso(opcional)"
-                  id="user_flor"
-                  value={formik.values.flor}
-                  error={!!formik.errors.flor}
-                  helperText={formik.errors.flor}
-                  onChange={formik.handleChange}
-                />
-                <TextField
-                  margin="normal"
-                  fullWidth
-                  name="department"
-                  label="Departamento(opcional)"
-                  id="user_department"
-                  value={formik.values.department}
-                  error={formik.errors.department}
-                  helperText={formik.errors.department}
-                  onChange={formik.handleChange}
-                />
-                <TextField
-                  margin="normal"
-                  fullWidth
-                  name="province"
-                  label="Provincia"
-                  id="user_province"
-                  value={formik.values.province}
-                  error={!!formik.errors.province}
-                  helperText={formik.errors.province}
-                  onChange={formik.handleChange}
-                />
-                <TextField
-                  margin="normal"
-                  fullWidth
-                  name="city"
-                  label="Ciudad"
-                  id="user_city"
-                  value={formik.values.city}
-                  error={!!formik.errors.city}
-                  helperText={formik.errors.city}
-                  onChange={formik.handleChange}
-                />
-                <TextField
-                  margin="normal"
-                  fullWidth
-                  name="zip"
-                  label="Código Postal"
-                  id="user_zip"
-                  type="number"
-                  value={formik.values.zip}
-                  error={!!formik.errors.zip}
-                  helperText={formik.errors.zip}
-                  onChange={formik.handleChange}
-                />
-              </MDBox> */}
-            </Box>
-          </Card>
+                </MDInput>
+              </Grid>
+            </Grid>
+          </Box>
         </Grid>
-      </MDBox>
+
+        {/* COLUMNA DERECHA: ESTADO Y ACCIONES */}
+        <Grid item xs={12} md={4}>
+          <Box
+            sx={{
+              p: 3,
+              mb: 3,
+              borderRadius: "12px",
+              textAlign: "center",
+              border: "1px solid #e0e0e0",
+            }}
+          >
+            <MDTypography variant="h6" fontWeight="bold" mb={2}>
+              Vista Previa
+            </MDTypography>
+            <MDBox
+              sx={{
+                bgcolor: "#f0f2f5",
+                borderRadius: "10px",
+                py: 4,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                border: "1px dashed #ced4da",
+              }}
+            >
+              <Icon sx={{ fontSize: "60px !important", color: "#adb5bd" }}>
+                account_circle
+              </Icon>
+              <MDTypography
+                variant="button"
+                fontWeight="medium"
+                color="text"
+                mt={1}
+              >
+                {formik.values.name || "Nombre"}{" "}
+                {formik.values.lastName || "Usuario"}
+              </MDTypography>
+              <MDTypography variant="caption" color="text">
+                {formik.values.email || "email@ejemplo.com"}
+              </MDTypography>
+            </MDBox>
+          </Box>
+
+          {/* ACCIONES */}
+          <MDBox display="flex" flexDirection="column" gap={2}>
+            <MDButton
+              type="submit"
+              variant="gradient"
+              color="info"
+              fullWidth
+              disabled={isLoading}
+            >
+              {isLoading ? "PROCESANDO..." : "EDITAR USUARIO"}
+            </MDButton>
+
+            <MDButton
+              variant="outlined"
+              color="secondary"
+              fullWidth
+              onClick={() => navigate(-1)}
+            >
+              CANCELAR
+            </MDButton>
+          </MDBox>
+
+          {isError && (
+            <MDBox mt={2}>
+              <Alert severity="error" sx={{ fontSize: "12px" }}>
+                Error: {error?.data?.msg || "No se pudo editar el usuario"}
+              </Alert>
+            </MDBox>
+          )}
+        </Grid>
+      </Grid>
     </MDBox>
   );
 }

@@ -1,155 +1,178 @@
+/* eslint-disable react/prop-types */
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { LoadingButton } from "@mui/lab";
-import {
-  Alert,
-  Box,
-  Card,
-  CardContent,
-  CardMedia,
-  TextField,
-} from "@mui/material";
 import { useFormik } from "formik";
-import MDBox from "components/MDBox";
-import MDButton from "components/MDButton";
-import colors from "assets/theme/base/colors";
-import { usePostCategoryMutation } from "api/categoryApi";
-import { useState } from "react";
-import Swal from "sweetalert2";
 import * as yup from "yup";
+import Swal from "sweetalert2";
+
+// @mui material components
+import { Grid, Card, Divider, Alert, Icon, Box } from "@mui/material";
+import { LoadingButton } from "@mui/lab";
+
+// Material Dashboard 2 React components
+import MDBox from "components/MDBox";
+import MDTypography from "components/MDTypography";
+import MDButton from "components/MDButton";
+import MDInput from "components/MDInput";
+
+// Data & Logic
+import { usePostCategoryMutation } from "api/categoryApi";
 import ImageUpload from "components/OUImageUpload/ImageUpload";
+import colors from "assets/theme/base/colors";
 
 const validationSchema = yup.object().shape({
-  name: yup.string().required("Requerido"),
+  name: yup.string().required("El nombre de la categoría es obligatorio"),
 });
 
 function AddCategoryForm() {
   const navigate = useNavigate();
-
   const [createCategory, { isLoading, isError }] = usePostCategoryMutation();
-  const [urlImage, setUrlImage] = useState(null);
+  const [urlImage, setUrlImage] = useState("");
 
   const formik = useFormik({
     initialValues: {
       name: "",
-      img:
-        urlImage ||
-        "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg",
-    },
-    onSubmit: async (values) => {
-      const newCategory = {
-        ...values,
-        img: urlImage,
-      };
-      const res = await createCategory(newCategory).unwrap();
-      if (res.ok) {
-        Swal.fire({
-          position: "center",
-          icon: "success",
-          title: "Categoria creada con éxito",
-          showConfirmButton: false,
-          timer: 2500,
-        });
-      }
     },
     validationSchema,
+    onSubmit: async (values) => {
+      try {
+        const newCategory = {
+          ...values,
+          img:
+            urlImage ||
+            "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg",
+        };
+        const res = await createCategory(newCategory).unwrap();
+        if (res.ok) {
+          Swal.fire({
+            icon: "success",
+            title: "Categoría creada",
+            text: "La categoría se registró correctamente.",
+            timer: 2000,
+            showConfirmButton: false,
+          });
+          navigate("/categorias/lista"); // Ajusta tu ruta
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    },
   });
 
   return (
-    <MDBox pt={6} pb={3}>
-      <Box
-        sx={{
-          display: "flex",
-          gap: 5,
-          justifyContent: "center",
-        }}
-      >
-        <Box sx={{ mt: 1, mx: 2, display: "flex", gap: 3, flex: 1 }}>
-          <Box
-            component="form"
-            autoComplete="off"
-            noValidate
-            onSubmit={formik.handleSubmit}
-            sx={{ width: "100%" }}
-          >
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              autoFocus
-              label="Nombre de categoria"
-              name="name"
-              error={!!formik.errors.name}
-              helperText={formik.errors.name}
-              onChange={formik.handleChange}
-            />
+    <MDBox py={3}>
+      <Grid container justifyContent="center">
+        <Grid item xs={12} lg={10}>
+          <MDBox p={4}>
+            <Grid container spacing={5}>
+              <Grid item xs={12} md={9}>
+                <MDBox component="form" onSubmit={formik.handleSubmit}>
+                  <MDBox mb={4}>
+                    <MDTypography variant="h6" fontWeight="bold" mb={1}>
+                      Información General
+                    </MDTypography>
+                    <MDInput
+                      fullWidth
+                      label="Nombre de la categoría"
+                      name="name"
+                      value={formik.values.name}
+                      onChange={formik.handleChange}
+                      error={formik.touched.name && !!formik.errors.name}
+                      helperText={formik.touched.name && formik.errors.name}
+                    />
+                  </MDBox>
 
-            <Box display="flex" alignItems="center">
-              <TextField
-                margin="normal"
-                fullWidth
-                name="img"
-                label="Imagen del producto"
-                id="user_flor"
-                value={urlImage}
-                error={!!formik.errors.img}
-                helperText={formik.errors.img}
-                onChange={formik.handleChange}
-              />
-            </Box>
+                  <MDBox mb={4}>
+                    <MDTypography variant="h6" fontWeight="bold" mb={1}>
+                      URL de Imagen (Opcional)
+                    </MDTypography>
+                    <MDInput
+                      fullWidth
+                      placeholder="La URL se genera automáticamente al subir"
+                      name="img"
+                      value={urlImage}
+                      disabled
+                    />
+                    <MDTypography variant="caption" color="text">
+                      Puedes subir un archivo a la derecha o pegar un enlace
+                      aquí si lo prefieres.
+                    </MDTypography>
+                  </MDBox>
 
-            <LoadingButton
-              type="submit"
-              variant="contained"
-              loading={isLoading}
-              sx={{
-                mt: 3,
-                mb: 2,
-                mr: 2,
-                backgroundColor: `${colors.info.main}`,
-                color: "white !important",
-              }}
-            >
-              Crear
-            </LoadingButton>
-            <MDButton
-              variant="outlined"
-              color="info"
-              onClick={() => navigate(-1)}
-              sx={{
-                mt: 3,
-                mb: 2,
-              }}
-            >
-              Volver
-            </MDButton>
-            {isError && (
-              <Alert severity="error">
-                Ha ocurrido un error, producto no creado
-              </Alert>
-            )}
-          </Box>
+                  <Divider sx={{ my: 3 }} />
 
-          <Box>
-            <Card
-              sx={{
-                maxWidth: "550px",
-              }}
-            >
-              <CardMedia
-                component="img"
-                image={
-                  urlImage ||
-                  "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"
-                }
-                alt="image product"
-              />
-              <CardContent>
-                <ImageUpload setUrlImage={setUrlImage} />
-              </CardContent>
-            </Card>
-          </Box>
-        </Box>
-      </Box>
+                  <MDBox display="flex" justifyContent="space-between" gap={2}>
+                    <MDButton
+                      variant="outlined"
+                      color="secondary"
+                      onClick={() => navigate(-1)}
+                      sx={{ flex: 1 }}
+                    >
+                      Cancelar
+                    </MDButton>
+                    <LoadingButton
+                      type="primary"
+                      variant="contained"
+                      loading={isLoading}
+                      color="info"
+                      sx={{
+                        flex: 1,
+                        backgroundColor: `${colors.info.main}`,
+                        color: "white !important",
+                      }}
+                    >
+                      Crear Categoría
+                    </LoadingButton>
+                  </MDBox>
+
+                  {isError && (
+                    <MDBox mt={2}>
+                      <Alert severity="error">
+                        No se pudo crear la categoría. Revisa los datos.
+                      </Alert>
+                    </MDBox>
+                  )}
+                </MDBox>
+              </Grid>
+
+              {/* COLUMNA DERECHA: PREVIEW DE IMAGEN */}
+              <Grid item xs={12} md={3}>
+                <MDTypography variant="h6" fontWeight="bold" mb={2}>
+                  Imagen de Portada
+                </MDTypography>
+                <Card
+                  sx={{
+                    border: "1px dashed #ced4da",
+                    boxShadow: "none",
+                    textAlign: "center",
+                    backgroundColor: "#f8f9fa",
+                  }}
+                >
+                  <Box p={1}>
+                    <Box
+                      component="img"
+                      src={
+                        urlImage ||
+                        "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"
+                      }
+                      alt="Preview"
+                      sx={{
+                        width: "100%",
+                        borderRadius: "8px",
+                        maxHeight: "250px",
+                        objectFit: "cover",
+                      }}
+                    />
+                  </Box>
+                  <MDBox p={2}>
+                    <ImageUpload setUrlImage={setUrlImage} />
+                  </MDBox>
+                </Card>
+              </Grid>
+            </Grid>
+          </MDBox>
+        </Grid>
+      </Grid>
     </MDBox>
   );
 }

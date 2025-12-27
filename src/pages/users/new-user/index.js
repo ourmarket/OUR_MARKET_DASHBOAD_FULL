@@ -29,9 +29,23 @@ function CreateNewUser() {
                 borderRadius="lg"
                 coloredShadow="info"
               >
-                <MDTypography variant="h6" color="white">
-                  Crear nuevo usuario
-                </MDTypography>
+                <MDBox>
+                  <MDTypography
+                    variant="h6"
+                    color="white"
+                    textTransform="uppercase"
+                  >
+                    Gestión de Usuarios
+                  </MDTypography>
+                  <MDTypography
+                    variant="button"
+                    color="white"
+                    fontWeight="regular"
+                    opacity={0.8}
+                  >
+                    Crear Nuevo Usuario para el Sistema
+                  </MDTypography>
+                </MDBox>
               </MDBox>
               <MDBox>
                 {l1 && <Loading />}

@@ -8,6 +8,7 @@ import { Avatar, Divider } from "@mui/material";
 import { formatPrice } from "utils/formaPrice";
 import { Link } from "react-router-dom";
 import PollIcon from "@mui/icons-material/Poll";
+import formatK from "utils/formatK";
 
 function TotalProducts({ totalProducts }) {
   const sliceProducts = totalProducts.slice(0, 19);
@@ -48,7 +49,7 @@ function TotalProducts({ totalProducts }) {
               textAlign: "center",
             }}
           >
-            CANTIDAD
+            Unidades
           </MDTypography>
           <MDTypography
             variant="h6"
@@ -99,7 +100,7 @@ function TotalProducts({ totalProducts }) {
                 variant="body2"
                 sx={{ width: "15%", textAlign: "center" }}
               >
-                {product?.count} unid.
+                {formatK(product?.totalQuantity)}
               </MDTypography>
 
               <MDTypography
@@ -107,7 +108,7 @@ function TotalProducts({ totalProducts }) {
                 mr={1}
                 sx={{ width: "15%", textAlign: "right" }}
               >
-                {formatPrice(product?.total)}
+                {formatPrice(product?.totalAmount)}
               </MDTypography>
             </MDBox>
           </Link>

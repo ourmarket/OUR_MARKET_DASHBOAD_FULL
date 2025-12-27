@@ -18,9 +18,10 @@ import {
 // Images
 import brandWhite from "assets/images/logo.png";
 import brandDark from "assets/images/logo-ct-dark.png";
-import PersistLogin from "router/PersistRoute";
 import Login from "pages/auth/Login";
 import { useSelector } from "react-redux";
+import RequireAuth from "router/RequireAuth";
+import PublicRoute from "router/PublicRoute";
 
 export default function App() {
   const [controller, dispatch] = useMaterialUIController();
@@ -109,6 +110,10 @@ export default function App() {
     </MDBox>
   );
 
+ /*  if (!loaded) {
+    return <Loading />;
+  } */
+
   return (
     <ThemeProvider theme={darkMode ? themeDark : theme}>
       <CssBaseline />
@@ -132,13 +137,49 @@ export default function App() {
       )}
       {layout === "vr" && <Configurator />}
       <Routes>
-        <Route path="/authentication/sign-in" element={<Login />} />
-        <Route element={<PersistLogin />}>
-          {version === "dr" && getRoutes(routes_dr)}
-          {version === "full" && getRoutes(routes_full)}
-          {version === "lite" && getRoutes(routes_lite)}
-          <Route path="*" element={<Navigate to="/dashboard/totales" />} />
-        </Route>
+        {/* ================= PUBLIC ================= */}
+        <Route
+          path="/authentication/sign-in"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
+
+        {/* ================= PRIVATE ================= */}
+        {version === "dr" &&
+          routes_dr.map((route) => (
+            <Route
+              key={route.route}
+              path={route.route}
+              element={<RequireAuth>{route.component}</RequireAuth>}
+            />
+          ))}
+
+        {version === "full" &&
+          routes_full.map((route) => (
+            <Route
+              key={route.route}
+              path={route.route}
+              element={<RequireAuth>{route.component}</RequireAuth>}
+            />
+          ))}
+
+        {version === "lite" &&
+          routes_lite.map((route) => (
+            <Route
+              key={route.route}
+              path={route.route}
+              element={<RequireAuth>{route.component}</RequireAuth>}
+            />
+          ))}
+
+        {/* ================= FALLBACK ================= */}
+        <Route
+          path="*"
+          element={<Navigate to="/authentication/sign-in" replace />}
+        />
       </Routes>
     </ThemeProvider>
   );

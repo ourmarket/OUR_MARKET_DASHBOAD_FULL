@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@clerk/clerk-react": "^5.58.1",
+    "@clerk/localizations": "^3.30.1",
     "@emotion/cache": "^11.11.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
@@ -32,6 +34,7 @@
     "imagekitio-react": "2.0.0",
     "leaflet": "^1.9.4",
     "leaflet-draw": "^1.0.4",
+    "lucide-react": "^0.561.0",
     "moment-timezone": "^0.5.43",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
@@ -39,6 +42,7 @@
     "react-chartjs-2": "^5.2.0",
     "react-datepicker": "^4.18.0",
     "react-dom": "^18.2.0",
+    "react-easy-crop": "^5.5.6",
     "react-icons": "^5.5.0",
     "react-leaflet": "^4.2.1",
     "react-leaflet-draw": "^0.20.4",

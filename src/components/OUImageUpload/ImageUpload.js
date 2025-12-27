@@ -1,63 +1,115 @@
 /* eslint-disable react/prop-types */
-/* eslint-disable no-underscore-dangle */
-
 import { useRef, useState } from "react";
-import { IKContext, IKUpload } from "imagekitio-react";
+import ImageKit from "imagekit-javascript";
+import Swal from "sweetalert2";
 import { LoadingButton } from "@mui/lab";
-import colors from "assets/theme/base/colors";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
-import MDTypography from "components/MDTypography";
+import colors from "assets/theme/base/colors";
 
-const publicKey = import.meta.env.VITE_APP_IMAGEKIT_PUBLIC_KEY;
-const urlEndpoint = import.meta.env.VITE_APP_IMAGEKIT_URL_ENDPOINT;
-const authenticationEndpoint = `${import.meta.env.VITE_APP_API_URL}/imageKit`;
+import ImageCropDialog from "./ImageCropDialog";
+import { getCroppedImage } from "utils/cropImage";
+import { validateImageFile, validateImageSize } from "utils/imageValidation";
+
+const imagekit = new ImageKit({
+  publicKey: import.meta.env.VITE_APP_IMAGEKIT_PUBLIC_KEY,
+  urlEndpoint: import.meta.env.VITE_APP_IMAGEKIT_URL_ENDPOINT,
+  authenticationEndpoint: `${import.meta.env.VITE_APP_API_URL}/imageKit`,
+});
 
 function ImageUpload({ setUrlImage }) {
-  const inputRefTest = useRef(null);
+  const inputRef = useRef(null);
   const [loading, setLoading] = useState(false);
+  const [rawImage, setRawImage] = useState(null);
+  const [openCrop, setOpenCrop] = useState(false);
 
-  const onError = (err) => {
-    console.log("Error", err);
-    setLoading(false);
+  const handleSelectFile = (e) => {
+    const file = e.target.files?.[0];
+    const error = validateImageFile(file);
+
+    if (error) {
+      Swal.fire({
+        icon: "warning",
+        title: "Imagen inválida",
+        text: error,
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.src = reader.result;
+
+      img.onload = () => {
+        const sizeError = validateImageSize(img);
+        if (sizeError) {
+          Swal.fire({
+            icon: "warning",
+            title: "Imagen demasiado pequeña",
+            text: sizeError,
+          });
+          return;
+        }
+
+        setRawImage(reader.result);
+        setOpenCrop(true);
+      };
+    };
+
+    reader.readAsDataURL(file);
   };
 
-  const onSuccess = async (res) => {
-    console.log("Success", res);
+  const handleCropConfirm = async (croppedAreaPixels) => {
+    try {
+      setLoading(true);
+      setOpenCrop(false);
 
-    setUrlImage(res.url);
-    setLoading(false);
-  };
+      const croppedFile = await getCroppedImage(rawImage, croppedAreaPixels);
 
-  const onUploadStart = () => {
-    console.log("start");
-    setLoading(true);
+      const res = await imagekit.upload({
+        file: croppedFile,
+        fileName: "product.png",
+      });
+
+      setUrlImage(res.url);
+
+      Swal.fire({
+        icon: "success",
+        title: "Imagen subida",
+        text: "La imagen se subió correctamente",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      console.error(error);
+
+      Swal.fire({
+        icon: "error",
+        title: "Error al subir imagen",
+        text: "Ocurrió un problema al procesar la imagen",
+      });
+    } finally {
+      setLoading(false);
+      setRawImage(null);
+    }
   };
 
   return (
-    <IKContext
-      publicKey={publicKey}
-      urlEndpoint={urlEndpoint}
-      authenticationEndpoint={authenticationEndpoint}
-    >
-      <IKUpload
-        fileName="product.png"
-        onError={onError}
-        onSuccess={onSuccess}
-        /*  onUploadProgress={onUploadProgress} */
-        onUploadStart={onUploadStart}
-        /*   onChange={changeHandler} */
-        /* validateFile={(file) =>
-              file.size < 2000000 && file.fileType === "image"
-            } */
-        style={{ display: "none" }}
-        inputRef={inputRefTest}
+    <>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/png, image/jpeg"
+        hidden
+        onChange={handleSelectFile}
       />
+
       <LoadingButton
-        type="submit"
         fullWidth
         variant="outlined"
         loading={loading}
-        onClick={() => inputRefTest.current.click()}
+        startIcon={<FileUploadIcon />}
+        onClick={() => inputRef.current.click()}
         sx={{
           mt: 1,
           color: colors.info.main,
@@ -68,19 +120,16 @@ function ImageUpload({ setUrlImage }) {
           },
         }}
       >
-        <FileUploadIcon />
         Subir imagen
       </LoadingButton>
-      <MDTypography
-        variant="body2"
-        sx={{
-          textAlign: "center",
-          marginTop: "10px",
-        }}
-      >
-        Imagen permitida, .jpg, .jpeg, .png, de 500px por 500px
-      </MDTypography>
-    </IKContext>
+
+      <ImageCropDialog
+        open={openCrop}
+        imageSrc={rawImage}
+        onCancel={() => setOpenCrop(false)}
+        onConfirm={handleCropConfirm}
+      />
+    </>
   );
 }
 

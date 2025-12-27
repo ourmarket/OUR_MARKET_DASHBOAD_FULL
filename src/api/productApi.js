@@ -21,12 +21,6 @@ export const productApi = apiSlice.injectEndpoints({
       extraOptions: { maxRetries: 3 },
       providesTags: ["products"],
     }),
-    getProductOfert: builder.query({
-      query: (id) => `/products/ofert/${id}`,
-      // keepUnusedDataFor: 3,
-      extraOptions: { maxRetries: 3 },
-      providesTags: ["products"],
-    }),
 
     postProduct: builder.mutation({
       query: (items) => ({
@@ -44,16 +38,7 @@ export const productApi = apiSlice.injectEndpoints({
         method: "put",
         body: items,
       }),
-      invalidatesTags: ["products", "reports"],
-      extraOptions: { maxRetries: 0 },
-    }),
-    putProductStock: builder.mutation({
-      query: ({ id, ...items }) => ({
-        url: `/products/updateStock1/${id}`,
-        method: "put",
-        body: items,
-      }),
-      invalidatesTags: ["products", "reports"],
+      invalidatesTags: ["products"],
       extraOptions: { maxRetries: 0 },
     }),
 
@@ -62,8 +47,23 @@ export const productApi = apiSlice.injectEndpoints({
         url: `/products/${id}`,
         method: "delete",
       }),
-      invalidatesTags: ["products", "reports"],
+      invalidatesTags: ["products"],
       extraOptions: { maxRetries: 0 },
+    }),
+
+    getProductsTotalByID: builder.query({
+      query: (id) => `/products/products-total-by-id/${id}`,
+      // keepUnusedDataFor: 3,
+      extraOptions: { maxRetries: 3 },
+      providesTags: ["products"],
+    }),
+    getTotalIndividualProductLast30Days: builder.query({
+      query: ({ id, client = "" }) =>
+        `/products/totalIndividualProductLast30days/${id}?client=${client}`,
+
+      // keepUnusedDataFor: 3,
+      extraOptions: { maxRetries: 5 },
+      providesTags: ["products"],
     }),
   }),
 });
@@ -71,9 +71,9 @@ export const productApi = apiSlice.injectEndpoints({
 export const {
   useGetProductsQuery,
   useGetProductQuery,
-  useGetProductOfertQuery,
   usePostProductMutation,
   usePutProductMutation,
-  usePutProductStockMutation,
   useDeleteProductMutation,
+  useGetProductsTotalByIDQuery,
+  useGetTotalIndividualProductLast30DaysQuery,
 } = productApi;

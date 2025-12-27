@@ -10,8 +10,17 @@ import { formatQuantity } from "utils/quantityFormat";
 import { Link } from "react-router-dom";
 import PollIcon from "@mui/icons-material/Poll";
 
+const sortByProfitDesc = (products = []) => {
+	return [...products].sort((a, b) => {
+		const profitA = Number(a.profit || 0);
+		const profitB = Number(b.profit || 0);
+		return profitB - profitA;
+	});
+};
+
 function TotalProductsProfit({ totalProducts }) {
-  const sliceProducts = totalProducts.slice(0, 19);
+  const sortedProducts = sortByProfitDesc(totalProducts);
+  const sliceProducts = sortedProducts.slice(0, 19);
 
   return (
     <Card>
@@ -102,7 +111,7 @@ function TotalProductsProfit({ totalProducts }) {
                 sx={{ width: "15%", textAlign: "center" }}
               >
                 {formatQuantity(
-                  (product.totalProfits * 100) / product.totalCost
+                  (product.profit * 100) / product.totalCost
                 )}
                 %
               </MDTypography>
@@ -112,7 +121,7 @@ function TotalProductsProfit({ totalProducts }) {
                 mr={1}
                 sx={{ width: "15%", textAlign: "right" }}
               >
-                {formatPrice(product?.totalProfits)}
+                {formatPrice(product?.profit)}
               </MDTypography>
             </MDBox>
           </Link>

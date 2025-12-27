@@ -13,9 +13,11 @@ import orderReducer from "./ordersSlice";
 import positionsReducer from "./positionSlice";
 import mapAutocompleteReducer from "./mapAutocomplete";
 import mapReducer from "./mapSlice";
+import uiReducer from "./uiSlice";
 
 export const store = configureStore({
   reducer: {
+    ui: uiReducer,
     auth: authReducer,
     cart: cartReducer,
     buy: buyReducer,

@@ -95,22 +95,23 @@ export const options = {
   },
 };
 
-function CharBar1({ ordersByDays }) {
-  const data = {
-    labels: ordersByDays.map((date) => dateToLocalDateMin(date.date)),
+function CharBar1({ data }) {
+  const dataFormated = {
+    labels: data.map((date) => dateToLocalDateMin(date.date)),
     datasets: [
       {
         label: "Pagos",
-        data: ordersByDays.map((report) => report.total - report.debtTotal),
+        data: data.map((report) => report.total - report.debtTotal),
         backgroundColor: "rgba(85, 230, 18, 0.7)",
       },
       {
         label: "Deudas",
-        data: ordersByDays.map((report) => report.debtTotal),
+        data: data.map((report) => report.debtTotal),
         backgroundColor: "rgba(230, 18, 18, 0.7)",
       },
     ],
   };
+
   return (
     <Card sx={{ height: "100%" }}>
       <MDBox padding="1rem">
@@ -127,7 +128,7 @@ function CharBar1({ ordersByDays }) {
                 background: "linear-gradient(0deg, #464b55 0%, #73809b 100%)",
               }}
             >
-              <Bar options={options} data={data} />
+              <Bar options={options} data={dataFormated} />
             </MDBox>
           ),
           []

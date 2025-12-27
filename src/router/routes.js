@@ -1,5 +1,4 @@
 import Dashboard2 from "pages/dashboard2";
-import RequireAuth from "./RequireAuth";
 import Dashboard1 from "pages/dashboard";
 import Dashboard3 from "pages/dashboard3";
 import ListUsers from "pages/users/list-users";
@@ -11,8 +10,7 @@ import ProductDetail from "pages/products/product/product-detail";
 import NewCategory from "pages/products/category/category-create";
 import EditCategory from "pages/products/category/category-edit";
 import CreateProduct from "pages/products/product/product-create";
-import CreateOfert from "pages/products/ofert/ofert-create";
-import EditOfert from "pages/products/ofert/ofert-edit";
+
 import ListSuppliers from "pages/suppliers/list-suppliers";
 import CreateNewSupplier from "pages/suppliers/create-suppliers";
 import EditSupplier from "pages/suppliers/edit-suppliers";
@@ -51,1394 +49,720 @@ import ListExpenses from "pages/expenses/list-expenses";
 import EditExpenses from "pages/expenses/edit-expenses";
 import Sales from "pages/sales";
 import SalesDetail from "pages/sales/detail/SalesDetail";
-import NewBuy from "pages/buys/new-buy";
-import ListBuys from "pages/buys/list-buys";
-import BuyDetails from "pages/buys/details-buy";
-import BuyEdit from "pages/buys/edit-buy";
+
 import CrearNuevoNegocio from "pages/negocios/nuevo-negocio";
 import ListaNegocios from "pages/negocios/lista-negocios";
 import EditarNegocioPage from "pages/negocios/editar-negocio";
+//buy
+import BuyPage from "pages/buys";
+import NewOrder from "pages/buys/orders/NewOrder";
+import OrderBuyDetails from "pages/buys/orders/OrderBuyDetails";
+import NewPurchase from "pages/buys/buys/NewPurchase";
+import PurchaseDetails from "pages/buys/buys/PurchaseDetails";
+import NewPayment from "pages/buys/payments/NewPayment";
+import PaymentDetails from "pages/buys/payments/PaymentDetails";
+import PaymentByBuyId from "pages/buys/payments/PaymentByBuyId";
 
 export const routes_dr = [
   //dashboard
   {
     route: "/dashboard/totales",
-    component: (
-      <RequireAuth>
-        <Dashboard1 />
-      </RequireAuth>
-    ),
+    component: <Dashboard1 />,
   },
   {
     route: "/dashboard/reparto",
-    component: (
-      <RequireAuth>
-        <Dashboard2 />
-      </RequireAuth>
-    ),
+    component: <Dashboard2 />,
   },
   {
     route: "/dashboard/cajones_de_pollo",
-    component: (
-      <RequireAuth>
-        <Dashboard3 />
-      </RequireAuth>
-    ),
+    component: <Dashboard3 />,
   },
   /* usuario  */
   {
     route: "/usuarios/lista",
-    component: (
-      <RequireAuth>
-        <ListUsers />
-      </RequireAuth>
-    ),
+    component: <ListUsers />,
   },
   {
     route: "/usuarios/nuevo",
-    component: (
-      <RequireAuth>
-        <CreateNewUser />
-      </RequireAuth>
-    ),
+    component: <CreateNewUser />,
   },
   {
     route: "/usuarios/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditUser />
-      </RequireAuth>
-    ),
+    component: <EditUser />,
   },
   {
     route: "/usuarios/editar/password/:id",
-    component: (
-      <RequireAuth>
-        <EditPasswordUser />
-      </RequireAuth>
-    ),
+    component: <EditPasswordUser />,
   },
 
   /* Productos */
 
   {
     route: "/productos",
-    component: (
-      <RequireAuth>
-        <Products />
-      </RequireAuth>
-    ),
+    component: <Products />,
   },
   {
     route: "/productos/nuevo",
-    component: (
-      <RequireAuth>
-        <CreateProduct />
-      </RequireAuth>
-    ),
+    component: <CreateProduct />,
   },
   {
     // este edita producto, oferta y stock
     route: "/productos/detalle/:id",
-    component: (
-      <RequireAuth>
-        <ProductDetail />
-      </RequireAuth>
-    ),
+    component: <ProductDetail />,
   },
 
   {
     route: "/productos/categoria/nueva",
-    component: (
-      <RequireAuth>
-        <NewCategory />
-      </RequireAuth>
-    ),
+    component: <NewCategory />,
   },
   {
     route: "/productos/categoria/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditCategory />
-      </RequireAuth>
-    ),
-  },
-
-  /* Ofertas */
-
-  {
-    route: "/productos/ofertas/nueva",
-    component: (
-      <RequireAuth>
-        <CreateOfert />
-      </RequireAuth>
-    ),
-  },
-  {
-    route: "/productos/ofertas/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditOfert />
-      </RequireAuth>
-    ),
+    component: <EditCategory />,
   },
 
   /* Proveedores */
 
   {
     route: "/productos/proveedores/lista",
-    component: (
-      <RequireAuth>
-        <ListSuppliers />
-      </RequireAuth>
-    ),
+    component: <ListSuppliers />,
   },
   {
     route: "/productos/proveedores/nuevo",
-    component: (
-      <RequireAuth>
-        <CreateNewSupplier />
-      </RequireAuth>
-    ),
+    component: <CreateNewSupplier />,
   },
   {
     route: "/productos/proveedores/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditSupplier />
-      </RequireAuth>
-    ),
+    component: <EditSupplier />,
   },
 
   /* Stock */
 
   {
     route: "/productos/stock/lista",
-    component: (
-      <RequireAuth>
-        <StockMain />
-      </RequireAuth>
-    ),
+    component: <StockMain />,
   },
   {
     route: "/productos/stock/nuevo",
-    component: (
-      <RequireAuth>
-        <CreateProductsLots />
-      </RequireAuth>
-    ),
+    component: <CreateProductsLots />,
   },
   {
     route: "/productos/stock/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditProductsLots />
-      </RequireAuth>
-    ),
+    component: <EditProductsLots />,
   },
 
   /* Clientes */
 
   {
     route: "/clientes/lista",
-    component: (
-      <RequireAuth>
-        <ListClients />
-      </RequireAuth>
-    ),
+    component: <ListClients />,
   },
   {
     route: "/clientes/nuevo",
-    component: (
-      <RequireAuth>
-        <CreateSimpleClient />
-      </RequireAuth>
-    ),
+    component: <CreateSimpleClient />,
   },
 
   {
     route: "/clientes/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditClient />
-      </RequireAuth>
-    ),
+    component: <EditClient />,
   },
   {
     route: "/clientes/detalle/:id",
-    component: (
-      <RequireAuth>
-        <DetailsClients />
-      </RequireAuth>
-    ),
+    component: <DetailsClients />,
   },
   {
     route: "/clientes/detalle/producto/:id",
-    component: (
-      <RequireAuth>
-        <DetailClientProduct />
-      </RequireAuth>
-    ),
+    component: <DetailClientProduct />,
   },
   /* Direcciones clientes */
   {
     route: "/clientes/direcciones/lista",
-    component: (
-      <RequireAuth>
-        <ListClientAddress />
-      </RequireAuth>
-    ),
+    component: <ListClientAddress />,
   },
   {
     route: "/clientes/direcciones/nuevo",
-    component: (
-      <RequireAuth>
-        <CreateNewClientAddress />
-      </RequireAuth>
-    ),
+    component: <CreateNewClientAddress />,
   },
   {
     route: "/clientes/direcciones/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditClientAddress />
-      </RequireAuth>
-    ),
+    component: <EditClientAddress />,
   },
 
   /* Ordenes */
   {
     route: "/ordenes/lista",
-    component: (
-      <RequireAuth>
-        <ListOrders />
-      </RequireAuth>
-    ),
+    component: <ListOrders />,
   },
 
   {
     route: "/ordenes/detalle/:id",
-    component: (
-      <RequireAuth>
-        <OrderDetails />
-      </RequireAuth>
-    ),
+    component: <OrderDetails />,
   },
   {
     route: "/ordenes/nueva",
-    component: (
-      <RequireAuth>
-        <OrderCreate />
-      </RequireAuth>
-    ),
+    component: <OrderCreate />,
   },
   {
     route: "/ordenes/nueva-local",
-    component: (
-      <RequireAuth>
-        <OrderLocalCreate />
-      </RequireAuth>
-    ),
+    component: <OrderLocalCreate />,
   },
   {
     route: "/ordenes/editar/:id",
-    component: (
-      <RequireAuth>
-        <OrderEdit />
-      </RequireAuth>
-    ),
+    component: <OrderEdit />,
   },
   /* Distribuidoras */
   {
     route: "/distribucion/distribuidoras/lista",
-    component: (
-      <RequireAuth>
-        <ListDistributors />
-      </RequireAuth>
-    ),
+    component: <ListDistributors />,
   },
   {
     route: "/distribucion/distribuidoras/nueva",
-    component: (
-      <RequireAuth>
-        <CreateNewDistributor />
-      </RequireAuth>
-    ),
+    component: <CreateNewDistributor />,
   },
   {
     route: "/distribucion/distribuidoras/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditDistributor />
-      </RequireAuth>
-    ),
+    component: <EditDistributor />,
   },
   /* Repartidores */
   {
     route: "/distribucion/repartidores/lista",
-    component: (
-      <RequireAuth>
-        <ListDeliveryTruck />
-      </RequireAuth>
-    ),
+    component: <ListDeliveryTruck />,
   },
   {
     route: "/distribucion/repartidores/nuevo",
-    component: (
-      <RequireAuth>
-        <CreateDeliveryTruck />
-      </RequireAuth>
-    ),
+    component: <CreateDeliveryTruck />,
   },
   {
     route: "/distribucion/repartidores/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditDeliveryTruck />
-      </RequireAuth>
-    ),
+    component: <EditDeliveryTruck />,
   },
   {
     route: "/distribucion/repartidores/detalle/:id",
-    component: (
-      <RequireAuth>
-        <DetailsDeliveryTruck />
-      </RequireAuth>
-    ),
+    component: <DetailsDeliveryTruck />,
   },
   /* Zonas reparto */
   {
     route: "/distribucion/zonas/lista",
-    component: (
-      <RequireAuth>
-        <ListDeliveryZone />
-      </RequireAuth>
-    ),
+    component: <ListDeliveryZone />,
   },
   {
     route: "/distribucion/zonas/nueva",
-    component: (
-      <RequireAuth>
-        <CreateNewDeliveryZone />
-      </RequireAuth>
-    ),
+    component: <CreateNewDeliveryZone />,
   },
   {
     route: "/distribucion/zonas/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditDeliveryZone />
-      </RequireAuth>
-    ),
+    component: <EditDeliveryZone />,
   },
   /* Sub Zonas reparto */
   {
     route: "/distribucion/sub-zonas/lista",
-    component: (
-      <RequireAuth>
-        <ListDeliverySubZone />
-      </RequireAuth>
-    ),
+    component: <ListDeliverySubZone />,
   },
   {
     route: "/distribucion/sub-zonas/nueva",
-    component: (
-      <RequireAuth>
-        <CreateNewSubDeliveryZone />
-      </RequireAuth>
-    ),
+    component: <CreateNewSubDeliveryZone />,
   },
   {
     route: "/distribucion/sub-zonas/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditDeliverySubZone />
-      </RequireAuth>
-    ),
+    component: <EditDeliverySubZone />,
   },
   /* Reportes */
   /* {
     route: "/reportes/productos-vendidos-por-dia",
     component: (
-      <RequireAuth>
+     
         <ProductsSellByDay />
-      </RequireAuth>
+     
     ),
   }, */
   {
     route: "/reportes/productos-vendidos-por-rango",
-    component: (
-      <RequireAuth>
-        <ProductsSellByRange />
-      </RequireAuth>
-    ),
+    component: <ProductsSellByRange />,
   },
   // Expenses
   {
     route: "/gastos/nuevo",
-    component: (
-      <RequireAuth>
-        <CreateNewExpenses />
-      </RequireAuth>
-    ),
+    component: <CreateNewExpenses />,
   },
   {
     route: "/gastos/lista",
-    component: (
-      <RequireAuth>
-        <ListExpenses />
-      </RequireAuth>
-    ),
+    component: <ListExpenses />,
   },
   {
     route: "/gastos/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditExpenses />
-      </RequireAuth>
-    ),
+    component: <EditExpenses />,
   },
 
   //sales
 
   {
     route: "/ventas",
-    component: (
-      <RequireAuth>
-        <Sales />
-      </RequireAuth>
-    ),
+    component: <Sales />,
   },
   {
     route: "/ventas/:id",
-    component: (
-      <RequireAuth>
-        <SalesDetail />
-      </RequireAuth>
-    ),
-  },
-
-  //buys
-  {
-    route: "/compras/lista",
-    component: (
-      <RequireAuth>
-        <ListBuys />
-      </RequireAuth>
-    ),
-  },
-  {
-    route: "/compras/nueva",
-    component: (
-      <RequireAuth>
-        <NewBuy />
-      </RequireAuth>
-    ),
-  },
-  {
-    route: "/compras/detalle/:id",
-    component: (
-      <RequireAuth>
-        <BuyDetails />
-      </RequireAuth>
-    ),
-  },
-  {
-    route: "/compras/editar/:id",
-    component: (
-      <RequireAuth>
-        <BuyEdit />
-      </RequireAuth>
-    ),
+    component: <SalesDetail />,
   },
 
   /* negocios */
 
   {
     route: "/negocios/lista",
-    component: (
-      <RequireAuth>
-        <ListaNegocios />
-      </RequireAuth>
-    ),
+    component: <ListaNegocios />,
   },
   {
     route: "/negocios/nuevo",
-    component: (
-      <RequireAuth>
-        <CrearNuevoNegocio />
-      </RequireAuth>
-    ),
+    component: <CrearNuevoNegocio />,
   },
 
   {
     route: "/negocios/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditarNegocioPage />
-      </RequireAuth>
-    ),
+    component: <EditarNegocioPage />,
   },
   {
     route: "/negocios/detalle/:id",
-    component: (
-      <RequireAuth>
-        <DetailsClients />
-      </RequireAuth>
-    ),
+    component: <DetailsClients />,
+  },
+
+  //Operaciones
+  {
+    route: "/compras",
+    component: <BuyPage />,
+  },
+  {
+    route: "/compras/ordenes/nueva",
+    component: <NewOrder />,
+  },
+  {
+    route: "/compras/directa/nueva",
+    component: <NewPurchase />,
+  },
+  {
+    route: "/compras/pagos/nuevo",
+    component: <NewPayment />,
+  },
+  {
+    route: "/compras/detalle1/:id",
+    component: <PurchaseDetails />,
+  },
+  {
+    route: "/compras/pagos/:id",
+    component: <PaymentDetails />,
+  },
+  {
+    route: "/compras/pagos/registrar-pago/:id",
+    component: <PaymentByBuyId />,
+  },
+  {
+    route: "/compras/ordenes/:id",
+    component: <OrderBuyDetails />,
   },
 ];
 export const routes_full = [
   //dashboard
   {
     route: "/dashboard/totales",
-    component: (
-      <RequireAuth>
-        <Dashboard1 />
-      </RequireAuth>
-    ),
+    component: <Dashboard1 />,
   },
   {
     route: "/dashboard/reparto",
-    component: (
-      <RequireAuth>
-        <Dashboard2 />
-      </RequireAuth>
-    ),
+    component: <Dashboard2 />,
   },
   {
     route: "/dashboard/cajones_de_pollo",
-    component: (
-      <RequireAuth>
-        <Dashboard3 />
-      </RequireAuth>
-    ),
+    component: <Dashboard3 />,
   },
   /* usuario  */
   {
     route: "/usuarios/lista",
-    component: (
-      <RequireAuth>
-        <ListUsers />
-      </RequireAuth>
-    ),
+    component: <ListUsers />,
   },
   {
     route: "/usuarios/nuevo",
-    component: (
-      <RequireAuth>
-        <CreateNewUser />
-      </RequireAuth>
-    ),
+    component: <CreateNewUser />,
   },
   {
     route: "/usuarios/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditUser />
-      </RequireAuth>
-    ),
+    component: <EditUser />,
   },
   {
     route: "/usuarios/editar/password/:id",
-    component: (
-      <RequireAuth>
-        <EditPasswordUser />
-      </RequireAuth>
-    ),
+    component: <EditPasswordUser />,
   },
 
   /* Productos */
 
   {
     route: "/productos",
-    component: (
-      <RequireAuth>
-        <Products />
-      </RequireAuth>
-    ),
+    component: <Products />,
   },
   {
     route: "/productos/nuevo",
-    component: (
-      <RequireAuth>
-        <CreateProduct />
-      </RequireAuth>
-    ),
+    component: <CreateProduct />,
   },
   {
     // este edita producto, oferta y stock
     route: "/productos/detalle/:id",
-    component: (
-      <RequireAuth>
-        <ProductDetail />
-      </RequireAuth>
-    ),
+    component: <ProductDetail />,
   },
 
   {
     route: "/productos/categoria/nueva",
-    component: (
-      <RequireAuth>
-        <NewCategory />
-      </RequireAuth>
-    ),
+    component: <NewCategory />,
   },
   {
     route: "/productos/categoria/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditCategory />
-      </RequireAuth>
-    ),
-  },
-
-  /* Ofertas */
-
-  {
-    route: "/productos/ofertas/nueva",
-    component: (
-      <RequireAuth>
-        <CreateOfert />
-      </RequireAuth>
-    ),
-  },
-  {
-    route: "/productos/ofertas/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditOfert />
-      </RequireAuth>
-    ),
+    component: <EditCategory />,
   },
 
   /* Proveedores */
 
   {
     route: "/productos/proveedores/lista",
-    component: (
-      <RequireAuth>
-        <ListSuppliers />
-      </RequireAuth>
-    ),
+    component: <ListSuppliers />,
   },
   {
     route: "/productos/proveedores/nuevo",
-    component: (
-      <RequireAuth>
-        <CreateNewSupplier />
-      </RequireAuth>
-    ),
+    component: <CreateNewSupplier />,
   },
   {
     route: "/productos/proveedores/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditSupplier />
-      </RequireAuth>
-    ),
+    component: <EditSupplier />,
   },
 
   /* Stock */
 
   {
     route: "/productos/stock/lista",
-    component: (
-      <RequireAuth>
-        <StockMain />
-      </RequireAuth>
-    ),
+    component: <StockMain />,
   },
   {
     route: "/productos/stock/nuevo",
-    component: (
-      <RequireAuth>
-        <CreateProductsLots />
-      </RequireAuth>
-    ),
+    component: <CreateProductsLots />,
   },
   {
     route: "/productos/stock/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditProductsLots />
-      </RequireAuth>
-    ),
+    component: <EditProductsLots />,
   },
 
   /* Clientes */
 
   {
     route: "/clientes/lista",
-    component: (
-      <RequireAuth>
-        <ListClients />
-      </RequireAuth>
-    ),
+    component: <ListClients />,
   },
   {
     route: "/clientes/nuevo",
-    component: (
-      <RequireAuth>
-        <CreateSimpleClient />
-      </RequireAuth>
-    ),
+    component: <CreateSimpleClient />,
   },
 
   {
     route: "/clientes/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditClient />
-      </RequireAuth>
-    ),
+    component: <EditClient />,
   },
   {
     route: "/clientes/detalle/:id",
-    component: (
-      <RequireAuth>
-        <DetailsClients />
-      </RequireAuth>
-    ),
+    component: <DetailsClients />,
   },
   {
     route: "/clientes/detalle/producto/:id",
-    component: (
-      <RequireAuth>
-        <DetailClientProduct />
-      </RequireAuth>
-    ),
+    component: <DetailClientProduct />,
   },
   /* Direcciones clientes */
   {
     route: "/clientes/direcciones/lista",
-    component: (
-      <RequireAuth>
-        <ListClientAddress />
-      </RequireAuth>
-    ),
+    component: <ListClientAddress />,
   },
   {
     route: "/clientes/direcciones/nuevo",
-    component: (
-      <RequireAuth>
-        <CreateNewClientAddress />
-      </RequireAuth>
-    ),
+    component: <CreateNewClientAddress />,
   },
   {
     route: "/clientes/direcciones/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditClientAddress />
-      </RequireAuth>
-    ),
+    component: <EditClientAddress />,
   },
 
   /* Ordenes */
   {
     route: "/ordenes/lista",
-    component: (
-      <RequireAuth>
-        <ListOrders />
-      </RequireAuth>
-    ),
+    component: <ListOrders />,
   },
 
   {
     route: "/ordenes/detalle/:id",
-    component: (
-      <RequireAuth>
-        <OrderDetails />
-      </RequireAuth>
-    ),
+    component: <OrderDetails />,
   },
   {
     route: "/ordenes/nueva",
-    component: (
-      <RequireAuth>
-        <OrderCreate />
-      </RequireAuth>
-    ),
+    component: <OrderCreate />,
   },
   {
     route: "/ordenes/nueva-local",
-    component: (
-      <RequireAuth>
-        <OrderLocalCreate />
-      </RequireAuth>
-    ),
+    component: <OrderLocalCreate />,
   },
   {
     route: "/ordenes/editar/:id",
-    component: (
-      <RequireAuth>
-        <OrderEdit />
-      </RequireAuth>
-    ),
+    component: <OrderEdit />,
   },
   /* Distribuidoras */
   {
     route: "/distribucion/distribuidoras/lista",
-    component: (
-      <RequireAuth>
-        <ListDistributors />
-      </RequireAuth>
-    ),
+    component: <ListDistributors />,
   },
   {
     route: "/distribucion/distribuidoras/nueva",
-    component: (
-      <RequireAuth>
-        <CreateNewDistributor />
-      </RequireAuth>
-    ),
+    component: <CreateNewDistributor />,
   },
   {
     route: "/distribucion/distribuidoras/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditDistributor />
-      </RequireAuth>
-    ),
+    component: <EditDistributor />,
   },
   /* Repartidores */
   {
     route: "/distribucion/repartidores/lista",
-    component: (
-      <RequireAuth>
-        <ListDeliveryTruck />
-      </RequireAuth>
-    ),
+    component: <ListDeliveryTruck />,
   },
   {
     route: "/distribucion/repartidores/nuevo",
-    component: (
-      <RequireAuth>
-        <CreateDeliveryTruck />
-      </RequireAuth>
-    ),
+    component: <CreateDeliveryTruck />,
   },
   {
     route: "/distribucion/repartidores/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditDeliveryTruck />
-      </RequireAuth>
-    ),
+    component: <EditDeliveryTruck />,
   },
   {
     route: "/distribucion/repartidores/detalle/:id",
-    component: (
-      <RequireAuth>
-        <DetailsDeliveryTruck />
-      </RequireAuth>
-    ),
+    component: <DetailsDeliveryTruck />,
   },
   /* Zonas reparto */
   {
     route: "/distribucion/zonas/lista",
-    component: (
-      <RequireAuth>
-        <ListDeliveryZone />
-      </RequireAuth>
-    ),
+    component: <ListDeliveryZone />,
   },
   {
     route: "/distribucion/zonas/nueva",
-    component: (
-      <RequireAuth>
-        <CreateNewDeliveryZone />
-      </RequireAuth>
-    ),
+    component: <CreateNewDeliveryZone />,
   },
   {
     route: "/distribucion/zonas/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditDeliveryZone />
-      </RequireAuth>
-    ),
+    component: <EditDeliveryZone />,
   },
   /* Sub Zonas reparto */
   {
     route: "/distribucion/sub-zonas/lista",
-    component: (
-      <RequireAuth>
-        <ListDeliverySubZone />
-      </RequireAuth>
-    ),
+    component: <ListDeliverySubZone />,
   },
   {
     route: "/distribucion/sub-zonas/nueva",
-    component: (
-      <RequireAuth>
-        <CreateNewSubDeliveryZone />
-      </RequireAuth>
-    ),
+    component: <CreateNewSubDeliveryZone />,
   },
   {
     route: "/distribucion/sub-zonas/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditDeliverySubZone />
-      </RequireAuth>
-    ),
+    component: <EditDeliverySubZone />,
   },
   /* Reportes */
   /* {
     route: "/reportes/productos-vendidos-por-dia",
     component: (
-      <RequireAuth>
+     
         <ProductsSellByDay />
-      </RequireAuth>
+     
     ),
   }, */
   {
     route: "/reportes/productos-vendidos-por-rango",
-    component: (
-      <RequireAuth>
-        <ProductsSellByRange />
-      </RequireAuth>
-    ),
+    component: <ProductsSellByRange />,
   },
   // Expenses
   {
     route: "/gastos/nuevo",
-    component: (
-      <RequireAuth>
-        <CreateNewExpenses />
-      </RequireAuth>
-    ),
+    component: <CreateNewExpenses />,
   },
   {
     route: "/gastos/lista",
-    component: (
-      <RequireAuth>
-        <ListExpenses />
-      </RequireAuth>
-    ),
+    component: <ListExpenses />,
   },
   {
     route: "/gastos/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditExpenses />
-      </RequireAuth>
-    ),
+    component: <EditExpenses />,
   },
 
   //sales
 
   {
     route: "/ventas",
-    component: (
-      <RequireAuth>
-        <Sales />
-      </RequireAuth>
-    ),
+    component: <Sales />,
   },
   {
     route: "/ventas/:id",
-    component: (
-      <RequireAuth>
-        <SalesDetail />
-      </RequireAuth>
-    ),
-  },
-
-  //buys
-  {
-    route: "/compras/lista",
-    component: (
-      <RequireAuth>
-        <ListBuys />
-      </RequireAuth>
-    ),
-  },
-  {
-    route: "/compras/nueva",
-    component: (
-      <RequireAuth>
-        <NewBuy />
-      </RequireAuth>
-    ),
-  },
-  {
-    route: "/compras/detalle/:id",
-    component: (
-      <RequireAuth>
-        <BuyDetails />
-      </RequireAuth>
-    ),
-  },
-  {
-    route: "/compras/editar/:id",
-    component: (
-      <RequireAuth>
-        <BuyEdit />
-      </RequireAuth>
-    ),
+    component: <SalesDetail />,
   },
 ];
 export const routes_lite = [
   //dashboard
   {
     route: "/dashboard/totales",
-    component: (
-      <RequireAuth>
-        <Dashboard1 />
-      </RequireAuth>
-    ),
+    component: <Dashboard1 />,
   },
 
   /* usuario  */
   {
     route: "/usuarios/lista",
-    component: (
-      <RequireAuth>
-        <ListUsers />
-      </RequireAuth>
-    ),
+    component: <ListUsers />,
   },
   {
     route: "/usuarios/nuevo",
-    component: (
-      <RequireAuth>
-        <CreateNewUser />
-      </RequireAuth>
-    ),
+    component: <CreateNewUser />,
   },
   {
     route: "/usuarios/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditUser />
-      </RequireAuth>
-    ),
+    component: <EditUser />,
   },
   {
     route: "/usuarios/editar/password/:id",
-    component: (
-      <RequireAuth>
-        <EditPasswordUser />
-      </RequireAuth>
-    ),
+    component: <EditPasswordUser />,
   },
 
   /* Productos */
 
   {
     route: "/productos",
-    component: (
-      <RequireAuth>
-        <Products />
-      </RequireAuth>
-    ),
+    component: <Products />,
   },
   {
     route: "/productos/nuevo",
-    component: (
-      <RequireAuth>
-        <CreateProduct />
-      </RequireAuth>
-    ),
+    component: <CreateProduct />,
   },
   {
     // este edita producto, oferta y stock
     route: "/productos/detalle/:id",
-    component: (
-      <RequireAuth>
-        <ProductDetail />
-      </RequireAuth>
-    ),
+    component: <ProductDetail />,
   },
 
   {
     route: "/productos/categoria/nueva",
-    component: (
-      <RequireAuth>
-        <NewCategory />
-      </RequireAuth>
-    ),
+    component: <NewCategory />,
   },
   {
     route: "/productos/categoria/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditCategory />
-      </RequireAuth>
-    ),
-  },
-
-  /* Ofertas */
-
-  {
-    route: "/productos/ofertas/nueva",
-    component: (
-      <RequireAuth>
-        <CreateOfert />
-      </RequireAuth>
-    ),
-  },
-  {
-    route: "/productos/ofertas/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditOfert />
-      </RequireAuth>
-    ),
+    component: <EditCategory />,
   },
 
   /* Proveedores */
 
   {
     route: "/productos/proveedores/lista",
-    component: (
-      <RequireAuth>
-        <ListSuppliers />
-      </RequireAuth>
-    ),
+    component: <ListSuppliers />,
   },
   {
     route: "/productos/proveedores/nuevo",
-    component: (
-      <RequireAuth>
-        <CreateNewSupplier />
-      </RequireAuth>
-    ),
+    component: <CreateNewSupplier />,
   },
   {
     route: "/productos/proveedores/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditSupplier />
-      </RequireAuth>
-    ),
+    component: <EditSupplier />,
   },
 
   /* Stock */
 
   {
     route: "/productos/stock/lista",
-    component: (
-      <RequireAuth>
-        <StockMain />
-      </RequireAuth>
-    ),
+    component: <StockMain />,
   },
   {
     route: "/productos/stock/nuevo",
-    component: (
-      <RequireAuth>
-        <CreateProductsLots />
-      </RequireAuth>
-    ),
+    component: <CreateProductsLots />,
   },
   {
     route: "/productos/stock/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditProductsLots />
-      </RequireAuth>
-    ),
+    component: <EditProductsLots />,
   },
 
   /* Clientes */
 
   {
     route: "/clientes/lista",
-    component: (
-      <RequireAuth>
-        <ListClients />
-      </RequireAuth>
-    ),
+    component: <ListClients />,
   },
   {
     route: "/clientes/nuevo",
-    component: (
-      <RequireAuth>
-        <CreateSimpleClient />
-      </RequireAuth>
-    ),
+    component: <CreateSimpleClient />,
   },
 
   {
     route: "/clientes/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditClient />
-      </RequireAuth>
-    ),
+    component: <EditClient />,
   },
   {
     route: "/clientes/detalle/:id",
-    component: (
-      <RequireAuth>
-        <DetailsClients />
-      </RequireAuth>
-    ),
+    component: <DetailsClients />,
   },
   {
     route: "/clientes/detalle/producto/:id",
-    component: (
-      <RequireAuth>
-        <DetailClientProduct />
-      </RequireAuth>
-    ),
+    component: <DetailClientProduct />,
   },
   /* Direcciones clientes */
   {
     route: "/clientes/direcciones/lista",
-    component: (
-      <RequireAuth>
-        <ListClientAddress />
-      </RequireAuth>
-    ),
+    component: <ListClientAddress />,
   },
   {
     route: "/clientes/direcciones/nuevo",
-    component: (
-      <RequireAuth>
-        <CreateNewClientAddress />
-      </RequireAuth>
-    ),
+    component: <CreateNewClientAddress />,
   },
   {
     route: "/clientes/direcciones/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditClientAddress />
-      </RequireAuth>
-    ),
+    component: <EditClientAddress />,
   },
 
   {
     route: "/distribucion/zonas/nueva",
-    component: (
-      <RequireAuth>
-        <CreateNewDeliveryZone />
-      </RequireAuth>
-    ),
+    component: <CreateNewDeliveryZone />,
   },
   {
     route: "/distribucion/zonas/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditDeliveryZone />
-      </RequireAuth>
-    ),
+    component: <EditDeliveryZone />,
   },
 
   /* Ordenes */
   {
     route: "/ordenes/lista",
-    component: (
-      <RequireAuth>
-        <ListOrders />
-      </RequireAuth>
-    ),
+    component: <ListOrders />,
   },
 
   {
     route: "/ordenes/detalle/:id",
-    component: (
-      <RequireAuth>
-        <OrderDetails />
-      </RequireAuth>
-    ),
+    component: <OrderDetails />,
   },
   {
     route: "/ordenes/nueva",
-    component: (
-      <RequireAuth>
-        <OrderCreate />
-      </RequireAuth>
-    ),
+    component: <OrderCreate />,
   },
   {
     route: "/ordenes/nueva-local",
-    component: (
-      <RequireAuth>
-        <OrderLocalCreate />
-      </RequireAuth>
-    ),
+    component: <OrderLocalCreate />,
   },
   {
     route: "/ordenes/editar/:id",
-    component: (
-      <RequireAuth>
-        <OrderEdit />
-      </RequireAuth>
-    ),
+    component: <OrderEdit />,
   },
 
   /* Reportes */
 
   {
     route: "/reportes/productos-vendidos-por-rango",
-    component: (
-      <RequireAuth>
-        <ProductsSellByRange />
-      </RequireAuth>
-    ),
+    component: <ProductsSellByRange />,
   },
   // Expenses
   {
     route: "/gastos/nuevo",
-    component: (
-      <RequireAuth>
-        <CreateNewExpenses />
-      </RequireAuth>
-    ),
+    component: <CreateNewExpenses />,
   },
   {
     route: "/gastos/lista",
-    component: (
-      <RequireAuth>
-        <ListExpenses />
-      </RequireAuth>
-    ),
+    component: <ListExpenses />,
   },
   {
     route: "/gastos/editar/:id",
-    component: (
-      <RequireAuth>
-        <EditExpenses />
-      </RequireAuth>
-    ),
-  },
-  //buys
-  {
-    route: "/compras/lista",
-    component: (
-      <RequireAuth>
-        <ListBuys />
-      </RequireAuth>
-    ),
-  },
-  {
-    route: "/compras/nueva",
-    component: (
-      <RequireAuth>
-        <NewBuy />
-      </RequireAuth>
-    ),
-  },
-  {
-    route: "/compras/detalle/:id",
-    component: (
-      <RequireAuth>
-        <BuyDetails />
-      </RequireAuth>
-    ),
-  },
-  {
-    route: "/compras/editar/:id",
-    component: (
-      <RequireAuth>
-        <BuyEdit />
-      </RequireAuth>
-    ),
+    component: <EditExpenses />,
   },
 ];

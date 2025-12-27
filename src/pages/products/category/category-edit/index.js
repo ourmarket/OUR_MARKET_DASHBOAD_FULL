@@ -30,9 +30,24 @@ function EditCategory() {
                 borderRadius="lg"
                 coloredShadow="info"
               >
-                <MDTypography variant="h6" color="white">
-                  Editar categoria
-                </MDTypography>
+                <MDBox>
+                  <MDTypography
+                    variant="h6"
+                    color="white"
+                    textTransform="uppercase"
+                  >
+                    Editar categoria
+                  </MDTypography>
+                  <MDTypography
+                    variant="button"
+                    color="white"
+                    fontWeight="regular"
+                    opacity={0.8}
+                  >
+                    Define el nombre y la imagen de presentación para el
+                    catálogo
+                  </MDTypography>
+                </MDBox>
               </MDBox>
               <MDBox>
                 {isLoading && <Loading />}

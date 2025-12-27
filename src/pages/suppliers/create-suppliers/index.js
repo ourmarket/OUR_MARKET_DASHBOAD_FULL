@@ -24,9 +24,23 @@ function CreateNewSupplier() {
                 borderRadius="lg"
                 coloredShadow="info"
               >
-                <MDTypography variant="h6" color="white">
-                  Crear nuevo proveedor
-                </MDTypography>
+                <MDBox>
+                  <MDTypography
+                    variant="h6"
+                    color="white"
+                    textTransform="uppercase"
+                  >
+                    Gestión de Proveedores
+                  </MDTypography>
+                  <MDTypography
+                    variant="button"
+                    color="white"
+                    fontWeight="regular"
+                    opacity={0.8}
+                  >
+                    Crear Proveedor
+                  </MDTypography>
+                </MDBox>
               </MDBox>
               <MDBox>
                 <SupplierCreate />
