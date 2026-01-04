@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Swal from "sweetalert2";
 
 // Material Dashboard 2 React components
@@ -35,6 +35,7 @@ import {
 import Loading from "components/DRLoading";
 import { useGetSuppliersQuery } from "api/supplierApi";
 import { useGetProductsQuery } from "api/productApi";
+import { useGetPurchaseOrderByIdQuery } from "api/purchaseOrderApi";
 import { Autocomplete } from "@mui/material";
 
 // Helpers
@@ -42,10 +43,28 @@ import { formatPrice } from "utils/formaPrice";
 
 const NewPurchase = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const fromOrderId = searchParams.get("fromOrder");
 
   // Mutations
   const [createBuy, { isLoading: isCreating }] = useCreateBuyMutation();
   const [registerBuyPayment] = useRegisterBuyPaymentMutation();
+
+  // Queries
+  const {
+    data: suppliersData,
+    isLoading: l1,
+    error: e1,
+  } = useGetSuppliersQuery();
+  const {
+    data: productsData,
+    isLoading: l2,
+    error: e2,
+  } = useGetProductsQuery();
+  const { data: orderData, isLoading: l3 } = useGetPurchaseOrderByIdQuery(
+    fromOrderId,
+    { skip: !fromOrderId }
+  );
 
   const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [purchaseDate, setPurchaseDate] = useState(
@@ -58,6 +77,34 @@ const NewPurchase = () => {
   const [payments, setPayments] = useState([
     { id: Date.now().toString(), method: "", amount: 0, reference: "" },
   ]);
+
+  // Prepopulate from Order
+  useEffect(() => {
+    if (fromOrderId && orderData?.data && productsData?.products) {
+      const order = orderData.data;
+      const products = productsData.products;
+
+      // 1. Set Supplier
+      setSelectedSupplier(order.supplier);
+
+      // 2. Map Items
+      const prepopulatedItems = order.items.map((orderItem) => {
+        // Find matching product in our products list to ensure Autocomplete works
+        const matchedProduct = products.find(
+          (p) => p._id === (orderItem.product?._id || orderItem.product)
+        );
+
+        return {
+          id: Math.random().toString(36).substr(2, 9),
+          product: matchedProduct || orderItem.product,
+          quantity: orderItem.quantityOrdered,
+          unitCost: orderItem.estimatedUnitCost,
+        };
+      });
+
+      setItems(prepopulatedItems);
+    }
+  }, [fromOrderId, orderData, productsData]);
 
   const addPayment = () => {
     setPayments([
@@ -135,6 +182,7 @@ const NewPurchase = () => {
     try {
       // 1. Crear la Compra (Ajustado al Controlador)
       const buyData = {
+        purchaseOrder: fromOrderId || null,
         supplier: selectedSupplier._id, // Enviar el ID del objeto seleccionado
         date: purchaseDate,
         amount: total,
@@ -148,7 +196,6 @@ const NewPurchase = () => {
           })),
       };
 
-      console.log(buyData);
       const result = await createBuy(buyData).unwrap();
 
       // 2. Si se marcó pago, registrarlo inmediatamente usando el ID de la compra creada
@@ -182,36 +229,45 @@ const NewPurchase = () => {
     }
   };
 
-  const {
-    data: suppliersData,
-    isLoading: l1,
-    error: e1,
-  } = useGetSuppliersQuery();
-  const {
-    data: productsData,
-    isLoading: l2,
-    error: e2,
-  } = useGetProductsQuery();
-
-  const loading = l1 || l2;
+  const loading = l1 || l2 || l3;
   const isError = e1 || e2;
 
   if (loading)
     return (
-      <MDBox>
-        <Loading />
-      </MDBox>
+      <DashboardLayout>
+        <DashboardNavbar />
+        <MDBox
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          height="50vh"
+        >
+          <Loading />
+        </MDBox>
+      </DashboardLayout>
     );
+
   if (isError)
     return (
-      <MDBox>
-        <MDTypography variant="h4">Error</MDTypography>
-      </MDBox>
+      <DashboardLayout>
+        <DashboardNavbar />
+        <MDBox
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+          height="50vh"
+        >
+          <MDTypography variant="h4">Error</MDTypography>
+          <MDTypography variant="body2" color="text">
+            Hubo un error al cargar los datos necesarios.
+          </MDTypography>
+        </MDBox>
+      </DashboardLayout>
     );
 
   const suppliers = suppliersData?.data.suppliers || [];
   const products = productsData?.products || [];
-  console.log(productsData);
 
   return (
     <DashboardLayout>
@@ -225,7 +281,7 @@ const NewPurchase = () => {
         >
           <MDBox>
             <MDTypography variant="h4" fontWeight="medium">
-              Registrar Compra
+              Registrar Compra {fromOrderId ? `desde Orden` : ""}
             </MDTypography>
             <MDBox display="flex" alignItems="center">
               <MDButton
@@ -238,7 +294,10 @@ const NewPurchase = () => {
                 <Icon>arrow_back</Icon>&nbsp;Volver
               </MDButton>
               <MDTypography variant="button" color="text" ml={1}>
-                / Ingreso directo de una compra realizada
+                /{" "}
+                {fromOrderId
+                  ? `Convirtiendo orden ${orderData?.data?.code}`
+                  : "Ingreso directo de una compra realizada"}
               </MDTypography>
             </MDBox>
           </MDBox>
@@ -258,13 +317,14 @@ const NewPurchase = () => {
                   <Grid container spacing={3}>
                     <Grid item xs={12} sm={6}>
                       <Autocomplete
+                        disabled={!!fromOrderId}
                         options={suppliers}
                         value={selectedSupplier}
                         onChange={(_, newValue) =>
                           setSelectedSupplier(newValue)
                         }
                         getOptionLabel={(option) =>
-                          option ? option.businessName : ""
+                          option ? option.businessName || option.name : ""
                         }
                         isOptionEqualToValue={(option, value) =>
                           option._id === value?._id
@@ -281,6 +341,7 @@ const NewPurchase = () => {
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <TextField
+                        disabled={!!fromOrderId}
                         type="date"
                         label="Fecha de Compra"
                         fullWidth
@@ -310,6 +371,7 @@ const NewPurchase = () => {
                     color="info"
                     size="small"
                     onClick={addItem}
+                    disabled={!!fromOrderId}
                   >
                     <Icon>add</Icon>&nbsp;Agregar Ítem
                   </MDButton>
@@ -332,6 +394,7 @@ const NewPurchase = () => {
                         <TableRow key={item.id}>
                           <TableCell>
                             <Autocomplete
+                              disabled={!!fromOrderId}
                               options={products}
                               value={item.product}
                               onChange={(_, newValue) =>
@@ -355,6 +418,7 @@ const NewPurchase = () => {
                           </TableCell>
                           <TableCell>
                             <TextField
+                              disabled={!!fromOrderId}
                               type="number"
                               fullWidth
                               value={item.quantity}
@@ -374,6 +438,7 @@ const NewPurchase = () => {
                           </TableCell>
                           <TableCell>
                             <TextField
+                              disabled={!!fromOrderId}
                               type="number"
                               fullWidth
                               value={item.unitCost}
@@ -402,7 +467,7 @@ const NewPurchase = () => {
                               color="error"
                               iconOnly
                               onClick={() => removeItem(item.id)}
-                              disabled={items.length === 1}
+                              disabled={items.length === 1 || !!fromOrderId}
                             >
                               <Icon>delete</Icon>
                             </MDButton>
@@ -591,7 +656,9 @@ const NewPurchase = () => {
                       Proveedor
                     </MDTypography>
                     <MDTypography variant="body2" fontWeight="medium">
-                      {selectedSupplier ? selectedSupplier.businessName : "-"}
+                      {selectedSupplier?.businessName ||
+                        selectedSupplier?.name ||
+                        "-"}
                     </MDTypography>
                   </MDBox>
                   <MDBox display="flex" justifyContent="space-between" mb={1}>

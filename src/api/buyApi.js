@@ -13,6 +13,10 @@ export const buyApi = apiSlice.injectEndpoints({
       query: () => "/buy/pending",
       providesTags: ["Buy"],
     }),
+    getBuysSummary: builder.query({
+      query: () => "/buy/summary",
+      providesTags: ["Buy"],
+    }),
 
     // DETAIL
     getBuyById: builder.query({
@@ -59,4 +63,5 @@ export const {
   useGetBuyPaymentsQuery,
   useGetBuyPaymentByIdQuery,
   useGetBuysPendingQuery,
+  useGetBuysSummaryQuery,
 } = buyApi;

@@ -21,21 +21,34 @@ import AppBar from "@mui/material/AppBar";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 
-import { getStats, formatCurrency } from "./mockData";
 import { OrderBuyTable } from "./orders/OrderBuyTable";
 import { PurchasesTable } from "./buys/PurchasesTable";
 import { PaymentsTable } from "./payments/PaymentsTable";
+import { AdjustmentsTable } from "./adjustments/AdjustmentsTable";
 import { useGetPurchaseOrdersQuery } from "api/purchaseOrderApi";
-import { useGetBuyPaymentsQuery, useGetBuysQuery } from "api/buyApi";
+import {
+  useGetBuyPaymentsQuery,
+  useGetBuysQuery,
+  useGetBuysSummaryQuery,
+} from "api/buyApi";
+import { formatPrice } from "utils/formaPrice";
+import { adjustments as mockAdjustments } from "./mockData";
 
 function BuyPage() {
   const { data: purchaseOrders, isLoading: l1 } = useGetPurchaseOrdersQuery();
   const { data: dataBuys, isLoading: l2 } = useGetBuysQuery();
   const { data: dataBuyPayments, isLoading: l3 } = useGetBuyPaymentsQuery();
 
+  const { data: summaryData } = useGetBuysSummaryQuery();
+
   const [activeTab, setActiveTab] = useState(0);
   const [menu, setMenu] = useState(null);
-  const stats = getStats();
+  const stats = summaryData || {
+    pendingApproval: 0,
+    pendingPayment: 0,
+    currentMonthTotal: 0,
+    percentageVariation: 0,
+  };
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
@@ -75,7 +88,7 @@ function BuyPage() {
       </MenuItem>
       <MenuItem onClick={closeMenu}>
         <Link
-          to="/compras/directa/nueva"
+          to="/compras/nueva"
           style={{
             display: "flex",
             alignItems: "center",
@@ -144,7 +157,7 @@ function BuyPage() {
                 percentage={{
                   color: "secondary",
                   amount: "",
-                  label: "órdenes esperando revisión",
+                  label: "Ordenes esperando revisión",
                 }}
               />
             </MDBox>
@@ -159,7 +172,7 @@ function BuyPage() {
                 percentage={{
                   color: "secondary",
                   amount: "",
-                  label: "compras sin saldar",
+                  label: "Compras sin saldar",
                 }}
               />
             </MDBox>
@@ -170,10 +183,12 @@ function BuyPage() {
                 color="success"
                 icon="trending_up"
                 title="Comprado este Mes"
-                count={formatCurrency(stats.totalPurchasedMonth)}
+                count={formatPrice(stats.currentMonthTotal)}
                 percentage={{
-                  color: "success",
-                  amount: "+12%",
+                  color: stats.percentageVariation >= 0 ? "success" : "error",
+                  amount: `${stats.percentageVariation >= 0 ? "+" : ""}${
+                    stats.percentageVariation
+                  }%`,
                   label: "que el mes pasado",
                 }}
               />
@@ -223,6 +238,16 @@ function BuyPage() {
                         </div>
                       }
                     />
+                    <Tab
+                      label={
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                          <Icon fontSize="small" sx={{ mr: 1 }}>
+                            settings_suggest
+                          </Icon>
+                          Ajustes ({mockAdjustments.length})
+                        </div>
+                      }
+                    />
                   </Tabs>
                 </AppBar>
 
@@ -269,6 +294,20 @@ function BuyPage() {
                           payments={dataBuyPayments}
                           isLoading={l3}
                         />
+                      </MDTypography>
+                    </MDBox>
+                  )}
+                  {activeTab === 3 && (
+                    <MDBox>
+                      <MDTypography
+                        variant="h6"
+                        fontWeight="medium"
+                        gutterBottom
+                      >
+                        ¿Hubo diferencias o devoluciones?
+                      </MDTypography>
+                      <MDTypography variant="body2" color="text">
+                        <AdjustmentsTable />
                       </MDTypography>
                     </MDBox>
                   )}

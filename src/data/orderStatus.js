@@ -29,8 +29,13 @@ export const ORDER_STATUS = {
       approve: false,
       cancel: false,
       convert: true, // → BUY
-      close: true, // opcional
+      close: false, // opcional
     },
+  },
+  EXECUTED: {
+    label: "Ejecutada",
+    color: "info",
+    actions: {},
   },
 
   CANCELLED: {

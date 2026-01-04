@@ -28,6 +28,19 @@ import { useGetBuyByIdQuery } from "api/buyApi";
 import { formatPrice } from "utils/formaPrice";
 import { dateToLocalDate } from "utils/dateFormat";
 
+// Mock Data Helpers (Temporary until API endpoints are available)
+import { adjustments, getReceiptsForPurchase } from "../mockData";
+
+const getAdjustmentsForPurchase = (purchaseId) => {
+  return adjustments.filter((a) => a.purchaseId === purchaseId);
+};
+// Helper to get total adjustment amount for a purchase
+const getTotalAdjustments = (purchaseId) => {
+  return adjustments
+    .filter((a) => a.purchaseId === purchaseId)
+    .reduce((sum, adj) => sum + adj.totalAmount, 0);
+};
+
 const PurchaseDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -128,6 +141,68 @@ const PurchaseDetail = () => {
     }
   };
 
+  const getAdjustmentTypeLabel = (type) => {
+    switch (type) {
+      case "shortage":
+        return "Faltante";
+      case "damage":
+        return "Daño";
+      case "price":
+        return "Dif. Precio";
+      case "bonus":
+        return "Bonificación";
+      default:
+        return type;
+    }
+  };
+
+  const getAdjustmentTypeColor = (type) => {
+    switch (type) {
+      case "shortage":
+        return "error";
+      case "damage":
+        return "warning";
+      case "price":
+        return "info";
+      case "bonus":
+        return "success";
+      default:
+        return "secondary";
+    }
+  };
+
+  const getReceiptStatusLabel = (status) => {
+    switch (status) {
+      case "none":
+        return "No recibida";
+      case "partial":
+        return "Parcial";
+      case "complete":
+        return "Completa";
+      default:
+        return status;
+    }
+  };
+
+  const getReceiptStatusColor = (status) => {
+    switch (status) {
+      case "none":
+        return "secondary";
+      case "partial":
+        return "warning";
+      case "complete":
+        return "success";
+      default:
+        return "secondary";
+    }
+  };
+
+  const receipts = getReceiptsForPurchase(buy?._id || buy?.id || id);
+
+  const adjustmentsList = getAdjustmentsForPurchase(buy?._id || buy?.id || id);
+  const totalAdjustments = getTotalAdjustments(buy?._id || buy?.id || id);
+  const adjustedBalance = balanceDue + totalAdjustments;
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -158,13 +233,22 @@ const PurchaseDetail = () => {
               </MDTypography>
             </MDBox>
           </MDBox>
-          {balanceDue > 0 && (
-            <Link to={`/compras/pagos/registrar-pago/${buy._id}`}>
-              <MDButton variant="gradient" color="success">
-                <Icon>account_balance_wallet</Icon>&nbsp;Registrar Pago
-              </MDButton>
-            </Link>
-          )}
+          <MDBox display="flex" gap={1}>
+            {balanceDue > 0 && (
+              <>
+                <Link to={`/compras/ajustes/nuevo?buy=${buy._id}`}>
+                  <MDButton variant="outlined" color="error">
+                    <Icon>settings_suggest</Icon>&nbsp;Registrar Ajuste
+                  </MDButton>
+                </Link>
+                <Link to={`/compras/pagos/registrar-pago/${buy._id}`}>
+                  <MDButton variant="gradient" color="success">
+                    <Icon>account_balance_wallet</Icon>&nbsp;Registrar Pago
+                  </MDButton>
+                </Link>
+              </>
+            )}
+          </MDBox>
         </MDBox>
 
         {/* Historical Record Notice */}
@@ -347,6 +431,24 @@ const PurchaseDetail = () => {
                           {formatPrice(paidAmount)}
                         </MDTypography>
                       </MDBox>
+                      {totalAdjustments !== 0 && (
+                        <MDBox
+                          display="flex"
+                          justifyContent="space-between"
+                          mb={1}
+                        >
+                          <MDTypography variant="body2" color="text">
+                            Ajustes
+                          </MDTypography>
+                          <MDTypography
+                            variant="body2"
+                            fontWeight="medium"
+                            color="error"
+                          >
+                            {formatPrice(totalAdjustments)}
+                          </MDTypography>
+                        </MDBox>
+                      )}
                       <Divider />
                       <MDBox
                         display="flex"
@@ -354,14 +456,14 @@ const PurchaseDetail = () => {
                         mt={1}
                       >
                         <MDTypography variant="body1" fontWeight="bold">
-                          Saldo
+                          Saldo final
                         </MDTypography>
                         <MDTypography
                           variant="body1"
                           fontWeight="bold"
-                          color={balanceDue > 0 ? "error" : "success"}
+                          color={adjustedBalance > 0 ? "error" : "success"}
                         >
-                          {formatPrice(balanceDue)}
+                          {formatPrice(Math.max(0, adjustedBalance))}
                         </MDTypography>
                       </MDBox>
                     </Grid>
@@ -429,6 +531,223 @@ const PurchaseDetail = () => {
                   </TableContainer>
                 </Card>
               )}
+
+              {/* Adjustments Section */}
+              <Card>
+                <MDBox p={2} display="flex" alignItems="center">
+                  <Icon sx={{ mr: 1 }}>credit_card</Icon>
+                  <MDTypography variant="h6" fontWeight="medium">
+                    Ajustes Aplicados
+                  </MDTypography>
+                </MDBox>
+                <MDBox p={2} pt={0}>
+                  <MDBox
+                    bgColor="info"
+                    variant="gradient"
+                    borderRadius="lg"
+                    p={2}
+                    display="flex"
+                    alignItems="flex-start"
+                    mb={2}
+                  >
+                    <Icon sx={{ color: "#fff", mr: 1, mt: 0.5 }}>info</Icon>
+                    <MDBox>
+                      <MDTypography variant="caption" color="white">
+                        Los ajustes representan créditos otorgados por el
+                        proveedor y reducen el saldo a pagar.
+                      </MDTypography>
+                    </MDBox>
+                  </MDBox>
+
+                  {adjustmentsList.length > 0 ? (
+                    <TableContainer>
+                      <Table>
+                        <TableHead sx={{ display: "table-header-group" }}>
+                          <TableRow>
+                            <TableCell>Nº Ajuste</TableCell>
+                            <TableCell>Tipo</TableCell>
+                            <TableCell>Fecha</TableCell>
+                            <TableCell align="right">Monto</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {adjustmentsList.map((adj) => (
+                            <TableRow
+                              key={adj.id}
+                              sx={{ cursor: "pointer" }}
+                              onClick={() =>
+                                navigate(`/compras/ajustes/${adj.id}`)
+                              }
+                            >
+                              <TableCell>
+                                <MDTypography
+                                  variant="button"
+                                  fontWeight="medium"
+                                >
+                                  {adj.adjustmentNumber}
+                                </MDTypography>
+                              </TableCell>
+                              <TableCell>
+                                <MDBadge
+                                  badgeContent={getAdjustmentTypeLabel(
+                                    adj.type
+                                  )}
+                                  color={getAdjustmentTypeColor(adj.type)}
+                                  variant="gradient"
+                                  size="sm"
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <MDTypography variant="button" color="text">
+                                  {dateToLocalDate(adj.date)}
+                                </MDTypography>
+                              </TableCell>
+                              <TableCell align="right">
+                                <MDTypography
+                                  variant="button"
+                                  fontWeight="bold"
+                                  color="error"
+                                >
+                                  {formatPrice(adj.totalAmount)}
+                                </MDTypography>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  ) : (
+                    <MDBox textAlign="center" py={3}>
+                      <Icon fontSize="large" color="disabled" sx={{ mb: 1 }}>
+                        credit_card
+                      </Icon>
+                      <MDTypography
+                        variant="button"
+                        color="text"
+                        display="block"
+                      >
+                        No hay ajustes registrados
+                      </MDTypography>
+                    </MDBox>
+                  )}
+                </MDBox>
+              </Card>
+
+              {/* Goods Receipt Section */}
+              <Card>
+                <MDBox
+                  p={2}
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <MDBox display="flex" alignItems="center">
+                    <Icon sx={{ mr: 1 }}>inventory_2</Icon>
+                    <MDTypography variant="h6" fontWeight="medium">
+                      Recepción de Mercadería
+                    </MDTypography>
+                  </MDBox>
+                  <MDBadge
+                    badgeContent={getReceiptStatusLabel(buy?.receiptStatus)}
+                    color={getReceiptStatusColor(buy?.receiptStatus)}
+                    variant="gradient"
+                    size="sm"
+                  />
+                </MDBox>
+                <MDBox p={2} pt={0}>
+                  <MDBox
+                    bgColor="grey-100"
+                    borderRadius="lg"
+                    p={2}
+                    display="flex"
+                    alignItems="flex-start"
+                    mb={2}
+                  >
+                    <Icon sx={{ color: "text.secondary", mr: 1, mt: 0.5 }}>
+                      info
+                    </Icon>
+                    <MDBox>
+                      <MDTypography variant="caption" color="text">
+                        La recepción documenta lo recibido físicamente y no
+                        modifica el monto de la compra ni los pagos.
+                      </MDTypography>
+                    </MDBox>
+                  </MDBox>
+
+                  {buy?.receipts.length > 0 ? (
+                    <TableContainer>
+                      <Table>
+                        <TableHead sx={{ display: "table-header-group" }}>
+                          <TableRow>
+                            <TableCell>Nº Recepción</TableCell>
+                            <TableCell>Fecha</TableCell>
+                            <TableCell>Registrado por</TableCell>
+                            <TableCell>Observaciones</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {buy?.receipts.map((receipt) => (
+                            <TableRow key={receipt.id}>
+                              <TableCell>
+                                <MDTypography
+                                  variant="button"
+                                  fontWeight="medium"
+                                >
+                                  {receipt.code}
+                                </MDTypography>
+                              </TableCell>
+                              <TableCell>
+                                <MDTypography variant="button" color="text">
+                                  {dateToLocalDate(receipt.date)}
+                                </MDTypography>
+                              </TableCell>
+                              <TableCell>
+                                <MDTypography variant="button" color="text">
+                                  {receipt.receivedBy.name +
+                                    " " +
+                                    receipt.receivedBy.lastName}
+                                </MDTypography>
+                              </TableCell>
+                              <TableCell>
+                                <MDTypography variant="caption" color="text">
+                                  {receipt.generalObservations || "-"}
+                                </MDTypography>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  ) : (
+                    <MDBox textAlign="center" py={3}>
+                      <Icon fontSize="large" color="disabled" sx={{ mb: 1 }}>
+                        inventory_2
+                      </Icon>
+                      <MDTypography
+                        variant="button"
+                        color="text"
+                        display="block"
+                      >
+                        No hay recepciones registradas
+                      </MDTypography>
+                    </MDBox>
+                  )}
+
+                  {buy?.receiptStatus !== "complete" && (
+                    <MDBox mt={2}>
+                      <Link
+                        to={`/compras/recepciones/nueva/${
+                          buy._id || buy.id || id
+                        }`}
+                      >
+                        <MDButton variant="outlined" color="info" fullWidth>
+                          <Icon>inventory_2</Icon>&nbsp;Registrar Recepción
+                        </MDButton>
+                      </Link>
+                    </MDBox>
+                  )}
+                </MDBox>
+              </Card>
             </MDBox>
           </Grid>
 
@@ -521,7 +840,7 @@ const PurchaseDetail = () => {
                         Orden Origen
                       </MDTypography>
                       <Link
-                        to={`/compras/ordenes/${buy.purchaseOrder}`}
+                        to={`/compras/ordenes/${buy.purchaseOrder._id}`}
                         style={{ textDecoration: "none" }}
                       >
                         <MDTypography

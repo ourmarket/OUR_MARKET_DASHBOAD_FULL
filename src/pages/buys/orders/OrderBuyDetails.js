@@ -32,6 +32,7 @@ import {
   useChangePurchaseOrderStatusMutation,
   useCancelPurchaseOrderMutation,
 } from "api/purchaseOrderApi";
+import Loading from "components/DRLoading";
 
 const OrderBuyDetails = () => {
   const { id } = useParams();
@@ -51,7 +52,7 @@ const OrderBuyDetails = () => {
       <DashboardLayout>
         <DashboardNavbar />
         <MDBox p={3}>
-          <MDTypography>Cargando orden...</MDTypography>
+          <Loading />
         </MDBox>
       </DashboardLayout>
     );
@@ -154,8 +155,21 @@ const OrderBuyDetails = () => {
     }
   };
 
-  const handleConvert = () => {
-    navigate(`/purchases/new?fromOrder=${order._id}`);
+  const handleConvert = async () => {
+    try {
+      await changeStatus({
+        id: order._id,
+        status: "EXECUTED",
+      }).unwrap();
+
+      navigate(`/compras/nueva?fromOrder=${order._id}`);
+    } catch (error) {
+      Swal.fire(
+        "Error",
+        error?.data?.message || "No se pudo convertir la orden",
+        "error"
+      );
+    }
   };
 
   /* ===================== UI ===================== */
@@ -369,7 +383,7 @@ const OrderBuyDetails = () => {
                     display="block"
                     gutterBottom
                   >
-                    {order.supplier.name}
+                    {order.supplier?.businessName || "-"}
                   </MDTypography>
                   <MDBox display="flex" alignItems="center" mb={1}>
                     <Icon
@@ -379,7 +393,7 @@ const OrderBuyDetails = () => {
                       email
                     </Icon>
                     <MDTypography variant="caption" color="text">
-                      {order.supplier.email}
+                      {order.supplier?.email || "-"}
                     </MDTypography>
                   </MDBox>
                   <MDBox display="flex" alignItems="center" mb={1}>
@@ -390,7 +404,7 @@ const OrderBuyDetails = () => {
                       phone
                     </Icon>
                     <MDTypography variant="caption" color="text">
-                      {order.supplier.phone}
+                      {order.supplier?.phone || "-"}
                     </MDTypography>
                   </MDBox>
                   <MDBox display="flex" alignItems="center">
@@ -401,7 +415,7 @@ const OrderBuyDetails = () => {
                       location_on
                     </Icon>
                     <MDTypography variant="caption" color="text">
-                      {order.supplier.address}
+                      {order.supplier?.address || "-"}
                     </MDTypography>
                   </MDBox>
                 </MDBox>

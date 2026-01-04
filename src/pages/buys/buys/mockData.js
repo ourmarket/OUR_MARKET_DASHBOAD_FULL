@@ -317,6 +317,112 @@ export const payments = [
   },
 ];
 
+// Goods Receipts (Recepciones de Mercadería)
+export const goodsReceipts = [
+  {
+    id: "rcpt-001",
+    receiptNumber: "REC-2024-001",
+    purchaseId: "buy-001",
+    date: "2024-01-11",
+    items: [
+      {
+        itemId: "p-item-1",
+        description: "Laptop Dell XPS 13",
+        quantityOrdered: 3,
+        quantityReceived: 3,
+      },
+      {
+        itemId: "p-item-2",
+        description: "Docking Station",
+        quantityOrdered: 3,
+        quantityReceived: 2,
+        observations: "Faltante: 1 unidad por recibir",
+      },
+    ],
+    observations: "Entrega parcial, falta 1 Docking Station",
+    createdAt: "2024-01-11T10:00:00",
+    createdBy: "Juan Pérez",
+  },
+  {
+    id: "rcpt-002",
+    receiptNumber: "REC-2024-002",
+    purchaseId: "buy-002",
+    date: "2024-01-16",
+    items: [
+      {
+        itemId: "p-item-3",
+        description: "Sillas ergonómicas",
+        quantityOrdered: 10,
+        quantityReceived: 10,
+      },
+      {
+        itemId: "p-item-4",
+        description: "Escritorios ajustables",
+        quantityOrdered: 5,
+        quantityReceived: 5,
+      },
+    ],
+    createdAt: "2024-01-16T14:30:00",
+    createdBy: "María García",
+  },
+  {
+    id: "rcpt-003",
+    receiptNumber: "REC-2024-003",
+    purchaseId: "buy-004",
+    date: "2024-01-25",
+    items: [
+      {
+        itemId: "p-item-6",
+        description: "Mouse inalámbrico Logitech",
+        quantityOrdered: 20,
+        quantityReceived: 20,
+      },
+      {
+        itemId: "p-item-7",
+        description: "Teclado mecánico",
+        quantityOrdered: 20,
+        quantityReceived: 18,
+        observations: "2 unidades con daño de empaque, reportadas al proveedor",
+      },
+    ],
+    observations: "2 teclados recibidos con daño de empaque",
+    createdAt: "2024-01-25T11:00:00",
+    createdBy: "Pedro Sánchez",
+  },
+];
+
+// Helper to get receipt status for a purchase
+export const getReceiptStatus = (purchaseId) => {
+  const purchase = purchases.find((p) => p.id === purchaseId);
+  if (!purchase) return "none";
+
+  const receipts = goodsReceipts.filter((r) => r.purchaseId === purchaseId);
+  if (receipts.length === 0) return "none";
+
+  // Check if all items have been fully received
+  const totalOrdered = purchase.items.reduce(
+    (sum, item) => sum + item.quantity,
+    0
+  );
+  const totalReceived = receipts.reduce(
+    (sum, receipt) =>
+      sum +
+      receipt.items.reduce(
+        (itemSum, item) => itemSum + item.quantityReceived,
+        0
+      ),
+    0
+  );
+
+  if (totalReceived >= totalOrdered) return "complete";
+  return "partial";
+};
+
+// Get receipts for a specific purchase
+export const getReceiptsForPurchase = (purchaseId) => {
+  return goodsReceipts.filter((r) => r.purchaseId === purchaseId);
+};
+
 // Helper functions
 export const formatCurrency = (amount) => {
   return new Intl.NumberFormat("es-AR", {
@@ -345,7 +451,45 @@ export const formatDateTime = (dateString) => {
   }).format(new Date(dateString));
 };
 
-// Stats calculations
+// Adjustments
+export const adjustments = [
+  {
+    id: "adj-001",
+    adjustmentNumber: "ADJ-2024-001",
+    supplier: suppliers[0],
+    purchaseId: "buy-001",
+    date: "2024-01-15",
+    type: "shortage",
+    totalAmount: 180000,
+    items: [
+      {
+        itemId: "p-item-2",
+        description: "Docking Station",
+        quantity: 1,
+        reason: "No recibido en el envío original",
+      },
+    ],
+  },
+  {
+    id: "adj-002",
+    adjustmentNumber: "ADJ-2024-002",
+    supplier: suppliers[1],
+    purchaseId: "buy-002",
+    date: "2024-01-20",
+    type: "damage",
+    totalAmount: 125000,
+    items: [
+      {
+        itemId: "p-item-3",
+        description: "Silla ergonómica",
+        quantity: 1,
+        reason: "Base de silla dañada durante el transporte",
+      },
+    ],
+  },
+];
+
+// Stats calculations (updated to include adjustments if needed, but keeping simple for now)
 export const getStats = () => {
   const pendingApproval = purchaseOrders.filter(
     (po) => po.status === "submitted"

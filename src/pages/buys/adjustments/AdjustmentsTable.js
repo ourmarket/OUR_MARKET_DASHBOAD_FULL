@@ -11,41 +11,52 @@ import MDButton from "components/MDButton";
 import Icon from "@mui/material/Icon";
 import Card from "@mui/material/Card";
 
-// Helpers
+// Utils
 import { formatPrice } from "utils/formaPrice";
-import { formatDate } from "./mockData";
-import { ORDER_STATUS } from "../../../data/orderStatus";
+import { dateToLocalDate } from "utils/dateFormat";
 
-export function OrderBuyTable({ orders: orderData, isLoading }) {
-  const orders = orderData?.data || [];
-  const orderFilter = orders?.filter((po) => po.status !== "EXECUTED");
+// Mock Data
+import { adjustments, purchases } from "../mockData";
+
+export function AdjustmentsTable() {
   const navigate = useNavigate();
 
-  const getStatusLabel = (status) => ORDER_STATUS[status]?.label || status;
+  const getAdjustmentTypeLabel = (type) => {
+    switch (type) {
+      case "shortage":
+        return "Faltante";
+      case "damage":
+        return "Daño";
+      case "price":
+        return "Diferencia Precio";
+      case "bonus":
+        return "Bonificación";
+      default:
+        return type;
+    }
+  };
 
-  const getStatusColor = (status) => ORDER_STATUS[status]?.color || "light";
-
-  const calculateEstimatedAmount = (items = []) =>
-    items.reduce(
-      (acc, item) =>
-        acc + (item.quantityOrdered || 0) * (item.estimatedUnitCost || 0),
-      0
-    );
-
-  const rows = (orderFilter || []).map((po) => ({
-    id: po._id,
-    code: po.code,
-    supplierName: po.supplier?.businessName || "-",
-    expectedDeliveryDate: po.expectedDate,
-    status: po.status,
-    estimatedAmount: calculateEstimatedAmount(po.items),
-  }));
+  const getAdjustmentTypeColor = (type) => {
+    switch (type) {
+      case "shortage":
+        return "error";
+      case "damage":
+        return "warning";
+      case "price":
+        return "info";
+      case "bonus":
+        return "success";
+      default:
+        return "secondary";
+    }
+  };
 
   const columns = [
     {
-      field: "code",
-      headerName: "Nº Orden",
+      field: "adjustmentNumber",
+      headerName: "Nº Ajuste",
       flex: 1,
+      minWidth: 120,
       renderCell: (params) => (
         <MDTypography variant="button" fontWeight="medium">
           {params.value}
@@ -53,51 +64,64 @@ export function OrderBuyTable({ orders: orderData, isLoading }) {
       ),
     },
     {
-      field: "supplierName",
+      field: "supplier",
       headerName: "Proveedor",
-      flex: 2,
-      renderCell: (params) => (
-        <MDBox display="flex" alignItems="center">
-          <Icon fontSize="small" sx={{ mr: 1 }}>
-            business
-          </Icon>
-          <MDTypography variant="button">{params.value}</MDTypography>
-        </MDBox>
-      ),
-    },
-    {
-      field: "expectedDeliveryDate",
-      headerName: "Fecha Esperada",
-      headerAlign: "center",
-      align: "center",
       flex: 1.5,
+      minWidth: 180,
       renderCell: (params) => (
-        <MDTypography variant="button">
-          {params.value ? formatDate(params.value) : "-"}
+        <MDTypography variant="button" color="text">
+          {params.value?.name || params.value?.businessName || "Sin Proveedor"}
         </MDTypography>
       ),
     },
     {
-      field: "status",
-      headerName: "Estado",
+      field: "purchaseId",
+      headerName: "Compra Relacionada",
+      flex: 1.5,
+      minWidth: 150,
+      renderCell: (params) => {
+        const purchase = purchases.find((p) => p.id === params.value);
+        return (
+          <MDTypography variant="button" color="info" fontWeight="medium">
+            {purchase?.purchaseNumber || purchase?.code || "-"}
+          </MDTypography>
+        );
+      },
+    },
+    {
+      field: "date",
+      headerName: "Fecha",
       flex: 1,
-      headerAlign: "center",
+      minWidth: 120,
+      renderCell: (params) => (
+        <MDTypography variant="button" color="text">
+          {dateToLocalDate(params.value)}
+        </MDTypography>
+      ),
+    },
+    {
+      field: "type",
+      headerName: "Tipo",
+      flex: 1,
+      minWidth: 130,
       align: "center",
+      headerAlign: "center",
       renderCell: (params) => (
         <MDBadge
-          badgeContent={getStatusLabel(params.value)}
-          color={getStatusColor(params.value)}
+          badgeContent={getAdjustmentTypeLabel(params.value)}
+          color={getAdjustmentTypeColor(params.value)}
           variant="gradient"
           size="sm"
         />
       ),
     },
     {
-      field: "estimatedAmount",
-      headerName: "Monto Estimado",
+      field: "totalAmount",
+      headerName: "Monto",
       flex: 1,
-      headerAlign: "center",
-      align: "center",
+      minWidth: 120,
+      align: "right",
+      headerAlign: "right",
       renderCell: (params) => (
         <MDTypography variant="button" fontWeight="medium">
           {formatPrice(params.value)}
@@ -106,15 +130,20 @@ export function OrderBuyTable({ orders: orderData, isLoading }) {
     },
     {
       field: "actions",
-      headerName: "Acciones",
+      headerName: "",
       flex: 0.8,
+      minWidth: 100,
       sortable: false,
+      align: "right",
       renderCell: (params) => (
         <MDButton
           variant="text"
           color="info"
           size="small"
-          onClick={() => navigate(`/compras/ordenes/${params.row.id}`)}
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/compras/ajustes/${params.row.id}`);
+          }}
         >
           <Icon>visibility</Icon>&nbsp;Ver
         </MDButton>
@@ -126,15 +155,15 @@ export function OrderBuyTable({ orders: orderData, isLoading }) {
     <Card>
       <MDBox p={3}>
         <MDTypography variant="h6" fontWeight="medium">
-          Órdenes de Compra
+          Ajustes de Compra
         </MDTypography>
       </MDBox>
       <MDBox pt={0} pb={2} px={2}>
         <MDBox sx={{ height: 400, width: "100%" }}>
           <DataGrid
-            rows={rows}
+            rows={adjustments}
+            getRowId={(row) => row.id}
             columns={columns}
-            loading={isLoading}
             initialState={{
               pagination: {
                 paginationModel: { page: 0, pageSize: 5 },

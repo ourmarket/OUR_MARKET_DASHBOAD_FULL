@@ -62,6 +62,9 @@ import PurchaseDetails from "pages/buys/buys/PurchaseDetails";
 import NewPayment from "pages/buys/payments/NewPayment";
 import PaymentDetails from "pages/buys/payments/PaymentDetails";
 import PaymentByBuyId from "pages/buys/payments/PaymentByBuyId";
+import NewAdjustment from "pages/buys/adjustments/NewAdjustment";
+import AdjustmentDetail from "pages/buys/adjustments/AdjustmentDetail";
+import NewReceipt from "pages/buys/buys/NewReceipt";
 
 export const routes_dr = [
   //dashboard
@@ -333,7 +336,7 @@ export const routes_dr = [
     component: <NewOrder />,
   },
   {
-    route: "/compras/directa/nueva",
+    route: "/compras/nueva",
     component: <NewPurchase />,
   },
   {
@@ -355,6 +358,18 @@ export const routes_dr = [
   {
     route: "/compras/ordenes/:id",
     component: <OrderBuyDetails />,
+  },
+  {
+    route: "/compras/ajustes/nuevo",
+    component: <NewAdjustment />,
+  },
+  {
+    route: "/compras/ajustes/:id",
+    component: <AdjustmentDetail />,
+  },
+  {
+    route: "/compras/recepciones/nueva/:id",
+    component: <NewReceipt />,
   },
 ];
 export const routes_full = [
@@ -595,6 +610,48 @@ export const routes_full = [
   {
     route: "/ventas/:id",
     component: <SalesDetail />,
+  },
+
+  //Operaciones
+  {
+    route: "/compras",
+    component: <BuyPage />,
+  },
+  {
+    route: "/compras/ordenes/nueva",
+    component: <NewOrder />,
+  },
+  {
+    route: "/compras/nueva",
+    component: <NewPurchase />,
+  },
+  {
+    route: "/compras/pagos/nuevo",
+    component: <NewPayment />,
+  },
+  {
+    route: "/compras/detalle1/:id",
+    component: <PurchaseDetails />,
+  },
+  {
+    route: "/compras/pagos/:id",
+    component: <PaymentDetails />,
+  },
+  {
+    route: "/compras/pagos/registrar-pago/:id",
+    component: <PaymentByBuyId />,
+  },
+  {
+    route: "/compras/ordenes/:id",
+    component: <OrderBuyDetails />,
+  },
+  {
+    route: "/compras/ajustes/nuevo",
+    component: <NewAdjustment />,
+  },
+  {
+    route: "/compras/ajustes/:id",
+    component: <AdjustmentDetail />,
   },
 ];
 export const routes_lite = [
