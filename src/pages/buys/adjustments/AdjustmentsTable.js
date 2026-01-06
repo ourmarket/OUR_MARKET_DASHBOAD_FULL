@@ -14,23 +14,23 @@ import Card from "@mui/material/Card";
 // Utils
 import { formatPrice } from "utils/formaPrice";
 import { dateToLocalDate } from "utils/dateFormat";
+import PropTypes from "prop-types";
 
-// Mock Data
-import { adjustments, purchases } from "../mockData";
-
-export function AdjustmentsTable() {
+export function AdjustmentsTable({ adjustments = [], isLoading = false }) {
   const navigate = useNavigate();
 
   const getAdjustmentTypeLabel = (type) => {
     switch (type) {
-      case "shortage":
+      case "SHORTAGE":
         return "Faltante";
-      case "damage":
+      case "DAMAGE":
         return "Daño";
-      case "price":
-        return "Diferencia Precio";
-      case "bonus":
+      case "PRICE":
+        return "Dif. Precio";
+      case "BONUS":
         return "Bonificación";
+      case "RETURN":
+        return "Devolución";
       default:
         return type;
     }
@@ -38,14 +38,16 @@ export function AdjustmentsTable() {
 
   const getAdjustmentTypeColor = (type) => {
     switch (type) {
-      case "shortage":
+      case "SHORTAGE":
         return "error";
-      case "damage":
+      case "DAMAGE":
         return "warning";
-      case "price":
+      case "PRICE":
         return "info";
-      case "bonus":
+      case "BONUS":
         return "success";
+      case "RETURN":
+        return "primary";
       default:
         return "secondary";
     }
@@ -53,7 +55,7 @@ export function AdjustmentsTable() {
 
   const columns = [
     {
-      field: "adjustmentNumber",
+      field: "code",
       headerName: "Nº Ajuste",
       flex: 1,
       minWidth: 120,
@@ -70,26 +72,32 @@ export function AdjustmentsTable() {
       minWidth: 180,
       renderCell: (params) => (
         <MDTypography variant="button" color="text">
-          {params.value?.name || params.value?.businessName || "Sin Proveedor"}
+          {params.value?.businessName || params.value?.name || "Sin Proveedor"}
         </MDTypography>
       ),
     },
     {
-      field: "purchaseId",
+      field: "buyId",
       headerName: "Compra Relacionada",
       flex: 1.5,
       minWidth: 150,
-      renderCell: (params) => {
-        const purchase = purchases.find((p) => p.id === params.value);
-        return (
-          <MDTypography variant="button" color="info" fontWeight="medium">
-            {purchase?.purchaseNumber || purchase?.code || "-"}
-          </MDTypography>
-        );
-      },
+      renderCell: (params) => (
+        <MDTypography
+          variant="button"
+          color="info"
+          fontWeight="medium"
+          sx={{ cursor: "pointer" }}
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/compras/detalle1/${params.value?._id || params.value}`);
+          }}
+        >
+          {params.value?.code || "-"}
+        </MDTypography>
+      ),
     },
     {
-      field: "date",
+      field: "createdAt",
       headerName: "Fecha",
       flex: 1,
       minWidth: 120,
@@ -123,14 +131,14 @@ export function AdjustmentsTable() {
       align: "right",
       headerAlign: "right",
       renderCell: (params) => (
-        <MDTypography variant="button" fontWeight="medium">
+        <MDTypography variant="button" fontWeight="medium" color="error">
           {formatPrice(params.value)}
         </MDTypography>
       ),
     },
     {
       field: "actions",
-      headerName: "",
+      headerName: "Acciones",
       flex: 0.8,
       minWidth: 100,
       sortable: false,
@@ -142,7 +150,7 @@ export function AdjustmentsTable() {
           size="small"
           onClick={(e) => {
             e.stopPropagation();
-            navigate(`/compras/ajustes/${params.row.id}`);
+            navigate(`/compras/ajustes/${params.row._id}`);
           }}
         >
           <Icon>visibility</Icon>&nbsp;Ver
@@ -162,8 +170,9 @@ export function AdjustmentsTable() {
         <MDBox sx={{ height: 400, width: "100%" }}>
           <DataGrid
             rows={adjustments}
-            getRowId={(row) => row.id}
+            getRowId={(row) => row._id}
             columns={columns}
+            loading={isLoading}
             initialState={{
               pagination: {
                 paginationModel: { page: 0, pageSize: 5 },
@@ -188,3 +197,8 @@ export function AdjustmentsTable() {
     </Card>
   );
 }
+
+AdjustmentsTable.propTypes = {
+  adjustments: PropTypes.array,
+  isLoading: PropTypes.bool,
+};

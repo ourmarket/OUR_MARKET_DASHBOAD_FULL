@@ -13,7 +13,7 @@ import Card from "@mui/material/Card";
 
 // Utils
 import { formatPrice } from "utils/formaPrice";
-import { dateToLocalDate } from "utils/dateFormat";
+import { dateToLocalDate, formatDateMonthFull } from "utils/dateFormat";
 
 export function PurchasesTable({ buys: buysData, isLoading }) {
   const navigate = useNavigate();
@@ -43,6 +43,32 @@ export function PurchasesTable({ buys: buysData, isLoading }) {
         return "Pendiente";
       default:
         return status;
+    }
+  };
+
+  const getReceiptStatusLabel = (status) => {
+    switch (status) {
+      case "COMPLETE":
+        return "Completado";
+      case "PARTIAL":
+        return "Parcial";
+      case "NONE":
+        return "No recibido";
+      default:
+        return status;
+    }
+  };
+
+  const getReceiptStatusColor = (status) => {
+    switch (status) {
+      case "COMPLETE":
+        return "success";
+      case "PARTIAL":
+        return "warning";
+      case "NONE":
+        return "error";
+      default:
+        return "light";
     }
   };
 
@@ -76,7 +102,7 @@ export function PurchasesTable({ buys: buysData, isLoading }) {
     },
     {
       field: "date",
-      headerName: "Fecha",
+      headerName: "Fecha programada",
       flex: 1.5,
       minWidth: 150,
       renderCell: (params) => (
@@ -85,7 +111,7 @@ export function PurchasesTable({ buys: buysData, isLoading }) {
             event
           </Icon>
           <MDTypography variant="button" color="text">
-            {dateToLocalDate(params.value)}
+            {formatDateMonthFull(params.value)}
           </MDTypography>
         </MDBox>
       ),
@@ -101,6 +127,22 @@ export function PurchasesTable({ buys: buysData, isLoading }) {
         <MDBadge
           badgeContent={getStatusLabel(params.value)}
           color={getStatusColor(params.value)}
+          variant="gradient"
+          size="sm"
+        />
+      ),
+    },
+    {
+      field: "receiptStatus",
+      headerName: "Recepción",
+      flex: 1,
+      minWidth: 120,
+      align: "center",
+      headerAlign: "center",
+      renderCell: (params) => (
+        <MDBadge
+          badgeContent={getReceiptStatusLabel(params.value)}
+          color={getReceiptStatusColor(params.value)}
           variant="gradient"
           size="sm"
         />
@@ -143,23 +185,39 @@ export function PurchasesTable({ buys: buysData, isLoading }) {
     },
     {
       field: "actions",
-      headerName: "",
-      flex: 0.8,
-      minWidth: 100,
+      headerName: "Acciones",
+      headerAlign: "center",
+      flex: 1.4,
+      minWidth: 150,
       sortable: false,
       align: "right",
       renderCell: (params) => (
-        <MDButton
-          variant="text"
-          color="info"
-          size="small"
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate(`/compras/detalle1/${params.row._id}`);
-          }}
-        >
-          <Icon>visibility</Icon>&nbsp;Ver
-        </MDButton>
+        <MDBox display="flex" gap={1}>
+          <MDButton
+            variant="text"
+            color="info"
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/compras/detalle1/${params.row._id}`);
+            }}
+          >
+            <Icon>visibility</Icon>&nbsp;Ver
+          </MDButton>
+          {params.row.receiptStatus === "NONE" && (
+            <MDButton
+              variant="text"
+              color="success"
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/compras/recepciones/nueva/${params.row._id}`);
+              }}
+            >
+              <Icon>inventory_2</Icon>&nbsp;Recibir
+            </MDButton>
+          )}
+        </MDBox>
       ),
     },
   ];

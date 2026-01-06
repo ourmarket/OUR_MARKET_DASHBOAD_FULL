@@ -66,7 +66,8 @@ const PaymentByBuyId = () => {
       Swal.fire(
         "Error",
         "Por favor complete todos los campos requeridos",
-        "error"
+        "error",
+        { confirmButtonColor: "#d41f1a" }
       );
       return;
     }
@@ -83,6 +84,8 @@ const PaymentByBuyId = () => {
         showCancelButton: true,
         confirmButtonText: "Sí, registrar",
         cancelButtonText: "No, corregir",
+        confirmButtonColor: "#fb8c00",
+        cancelButtonColor: "#7b809a",
       });
       if (!confirm.isConfirmed) return;
     }
@@ -102,12 +105,18 @@ const PaymentByBuyId = () => {
         icon: "success",
         title: "Pago Registrado",
         text: "El pago ha sido registrado exitosamente.",
+        confirmButtonColor: "#4CAF50",
       }).then(() => {
         navigate(`/compras/detalle1/${id}`);
       });
     } catch (err) {
       console.error(err);
-      Swal.fire("Error", "Ocurrió un error al registrar el pago", "error");
+      Swal.fire({
+        title: "Error",
+        text: "Ocurrió un error al registrar el pago",
+        icon: "error",
+        confirmButtonColor: "#d41f1a",
+      });
     }
   };
 

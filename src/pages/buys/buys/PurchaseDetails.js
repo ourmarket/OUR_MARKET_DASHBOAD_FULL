@@ -41,6 +41,19 @@ const getTotalAdjustments = (purchaseId) => {
     .reduce((sum, adj) => sum + adj.totalAmount, 0);
 };
 
+const ACTION_CONFIG = {
+  CREATED: { label: "Compra Creada", color: "dark" },
+  GOODS_RECEIVED: { label: "Mercadería Recibida", color: "success" },
+  PARTIAL_RECEIPT: { label: "Recepción Parcial", color: "warning" },
+  PAYMENT_ADDED: { label: "Pago Registrado", color: "success" },
+  PAYMENT_REMOVED: { label: "Pago Eliminado", color: "error" },
+  STATUS_CHANGED: { label: "Estado Actualizado", color: "info" },
+  ADJUSTMENT_LINKED: { label: "Ajuste Vinculado", color: "primary" },
+  DOCUMENT_ATTACHED: { label: "Documento Adjunto", color: "info" },
+  NOTE_ADDED: { label: "Nota Agregada", color: "secondary" },
+  CANCELLED: { label: "Compra Anulada", color: "error" },
+};
+
 const PurchaseDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -197,10 +210,32 @@ const PurchaseDetail = () => {
     }
   };
 
-  const receipts = getReceiptsForPurchase(buy?._id || buy?.id || id);
+  // Calculate total received quantity per item across all receipts
+  const getReceivedQuantity = (productId) => {
+    return (
+      buy?.receipts?.reduce((total, receipt) => {
+        const item = receipt.items?.find(
+          (i) => (i.product?._id || i.product) === (productId?._id || productId)
+        );
+        return total + (item?.quantityReceived || 0);
+      }, 0) || 0
+    );
+  };
 
-  const adjustmentsList = getAdjustmentsForPurchase(buy?._id || buy?.id || id);
-  const totalAdjustments = getTotalAdjustments(buy?._id || buy?.id || id);
+  const receipts = buy?.receipts || [];
+  const hasReceipts = receipts.length > 0;
+
+  // Check if there are differences between ordered and received quantities
+  const hasDifferences = buy.items?.some((item) => {
+    const received = getReceivedQuantity(item.product);
+    return received !== item.quantity;
+  });
+
+  const adjustmentsList = buy?.adjustments || [];
+  const totalAdjustments = adjustmentsList.reduce(
+    (sum, adj) => sum + adj.totalAmount,
+    0
+  );
   const adjustedBalance = balanceDue + totalAdjustments;
 
   return (
@@ -236,11 +271,13 @@ const PurchaseDetail = () => {
           <MDBox display="flex" gap={1}>
             {balanceDue > 0 && (
               <>
-                <Link to={`/compras/ajustes/nuevo?buy=${buy._id}`}>
-                  <MDButton variant="outlined" color="error">
-                    <Icon>settings_suggest</Icon>&nbsp;Registrar Ajuste
-                  </MDButton>
-                </Link>
+                {hasReceipts && hasDifferences && (
+                  <Link to={`/compras/ajustes/nuevo?buy=${buy._id}`}>
+                    <MDButton variant="outlined" color="error">
+                      <Icon>settings_suggest</Icon>&nbsp;Registrar Ajuste
+                    </MDButton>
+                  </Link>
+                )}
                 <Link to={`/compras/pagos/registrar-pago/${buy._id}`}>
                   <MDButton variant="gradient" color="success">
                     <Icon>account_balance_wallet</Icon>&nbsp;Registrar Pago
@@ -377,7 +414,10 @@ const PurchaseDetail = () => {
                     <TableHead sx={{ display: "table-header-group" }}>
                       <TableRow>
                         <TableCell>Producto</TableCell>
-                        <TableCell align="right">Cantidad</TableCell>
+                        <TableCell align="right">Comprado</TableCell>
+                        {hasReceipts && (
+                          <TableCell align="right">Recibido</TableCell>
+                        )}
                         <TableCell align="right">Costo Unit.</TableCell>
                         <TableCell align="right">Total</TableCell>
                       </TableRow>
@@ -387,6 +427,22 @@ const PurchaseDetail = () => {
                         <TableRow key={item._id || index}>
                           <TableCell>{item.nameSnapshot || "N/A"}</TableCell>
                           <TableCell align="right">{item.quantity}</TableCell>
+                          {hasReceipts && (
+                            <TableCell align="right">
+                              <MDTypography
+                                variant="button"
+                                fontWeight="bold"
+                                color={
+                                  getReceivedQuantity(item.product) <
+                                  item.quantity
+                                    ? "error"
+                                    : "success"
+                                }
+                              >
+                                {getReceivedQuantity(item.product)}
+                              </MDTypography>
+                            </TableCell>
+                          )}
                           <TableCell align="right">
                             {formatPrice(item.unitCost)}
                           </TableCell>
@@ -531,108 +587,6 @@ const PurchaseDetail = () => {
                   </TableContainer>
                 </Card>
               )}
-
-              {/* Adjustments Section */}
-              <Card>
-                <MDBox p={2} display="flex" alignItems="center">
-                  <Icon sx={{ mr: 1 }}>credit_card</Icon>
-                  <MDTypography variant="h6" fontWeight="medium">
-                    Ajustes Aplicados
-                  </MDTypography>
-                </MDBox>
-                <MDBox p={2} pt={0}>
-                  <MDBox
-                    bgColor="info"
-                    variant="gradient"
-                    borderRadius="lg"
-                    p={2}
-                    display="flex"
-                    alignItems="flex-start"
-                    mb={2}
-                  >
-                    <Icon sx={{ color: "#fff", mr: 1, mt: 0.5 }}>info</Icon>
-                    <MDBox>
-                      <MDTypography variant="caption" color="white">
-                        Los ajustes representan créditos otorgados por el
-                        proveedor y reducen el saldo a pagar.
-                      </MDTypography>
-                    </MDBox>
-                  </MDBox>
-
-                  {adjustmentsList.length > 0 ? (
-                    <TableContainer>
-                      <Table>
-                        <TableHead sx={{ display: "table-header-group" }}>
-                          <TableRow>
-                            <TableCell>Nº Ajuste</TableCell>
-                            <TableCell>Tipo</TableCell>
-                            <TableCell>Fecha</TableCell>
-                            <TableCell align="right">Monto</TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {adjustmentsList.map((adj) => (
-                            <TableRow
-                              key={adj.id}
-                              sx={{ cursor: "pointer" }}
-                              onClick={() =>
-                                navigate(`/compras/ajustes/${adj.id}`)
-                              }
-                            >
-                              <TableCell>
-                                <MDTypography
-                                  variant="button"
-                                  fontWeight="medium"
-                                >
-                                  {adj.adjustmentNumber}
-                                </MDTypography>
-                              </TableCell>
-                              <TableCell>
-                                <MDBadge
-                                  badgeContent={getAdjustmentTypeLabel(
-                                    adj.type
-                                  )}
-                                  color={getAdjustmentTypeColor(adj.type)}
-                                  variant="gradient"
-                                  size="sm"
-                                />
-                              </TableCell>
-                              <TableCell>
-                                <MDTypography variant="button" color="text">
-                                  {dateToLocalDate(adj.date)}
-                                </MDTypography>
-                              </TableCell>
-                              <TableCell align="right">
-                                <MDTypography
-                                  variant="button"
-                                  fontWeight="bold"
-                                  color="error"
-                                >
-                                  {formatPrice(adj.totalAmount)}
-                                </MDTypography>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  ) : (
-                    <MDBox textAlign="center" py={3}>
-                      <Icon fontSize="large" color="disabled" sx={{ mb: 1 }}>
-                        credit_card
-                      </Icon>
-                      <MDTypography
-                        variant="button"
-                        color="text"
-                        display="block"
-                      >
-                        No hay ajustes registrados
-                      </MDTypography>
-                    </MDBox>
-                  )}
-                </MDBox>
-              </Card>
-
               {/* Goods Receipt Section */}
               <Card>
                 <MDBox
@@ -748,6 +702,96 @@ const PurchaseDetail = () => {
                   )}
                 </MDBox>
               </Card>
+
+              {/* Adjustments Section */}
+              {adjustmentsList.length > 0 && (
+                <Card>
+                  <MDBox p={2} display="flex" alignItems="center">
+                    <Icon sx={{ mr: 1 }}>credit_card</Icon>
+                    <MDTypography variant="h6" fontWeight="medium">
+                      Ajustes Aplicados
+                    </MDTypography>
+                  </MDBox>
+                  <MDBox p={2} pt={0}>
+                    <MDBox
+                      bgColor="info"
+                      variant="gradient"
+                      borderRadius="lg"
+                      p={2}
+                      display="flex"
+                      alignItems="flex-start"
+                      mb={2}
+                    >
+                      <Icon sx={{ color: "#fff", mr: 1, mt: 0.5 }}>info</Icon>
+                      <MDBox>
+                        <MDTypography variant="caption" color="white">
+                          Los ajustes representan créditos otorgados por el
+                          proveedor y reducen el saldo a pagar.
+                        </MDTypography>
+                      </MDBox>
+                    </MDBox>
+
+                    <TableContainer>
+                      <Table>
+                        <TableHead sx={{ display: "table-header-group" }}>
+                          <TableRow>
+                            <TableCell>Nº Ajuste</TableCell>
+                            <TableCell>Tipo</TableCell>
+                            <TableCell>Fecha</TableCell>
+                            <TableCell align="right">Monto</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {adjustmentsList.map((adj) => (
+                            <TableRow
+                              key={adj._id || adj.id}
+                              sx={{ cursor: "pointer" }}
+                              onClick={() =>
+                                navigate(
+                                  `/compras/ajustes/${adj._id || adj.id}`
+                                )
+                              }
+                            >
+                              <TableCell>
+                                <MDTypography
+                                  variant="button"
+                                  fontWeight="medium"
+                                >
+                                  {adj.adjustmentNumber || adj.code}
+                                </MDTypography>
+                              </TableCell>
+                              <TableCell>
+                                <MDBadge
+                                  badgeContent={getAdjustmentTypeLabel(
+                                    adj.type
+                                  )}
+                                  color={getAdjustmentTypeColor(adj.type)}
+                                  variant="gradient"
+                                  size="sm"
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <MDTypography variant="button" color="text">
+                                  {dateToLocalDate(adj.date)}
+                                </MDTypography>
+                              </TableCell>
+                              <TableCell align="right">
+                                <MDTypography
+                                  variant="button"
+                                  fontWeight="bold"
+                                  color="error"
+                                >
+                                  {formatPrice(adj.totalAmount)}
+                                </MDTypography>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </MDBox>
+                </Card>
+              )}
             </MDBox>
           </Grid>
 
@@ -855,6 +899,119 @@ const PurchaseDetail = () => {
                   )}
                 </MDBox>
               </Card>
+
+              {/* Status History */}
+              {buy.history && buy.history.length > 0 && (
+                <Card>
+                  <MDBox p={2} display="flex" alignItems="center">
+                    <Icon sx={{ mr: 1 }}>history</Icon>
+                    <MDTypography variant="h6" fontWeight="medium">
+                      Bitácora de Actividad
+                    </MDTypography>
+                  </MDBox>
+                  <MDBox p={2} pt={0}>
+                    <MDBox
+                      component="ul"
+                      sx={{ listStyle: "none", m: 0, p: 0 }}
+                    >
+                      {[...buy.history].reverse().map((entry, index) => {
+                        const config = ACTION_CONFIG[entry.action] || {
+                          label: entry.action,
+                          color: "secondary",
+                        };
+
+                        return (
+                          <MDBox
+                            component="li"
+                            key={index}
+                            display="flex"
+                            position="relative"
+                            mb={2}
+                            sx={{
+                              "&:not(:last-child):before": {
+                                content: '""',
+                                position: "absolute",
+                                left: "15px",
+                                top: "25px",
+                                height: "calc(100% - 10px)",
+                                width: "1px",
+                                backgroundColor: "#f0f2f5",
+                              },
+                            }}
+                          >
+                            <MDBox
+                              display="flex"
+                              justifyContent="center"
+                              alignItems="center"
+                              width="32px"
+                              height="32px"
+                              borderRadius="50%"
+                              bgColor={config.color}
+                              variant="gradient"
+                              color="white"
+                              mr={2}
+                              zIndex={1}
+                              boxShadow="0rem 0.25rem 0.25rem 0rem rgba(0, 0, 0, 0.05)"
+                            >
+                              <Icon sx={{ fontSize: "16px !important" }}>
+                                {entry.action === "CREATED"
+                                  ? "add_shopping_cart"
+                                  : entry.action.includes("RECEIPT") ||
+                                    entry.action === "GOODS_RECEIVED"
+                                  ? "inventory_2"
+                                  : entry.action.includes("PAYMENT")
+                                  ? "account_balance_wallet"
+                                  : entry.action === "STATUS_CHANGED"
+                                  ? "sync"
+                                  : entry.action === "CANCELLED"
+                                  ? "block"
+                                  : "notifications"}
+                              </Icon>
+                            </MDBox>
+                            <MDBox
+                              display="flex"
+                              flexDirection="column"
+                              justifyContent="center"
+                            >
+                              <MDBox
+                                display="flex"
+                                alignItems="baseline"
+                                gap={1}
+                              >
+                                <MDTypography
+                                  variant="button"
+                                  fontWeight="bold"
+                                >
+                                  {config.label}
+                                </MDTypography>
+                                <MDTypography variant="caption" color="text">
+                                  {dateToLocalDate(entry.performedAt)}
+                                </MDTypography>
+                              </MDBox>
+                              <MDTypography
+                                variant="caption"
+                                color="text"
+                                sx={{ mt: 0.2 }}
+                              >
+                                {entry.description}
+                                {entry.performedBy && (
+                                  <>
+                                    {" • "}
+                                    <b>
+                                      {entry.performedBy.name}{" "}
+                                      {entry.performedBy.lastName}
+                                    </b>
+                                  </>
+                                )}
+                              </MDTypography>
+                            </MDBox>
+                          </MDBox>
+                        );
+                      })}
+                    </MDBox>
+                  </MDBox>
+                </Card>
+              )}
             </MDBox>
           </Grid>
         </Grid>

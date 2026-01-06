@@ -40,7 +40,7 @@ export const buyApi = apiSlice.injectEndpoints({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["Buy"],
+      invalidatesTags: ["Buy", "PurchaseOrder"],
     }),
 
     // REGISTER PAYMENT (acción de dominio)

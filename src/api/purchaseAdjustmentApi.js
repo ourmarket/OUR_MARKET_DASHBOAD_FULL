@@ -1,33 +1,33 @@
 import { apiSlice } from "./apiSlice";
 
 export const purchaseAdjustmentApi = apiSlice.injectEndpoints({
-  tagTypes: ["purchase-adjustment"],
+  tagTypes: ["PurchaseAdjustment"],
 
   endpoints: (builder) => ({
     // LIST
     getPurchaseAdjustments: builder.query({
-      query: () => "/purchase-adjustment",
-      providesTags: ["purchase-adjustment"],
+      query: () => "/purchase-adjustments",
+      providesTags: ["PurchaseAdjustment"],
     }),
 
     // DETAIL
     getPurchaseAdjustmentById: builder.query({
-      query: (id) => `/purchase-adjustment/${id}`,
-      providesTags: ["purchase-adjustment"],
+      query: (id) => `/purchase-adjustments/${id}`,
+      providesTags: ["PurchaseAdjustment"],
     }),
     getPurchaseAdjustmentByBuyId: builder.query({
-      query: (id) => `/purchase-adjustment/by-buy/${id}`,
-      providesTags: ["purchase-adjustment"],
+      query: (id) => `/purchase-adjustments/by-buy/${id}`,
+      providesTags: ["PurchaseAdjustment"],
     }),
 
     // CREATE
     createPurchaseAdjustment: builder.mutation({
       query: (payload) => ({
-        url: "/purchase-adjustment",
+        url: "/purchase-adjustments",
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["purchase-adjustment"],
+      invalidatesTags: ["PurchaseAdjustment", "Buy"],
     }),
   }),
 });

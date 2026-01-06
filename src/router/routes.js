@@ -57,6 +57,7 @@ import EditarNegocioPage from "pages/negocios/editar-negocio";
 import BuyPage from "pages/buys";
 import NewOrder from "pages/buys/orders/NewOrder";
 import OrderBuyDetails from "pages/buys/orders/OrderBuyDetails";
+import EditOrder from "pages/buys/orders/EditOrder";
 import NewPurchase from "pages/buys/buys/NewPurchase";
 import PurchaseDetails from "pages/buys/buys/PurchaseDetails";
 import NewPayment from "pages/buys/payments/NewPayment";
@@ -334,6 +335,10 @@ export const routes_dr = [
   {
     route: "/compras/ordenes/nueva",
     component: <NewOrder />,
+  },
+  {
+    route: "/compras/ordenes/editar/:id",
+    component: <EditOrder />,
   },
   {
     route: "/compras/nueva",
@@ -628,6 +633,10 @@ export const routes_full = [
   {
     route: "/compras/pagos/nuevo",
     component: <NewPayment />,
+  },
+  {
+    route: "/compras/ordenes/editar/:id",
+    component: <EditOrder />,
   },
   {
     route: "/compras/detalle1/:id",

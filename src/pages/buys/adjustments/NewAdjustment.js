@@ -26,10 +26,12 @@ import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import Divider from "@mui/material/Divider";
 
-// Utils & Data
+// API & Utils
+import { useGetBuyByIdQuery } from "api/buyApi";
+import { useCreatePurchaseAdjustmentMutation } from "api/purchaseAdjustmentApi";
+import Loading from "components/DRLoading";
 import { formatPrice } from "utils/formaPrice";
 import { dateToLocalDate } from "utils/dateFormat";
-import { purchases } from "../mockData";
 
 const adjustmentTypes = [
   { value: "shortage", label: "Faltante" },
@@ -43,26 +45,36 @@ const NewAdjustment = () => {
   const [searchParams] = useSearchParams();
   const buyId = searchParams.get("buy");
 
-  // Filter purchase from mock data
-  const purchase = useMemo(() => {
-    return buyId
-      ? purchases.find((p) => p.id === buyId || p._id === buyId)
-      : null;
-  }, [buyId]);
+  const {
+    data: purchase,
+    isLoading,
+    isError,
+  } = useGetBuyByIdQuery(buyId, { skip: !buyId });
+  const [createAdjustment, { isLoading: isSubmitting }] =
+    useCreatePurchaseAdjustmentMutation();
 
   const [adjustmentType, setAdjustmentType] = useState(null);
   const [observations, setObservations] = useState("");
-  const [items, setItems] = useState(
-    purchase?.items?.map((item) => ({
-      itemId: item.id || item._id,
-      description: item.description || item.nameSnapshot,
-      maxQuantity: item.quantity,
-      quantity: 0,
-      unitAmount: item.unitCost,
-    })) || []
-  );
+  const [items, setItems] = useState([]);
 
-  if (!purchase) {
+  // Load items when purchase data arrives
+  useMemo(() => {
+    if (purchase && items.length === 0) {
+      setItems(
+        purchase.items?.map((item) => ({
+          itemId: item._id || item.id,
+          description: item.nameSnapshot || item.description || "Producto",
+          maxQuantity: item.quantity,
+          quantity: 0,
+          unitAmount: item.unitCost,
+        })) || []
+      );
+    }
+  }, [purchase]);
+
+  if (isLoading) return <Loading />;
+
+  if (!purchase || isError) {
     return (
       <DashboardLayout>
         <DashboardNavbar />
@@ -136,16 +148,42 @@ const NewAdjustment = () => {
       showCancelButton: true,
       confirmButtonText: "Sí, confirmar",
       cancelButtonText: "Cancelar",
+      confirmButtonColor: "#fb8c00",
+      cancelButtonColor: "#7b809a",
     });
 
     if (isConfirmed) {
-      // Logic to save (mutation would go here)
-      Swal.fire({
-        title: "¡Ajuste registrado!",
-        text: "El saldo de la compra ha sido actualizado.",
-        icon: "success",
-      });
-      navigate(`/compras/detalle1/${purchase.id || purchase._id}`);
+      try {
+        const payload = {
+          buyId: purchase._id || purchase.id,
+          type: adjustmentType.value,
+          observations,
+          totalAmount: totalAdjustment,
+          items: adjustedItems.map((i) => ({
+            itemId: i.itemId,
+            description: i.description,
+            quantity: i.quantity,
+            unitAmount: i.unitAmount,
+          })),
+        };
+
+        await createAdjustment(payload).unwrap();
+
+        Swal.fire({
+          title: "¡Ajuste registrado!",
+          text: "El saldo de la compra ha sido actualizado.",
+          icon: "success",
+          confirmButtonColor: "#4CAF50",
+        });
+        navigate(`/compras/detalle1/${purchase._id || purchase.id}`);
+      } catch (err) {
+        Swal.fire({
+          title: "Error",
+          text: err.data?.message || "No se pudo registrar el ajuste",
+          icon: "error",
+          confirmButtonColor: "#d41f1a",
+        });
+      }
     }
   };
 
@@ -483,10 +521,21 @@ const NewAdjustment = () => {
                 variant="gradient"
                 color="info"
                 fullWidth
-                disabled={!canSubmit}
+                disabled={!canSubmit || isSubmitting}
                 onClick={handleSubmit}
               >
-                <Icon>check</Icon>&nbsp;Confirmar Ajuste
+                {isSubmitting ? (
+                  <MDBox display="flex" alignItems="center">
+                    <Icon sx={{ mr: 1, animation: "spin 2s linear infinite" }}>
+                      sync
+                    </Icon>
+                    Procesando...
+                  </MDBox>
+                ) : (
+                  <>
+                    <Icon>check</Icon>&nbsp;Confirmar Ajuste
+                  </>
+                )}
               </MDButton>
             </MDBox>
           </Grid>

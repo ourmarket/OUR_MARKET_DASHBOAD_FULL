@@ -33,6 +33,7 @@ import {
   useCancelPurchaseOrderMutation,
 } from "api/purchaseOrderApi";
 import Loading from "components/DRLoading";
+import { Alert } from "@mui/material";
 
 const OrderBuyDetails = () => {
   const { id } = useParams();
@@ -82,6 +83,8 @@ const OrderBuyDetails = () => {
       showCancelButton: true,
       confirmButtonText: "Enviar",
       cancelButtonText: "Cancelar",
+      confirmButtonColor: "#009fc7",
+      cancelButtonColor: "#7b809a",
     });
 
     if (!result.isConfirmed) return;
@@ -110,6 +113,8 @@ const OrderBuyDetails = () => {
       showCancelButton: true,
       confirmButtonText: "Aprobar",
       cancelButtonText: "Cancelar",
+      confirmButtonColor: "#4CAF50",
+      cancelButtonColor: "#7b809a",
     });
 
     if (!result.isConfirmed) return;
@@ -121,6 +126,7 @@ const OrderBuyDetails = () => {
       }).unwrap();
 
       Swal.fire("Aprobada", "La orden fue aprobada", "success");
+      navigate(`/compras`);
     } catch (error) {
       Swal.fire(
         "Error",
@@ -138,6 +144,8 @@ const OrderBuyDetails = () => {
       showCancelButton: true,
       confirmButtonText: "Cancelar orden",
       cancelButtonText: "Volver",
+      confirmButtonColor: "#d41f1a",
+      cancelButtonColor: "#7b809a",
     });
 
     if (!result.isConfirmed) return;
@@ -237,6 +245,13 @@ const OrderBuyDetails = () => {
         {/* ⬇️ TODO el resto del JSX queda EXACTAMENTE igual ⬇️ */}
         <Grid container spacing={3}>
           {/* Main Content */}
+          {status?.actions.convert && (
+            <Alert severity="info">
+              Esta orden de compra ya fue aprobada, continua para realizar la
+              compra, lo que implica que el pedido se realizara y no puede ser
+              editado posteriormente.
+            </Alert>
+          )}
           <Grid item xs={12} lg={8}>
             <MDBox display="flex" flexDirection="column" gap={3}>
               {/* Status Card */}

@@ -130,8 +130,8 @@ const NewReceipt = () => {
       text: "Esta acción no se puede deshacer. La recepción quedará registrada como documento histórico y afectará el stock.",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
+      confirmButtonColor: "#fb8c00",
+      cancelButtonColor: "#7b809a",
       confirmButtonText: "Sí, confirmar",
       cancelButtonText: "Cancelar",
     });
@@ -166,6 +166,7 @@ const NewReceipt = () => {
           title: "Error",
           text: err.data?.message || "No se pudo registrar la recepción.",
           icon: "error",
+          confirmButtonColor: "#d41f1a",
         });
       }
     }

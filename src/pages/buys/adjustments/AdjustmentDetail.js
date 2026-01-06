@@ -22,17 +22,24 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 
-// Utils & Data
-import { formatPrice } from "utils/formaPrice";
+// API & Components
+import { useGetPurchaseAdjustmentByIdQuery } from "api/purchaseAdjustmentApi";
+import Loading from "components/DRLoading";
 import { dateToLocalDate } from "utils/dateFormat";
-import { adjustments, purchases, goodsReceipts } from "../mockData";
+import { formatPrice } from "utils/formaPrice";
 
 const AdjustmentDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const adjustment = adjustments.find((a) => a.id === id);
+  const {
+    data: adjustment,
+    isLoading,
+    error,
+  } = useGetPurchaseAdjustmentByIdQuery(id);
 
-  if (!adjustment) {
+  if (isLoading) return <Loading />;
+
+  if (error || !adjustment) {
     return (
       <DashboardLayout>
         <DashboardNavbar />
@@ -47,7 +54,7 @@ const AdjustmentDetail = () => {
             Ajuste no encontrado
           </MDTypography>
           <MDTypography variant="body2" color="text" gutterBottom>
-            El ajuste que buscas no existe.
+            Hubo un error al cargar el ajuste o el documento no existe.
           </MDTypography>
           <MDButton
             variant="gradient"
@@ -62,21 +69,21 @@ const AdjustmentDetail = () => {
     );
   }
 
-  const relatedPurchase = purchases.find((p) => p.id === adjustment.purchaseId);
-  const relatedReceipt = adjustment.receiptId
-    ? goodsReceipts.find((r) => r.id === adjustment.receiptId)
-    : null;
+  const relatedPurchase = adjustment.buyId;
+  const relatedReceipt = adjustment.goodsReceipt;
 
   const getAdjustmentTypeLabel = (type) => {
     switch (type) {
-      case "shortage":
+      case "SHORTAGE":
         return "Faltante";
-      case "damage":
+      case "DAMAGE":
         return "Daño";
-      case "price":
+      case "PRICE":
         return "Diferencia de Precio";
-      case "bonus":
+      case "BONUS":
         return "Bonificación";
+      case "RETURN":
+        return "Devolución";
       default:
         return type;
     }
@@ -84,14 +91,16 @@ const AdjustmentDetail = () => {
 
   const getAdjustmentTypeColor = (type) => {
     switch (type) {
-      case "shortage":
+      case "SHORTAGE":
         return "error";
-      case "damage":
+      case "DAMAGE":
         return "warning";
-      case "price":
+      case "PRICE":
         return "info";
-      case "bonus":
+      case "BONUS":
         return "success";
+      case "RETURN":
+        return "primary";
       default:
         return "secondary";
     }
@@ -110,7 +119,7 @@ const AdjustmentDetail = () => {
         >
           <MDBox>
             <MDTypography variant="h4" fontWeight="medium">
-              {adjustment.adjustmentNumber}
+              {adjustment.code}
             </MDTypography>
             <MDBox display="flex" alignItems="center">
               <MDButton
@@ -166,59 +175,76 @@ const AdjustmentDetail = () => {
               {/* Summary Card */}
               <Card>
                 <MDBox p={3}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={6} sm={3}>
-                      <MDTypography
-                        variant="caption"
-                        color="text"
-                        fontWeight="bold"
-                        textTransform="uppercase"
-                      >
-                        Fecha
-                      </MDTypography>
-                      <MDBox display="flex" alignItems="center" mt={0.5}>
-                        <Icon
-                          fontSize="small"
-                          color="disabled"
-                          sx={{ mr: 0.5 }}
+                  <Grid container spacing={3} alignItems="center">
+                    <Grid item xs={12} sm={4}>
+                      <MDBox display="flex" flexDirection="column">
+                        <MDTypography
+                          variant="caption"
+                          color="text"
+                          fontWeight="bold"
+                          textTransform="uppercase"
                         >
-                          event
-                        </Icon>
-                        <MDTypography variant="button" fontWeight="medium">
-                          {dateToLocalDate(adjustment.date)}
+                          Fecha
+                        </MDTypography>
+                        <MDBox display="flex" alignItems="center" mt={0.5}>
+                          <Icon
+                            fontSize="small"
+                            color="disabled"
+                            sx={{ mr: 0.5 }}
+                          >
+                            event
+                          </Icon>
+                          <MDTypography variant="button" fontWeight="medium">
+                            {dateToLocalDate(adjustment.createdAt)}
+                          </MDTypography>
+                        </MDBox>
+                      </MDBox>
+                    </Grid>
+
+                    <Grid item xs={12} sm={4}>
+                      <MDBox
+                        display="flex"
+                        flexDirection="column"
+                        alignItems="center"
+                      >
+                        <MDTypography
+                          variant="caption"
+                          color="text"
+                          fontWeight="bold"
+                          textTransform="uppercase"
+                        >
+                          Tipo de Ajuste
+                        </MDTypography>
+                        <MDBox mt={0.5}>
+                          <MDBadge
+                            badgeContent={getAdjustmentTypeLabel(
+                              adjustment.type
+                            )}
+                            color={getAdjustmentTypeColor(adjustment.type)}
+                            variant="gradient"
+                            size="sm"
+                          />
+                        </MDBox>
+                      </MDBox>
+                    </Grid>
+                    <Grid item xs={12} sm={4}>
+                      <MDBox
+                        display="flex"
+                        flexDirection="column"
+                        alignItems="flex-end"
+                      >
+                        <MDTypography
+                          variant="caption"
+                          color="text"
+                          fontWeight="bold"
+                          textTransform="uppercase"
+                        >
+                          Monto del Ajuste
+                        </MDTypography>
+                        <MDTypography variant="h5" mt={0.5} color="error">
+                          {formatPrice(adjustment.totalAmount)}
                         </MDTypography>
                       </MDBox>
-                    </Grid>
-                    <Grid item xs={6} sm={3}>
-                      <MDTypography
-                        variant="caption"
-                        color="text"
-                        fontWeight="bold"
-                        textTransform="uppercase"
-                      >
-                        Tipo de Ajuste
-                      </MDTypography>
-                      <MDBox mt={0.5}>
-                        <MDBadge
-                          badgeContent={getAdjustmentTypeLabel(adjustment.type)}
-                          color={getAdjustmentTypeColor(adjustment.type)}
-                          variant="gradient"
-                          size="sm"
-                        />
-                      </MDBox>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <MDTypography
-                        variant="caption"
-                        color="text"
-                        fontWeight="bold"
-                        textTransform="uppercase"
-                      >
-                        Monto del Ajuste
-                      </MDTypography>
-                      <MDTypography variant="h5" mt={0.5} color="error">
-                        {formatPrice(adjustment.totalAmount)}
-                      </MDTypography>
                     </Grid>
                   </Grid>
                 </MDBox>
@@ -268,8 +294,10 @@ const AdjustmentDetail = () => {
                     </TableHead>
                     <TableBody>
                       {adjustment.items?.map((item, index) => (
-                        <TableRow key={item.itemId || index}>
-                          <TableCell>{item.description}</TableCell>
+                        <TableRow key={item._id || index}>
+                          <TableCell>
+                            {item.nameSnapshot || item.description}
+                          </TableCell>
                           <TableCell align="right">{item.quantity}</TableCell>
                           <TableCell align="right">
                             {formatPrice(item.unitAmount)}
@@ -341,8 +369,7 @@ const AdjustmentDetail = () => {
                           Compra Asociada
                         </MDTypography>
                         <MDTypography variant="button" fontWeight="medium">
-                          {relatedPurchase.purchaseNumber ||
-                            relatedPurchase.code}
+                          {relatedPurchase.code}
                         </MDTypography>
                       </MDBox>
                       <Link
@@ -378,7 +405,8 @@ const AdjustmentDetail = () => {
                             Recepción Relacionada
                           </MDTypography>
                           <MDTypography variant="button" fontWeight="medium">
-                            {relatedReceipt.receiptNumber}
+                            {relatedReceipt.code ||
+                              relatedReceipt.receiptNumber}
                           </MDTypography>
                         </MDBox>
                       </MDBox>
@@ -407,8 +435,8 @@ const AdjustmentDetail = () => {
                     display="block"
                     gutterBottom
                   >
-                    {adjustment.supplier?.name ||
-                      adjustment.supplier?.businessName}
+                    {adjustment.supplier?.businessName ||
+                      adjustment.supplier?.name}
                   </MDTypography>
                   <MDBox display="flex" alignItems="center" mb={1}>
                     <Icon
@@ -460,7 +488,7 @@ const AdjustmentDetail = () => {
                       Nº Ajuste
                     </MDTypography>
                     <MDTypography variant="caption" fontWeight="medium">
-                      {adjustment.adjustmentNumber}
+                      {adjustment.code}
                     </MDTypography>
                   </MDBox>
                   <MDBox display="flex" justifyContent="space-between" mb={1}>
@@ -476,7 +504,7 @@ const AdjustmentDetail = () => {
                       Fecha de Registro
                     </MDTypography>
                     <MDTypography variant="caption" fontWeight="medium">
-                      {dateToLocalDate(adjustment.date)}
+                      {dateToLocalDate(adjustment.createdAt)}
                     </MDTypography>
                   </MDBox>
                   <MDBox display="flex" justifyContent="space-between">
@@ -484,7 +512,9 @@ const AdjustmentDetail = () => {
                       Registrado por
                     </MDTypography>
                     <MDTypography variant="caption" fontWeight="medium">
-                      {adjustment.createdBy || "Sistema"}
+                      {adjustment.createdBy?.name
+                        ? `${adjustment.createdBy.name} ${adjustment.createdBy.lastName}`
+                        : "Sistema"}
                     </MDTypography>
                   </MDBox>
                 </MDBox>

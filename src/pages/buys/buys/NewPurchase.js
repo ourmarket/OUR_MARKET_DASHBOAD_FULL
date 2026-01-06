@@ -35,7 +35,10 @@ import {
 import Loading from "components/DRLoading";
 import { useGetSuppliersQuery } from "api/supplierApi";
 import { useGetProductsQuery } from "api/productApi";
-import { useGetPurchaseOrderByIdQuery } from "api/purchaseOrderApi";
+import {
+  useCancelPurchaseOrderMutation,
+  useGetPurchaseOrderByIdQuery,
+} from "api/purchaseOrderApi";
 import { Autocomplete } from "@mui/material";
 
 // Helpers
@@ -65,6 +68,8 @@ const NewPurchase = () => {
     fromOrderId,
     { skip: !fromOrderId }
   );
+  const [cancelOrder, { isLoading: isLoadingCancel }] =
+    useCancelPurchaseOrderMutation();
 
   const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [purchaseDate, setPurchaseDate] = useState(
@@ -159,22 +164,29 @@ const NewPurchase = () => {
       Swal.fire(
         "Error",
         "Por favor complete todos los campos requeridos",
-        "error"
+        "error",
+        { confirmButtonColor: "#d41f1a" }
       );
       return;
     }
 
     if (registerPayment) {
       if (payments.some((p) => !p.method || p.amount <= 0)) {
-        Swal.fire("Error", "Complete todos los datos de los pagos", "error");
+        Swal.fire({
+          title: "Error",
+          text: "Complete todos los datos de los pagos",
+          icon: "error",
+          confirmButtonColor: "#d41f1a",
+        });
         return;
       }
       if (calculateTotalPayments() > total) {
-        Swal.fire(
-          "Error",
-          "El total de los pagos no puede superar el total de la compra",
-          "error"
-        );
+        Swal.fire({
+          title: "Error",
+          text: "El total de los pagos no puede superar el total de la compra",
+          icon: "error",
+          confirmButtonColor: "#d41f1a",
+        });
         return;
       }
     }
@@ -217,15 +229,17 @@ const NewPurchase = () => {
         text: "La compra ha sido registrada exitosamente .",
         icon: "success",
         confirmButtonText: "OK",
+        confirmButtonColor: "#4CAF50",
       }).then(() => {
         navigate("/compras");
       });
     } catch (error) {
-      Swal.fire(
-        "Error",
-        error.data?.message || "Ocurrió un error al registrar la compra",
-        "error"
-      );
+      Swal.fire({
+        title: "Error",
+        text: error.data?.message || "Ocurrió un error al registrar la compra",
+        icon: "error",
+        confirmButtonColor: "#d41f1a",
+      });
     }
   };
 
@@ -265,6 +279,40 @@ const NewPurchase = () => {
         </MDBox>
       </DashboardLayout>
     );
+
+  const handleReject = async () => {
+    const result = await Swal.fire({
+      title: "Cancelar orden",
+      text: "La orden será cancelada",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Cancelar orden",
+      cancelButtonText: "Volver",
+      confirmButtonColor: "#d41f1a",
+      cancelButtonColor: "#7b809a",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      await cancelOrder(fromOrderId).unwrap();
+
+      Swal.fire({
+        title: "Cancelada",
+        text: "La orden fue cancelada",
+        icon: "info",
+        confirmButtonColor: "#009fc7",
+      });
+      navigate("/compras");
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: error?.data?.message || "No se pudo cancelar la orden",
+        icon: "error",
+        confirmButtonColor: "#d41f1a",
+      });
+    }
+  };
 
   const suppliers = suppliersData?.data.suppliers || [];
   const products = productsData?.products || [];
@@ -738,6 +786,20 @@ const NewPurchase = () => {
                 <Icon>check</Icon>&nbsp;
                 {isCreating ? "Registrando..." : "Confirmar Compra"}
               </MDButton>
+              {fromOrderId && (
+                <MDButton
+                  variant="gradient"
+                  color="error"
+                  fullWidth
+                  onClick={handleReject}
+                  disabled={isLoadingCancel}
+                >
+                  <Icon>cancel</Icon>&nbsp;
+                  {isLoadingCancel
+                    ? "Cancelando..."
+                    : "Cancelar orden de compra"}
+                </MDButton>
+              )}
             </MDBox>
           </Grid>
         </Grid>

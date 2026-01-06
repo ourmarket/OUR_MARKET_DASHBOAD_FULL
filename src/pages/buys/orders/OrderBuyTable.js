@@ -109,16 +109,36 @@ export function OrderBuyTable({ orders: orderData, isLoading }) {
       headerName: "Acciones",
       flex: 0.8,
       sortable: false,
-      renderCell: (params) => (
-        <MDButton
-          variant="text"
-          color="info"
-          size="small"
-          onClick={() => navigate(`/compras/ordenes/${params.row.id}`)}
-        >
-          <Icon>visibility</Icon>&nbsp;Ver
-        </MDButton>
-      ),
+      renderCell: (params) => {
+        const { status, id } = params.row;
+        const isDraft = status === "DRAFT";
+        const isApproved = status === "APPROVED";
+
+        let buttonLabel = "Ver";
+        let buttonIcon = "visibility";
+        let targetRoute = `/compras/ordenes/${id}`;
+
+        if (isDraft) {
+          buttonLabel = "Editar";
+          buttonIcon = "edit";
+          targetRoute = `/compras/ordenes/editar/${id}`;
+        } else if (isApproved) {
+          buttonLabel = "Comprar";
+          buttonIcon = "shopping_cart";
+          targetRoute = `/compras/nueva?fromOrder=${id}`;
+        }
+
+        return (
+          <MDButton
+            variant="text"
+            color="info"
+            size="small"
+            onClick={() => navigate(targetRoute)}
+          >
+            <Icon>{buttonIcon}</Icon>&nbsp;{buttonLabel}
+          </MDButton>
+        );
+      },
     },
   ];
 

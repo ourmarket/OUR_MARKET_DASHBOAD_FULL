@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
 // Material Dashboard 2 React components
@@ -23,31 +23,95 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import TextField from "@mui/material/TextField";
 import Divider from "@mui/material/Divider";
+import CircularProgress from "@mui/material/CircularProgress";
 
 // Helpers
 import { formatPrice } from "utils/formaPrice";
 
 import {
-  useCreatePurchaseOrderMutation,
-  useChangePurchaseOrderStatusMutation,
+  useGetPurchaseOrderByIdQuery,
+  useUpdatePurchaseOrderMutation,
+  useCancelPurchaseOrderMutation,
 } from "api/purchaseOrderApi";
 import { useGetSuppliersQuery } from "api/supplierApi";
 import { useGetProductsQuery } from "api/productApi";
-import { Autocomplete } from "@mui/material";
+import { Autocomplete, Box } from "@mui/material";
 import Loading from "components/DRLoading";
 
-const NewOrder = () => {
-  const [createPurchaseOrder] = useCreatePurchaseOrderMutation();
-  const [changeStatus] = useChangePurchaseOrderStatusMutation();
-
+const EditOrder = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
-  const [selectedSupplier, setSelectedSupplier] = useState(null);
 
+  const {
+    data: orderData,
+    isLoading: isLoadingOrder,
+    error: orderError,
+  } = useGetPurchaseOrderByIdQuery(id);
+  const [updatePurchaseOrder, { isLoading: isUpdating }] =
+    useUpdatePurchaseOrderMutation();
+  const [cancelOrder] = useCancelPurchaseOrderMutation();
+
+  const { data: suppliersData, isLoading: l1 } = useGetSuppliersQuery();
+  const { data: productsData, isLoading: l2 } = useGetProductsQuery();
+
+  const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [expectedDate, setExpectedDate] = useState("");
   const [notes, setNotes] = useState("");
-  const [items, setItems] = useState([
-    { id: "1", product: null, quantity: 1, unitPrice: 0 },
-  ]);
+  const [items, setItems] = useState([]);
+
+  // Load order data into state
+  useEffect(() => {
+    if (
+      orderData?.data &&
+      suppliersData?.data?.suppliers &&
+      productsData?.products
+    ) {
+      const order = orderData.data;
+      const suppliers = suppliersData.data.suppliers;
+      const products = productsData.products;
+
+      // Find full supplier object
+      const matchedSupplier = suppliers.find(
+        (s) => s._id === (order.supplier?._id || order.supplier)
+      );
+      setSelectedSupplier(matchedSupplier || null);
+
+      // Date format YYYY-MM-DD
+      if (order.expectedDate) {
+        setExpectedDate(
+          new Date(order.expectedDate).toISOString().split("T")[0]
+        );
+      }
+
+      setNotes(order.notes || "");
+
+      // Map items and find full product objects
+      const mappedItems = order.items.map((item) => {
+        const matchedProduct = products.find(
+          (p) => p._id === (item.product?._id || item.product)
+        );
+        return {
+          id: item._id || Math.random().toString(),
+          product: matchedProduct || item.product,
+          quantity: item.quantityOrdered,
+          unitPrice: item.estimatedUnitCost,
+        };
+      });
+
+      setItems(
+        mappedItems.length > 0
+          ? mappedItems
+          : [
+              {
+                id: Date.now().toString(),
+                product: null,
+                quantity: 1,
+                unitPrice: 0,
+              },
+            ]
+      );
+    }
+  }, [orderData, suppliersData, productsData]);
 
   const addItem = () => {
     setItems((prev) => [
@@ -72,7 +136,13 @@ const NewOrder = () => {
     return items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
   };
 
+  const isComplete =
+    selectedSupplier &&
+    expectedDate &&
+    items.some((i) => i.product && i.quantity > 0);
+
   const buildPayload = (status = "DRAFT") => ({
+    id,
     supplier: selectedSupplier?._id,
     expectedDate,
     notes,
@@ -87,106 +157,89 @@ const NewOrder = () => {
       })),
   });
 
-  const handleSaveDraft = async () => {
-    const isEmptyDraft = !selectedSupplier && items.every((i) => !i.product);
-
-    if (isEmptyDraft) {
-      const result = await Swal.fire({
-        icon: "warning",
-        title: "Borrador vacío",
-        text: "Estás por guardar un borrador sin datos. ¿Deseás continuar?",
-        showCancelButton: true,
-        confirmButtonText: "Guardar borrador",
-        cancelButtonText: "Cancelar",
-        confirmButtonColor: "#fb8c00",
-        cancelButtonColor: "#7b809a",
-      });
-
-      if (!result.isConfirmed) return;
-    }
+  const handleUpdate = async (shouldSubmit = false) => {
+    const status = shouldSubmit ? "SUBMITTED" : "DRAFT";
 
     try {
-      await createPurchaseOrder(buildPayload("DRAFT")).unwrap();
+      await updatePurchaseOrder(buildPayload(status)).unwrap();
 
       Swal.fire({
         icon: "success",
-        title: "Borrador guardado",
-        timer: 1200,
+        title: shouldSubmit
+          ? "Orden enviada para aprobación"
+          : "Orden actualizada",
+        timer: 1500,
         showConfirmButton: false,
       });
 
       navigate("/compras");
-    } catch {
+    } catch (err) {
       Swal.fire({
         title: "Error",
-        text: "No se pudo guardar el borrador",
+        text: err?.data?.message || "No se pudo actualizar la orden",
         icon: "error",
         confirmButtonColor: "#d41f1a",
       });
     }
   };
 
-  const handleSubmit = async () => {
-    if (!selectedSupplier || !expectedDate || items.every((i) => !i.product)) {
-      Swal.fire({
-        title: "Error",
-        text: "Complete todos los campos requeridos",
-        icon: "error",
-        confirmButtonColor: "#d41f1a",
-      });
-      return;
-    }
+  const handleReject = async () => {
+    const result = await Swal.fire({
+      title: "Cancelar orden",
+      text: "La orden será cancelada",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Cancelar orden",
+      cancelButtonText: "Volver",
+      confirmButtonColor: "#d41f1a",
+      cancelButtonColor: "#7b809a",
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
-      await createPurchaseOrder(buildPayload("SUBMITTED")).unwrap();
+      await cancelOrder(id).unwrap();
 
       Swal.fire({
-        icon: "success",
-        title: "Orden enviada para aprobación",
-        confirmButtonColor: "#4CAF50",
+        title: "Cancelada",
+        text: "La orden fue cancelada",
+        icon: "info",
+        confirmButtonColor: "#009fc7",
       });
-
       navigate("/compras");
-    } catch {
+    } catch (error) {
       Swal.fire({
         title: "Error",
-        text: "No se pudo enviar la orden",
+        text: error?.data?.message || "No se pudo cancelar la orden",
         icon: "error",
         confirmButtonColor: "#d41f1a",
       });
     }
   };
 
-  const {
-    data: suppliersData,
-    isLoading: l1,
-    error: e1,
-  } = useGetSuppliersQuery();
-  const {
-    data: productsData,
-    isLoading: l2,
-    error: e2,
-  } = useGetProductsQuery();
-
-  const loading = l1 || l2;
-  const isError = e1 || e2;
-
-  if (loading)
+  if (isLoadingOrder || l1 || l2) return <Loading />;
+  if (orderError)
     return (
-      <MDBox>
-        <Loading />
-      </MDBox>
-    );
-  if (isError)
-    return (
-      <MDBox>
-        <MDTypography variant="h4">Error</MDTypography>
-      </MDBox>
+      <DashboardLayout>
+        <DashboardNavbar />
+        <MDBox p={3} textAlign="center">
+          <MDTypography variant="h5" color="error">
+            No se encontró la orden o hubo un error al cargar.
+          </MDTypography>
+          <MDButton
+            variant="gradient"
+            color="info"
+            onClick={() => navigate("/compras")}
+            sx={{ mt: 2 }}
+          >
+            Volver
+          </MDButton>
+        </MDBox>
+      </DashboardLayout>
     );
 
   const suppliers = suppliersData?.data.suppliers || [];
   const products = productsData?.products || [];
-  console.log(productsData);
 
   return (
     <DashboardLayout>
@@ -201,7 +254,7 @@ const NewOrder = () => {
         >
           <MDBox>
             <MDTypography variant="h4" fontWeight="medium">
-              Nueva Orden de Compra
+              Editar Orden: {orderData?.data?.code}
             </MDTypography>
             <MDBox display="flex" alignItems="center">
               <MDButton
@@ -214,14 +267,13 @@ const NewOrder = () => {
                 <Icon>arrow_back</Icon>&nbsp;Volver
               </MDButton>
               <MDTypography variant="button" color="text" ml={1}>
-                / Planificá una nueva compra
+                / Modificando borrador
               </MDTypography>
             </MDBox>
           </MDBox>
         </MDBox>
 
         <Grid container spacing={3}>
-          {/* Main Form */}
           <Grid item xs={12} lg={8}>
             <MDBox display="flex" flexDirection="column" gap={3}>
               {/* Supplier Selection */}
@@ -473,22 +525,64 @@ const NewOrder = () => {
 
               {/* Actions */}
               <MDBox display="flex" flexDirection="column" gap={2}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 2,
+                  }}
+                >
+                  <MDButton
+                    variant="outlined"
+                    color="dark"
+                    fullWidth
+                    onClick={() => handleUpdate(false)}
+                    disabled={isUpdating}
+                  >
+                    {isUpdating ? (
+                      <CircularProgress size={20} color="inherit" />
+                    ) : (
+                      <>
+                        <Icon>save</Icon>&nbsp;Actualizar
+                      </>
+                    )}
+                  </MDButton>
+                  <MDButton
+                    variant="outlined"
+                    color="error"
+                    fullWidth
+                    onClick={handleReject}
+                  >
+                    <Icon>delete</Icon>&nbsp;Eliminar
+                  </MDButton>
+                </Box>
+
                 <MDButton
                   variant="gradient"
                   color="info"
                   fullWidth
-                  onClick={handleSubmit}
+                  onClick={() => handleUpdate(true)}
+                  disabled={isUpdating || !isComplete}
                 >
-                  <Icon>send</Icon>&nbsp;Enviar para Aprobación
+                  {isUpdating ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : (
+                    <>
+                      <Icon>send</Icon>&nbsp;Enviar para Aprobación
+                    </>
+                  )}
                 </MDButton>
-                <MDButton
-                  variant="outlined"
-                  color="dark"
-                  fullWidth
-                  onClick={handleSaveDraft}
-                >
-                  <Icon>save</Icon>&nbsp;Guardar Borrador
-                </MDButton>
+
+                {!isComplete && (
+                  <MDTypography
+                    variant="caption"
+                    color="error"
+                    textAlign="center"
+                    fontWeight="medium"
+                  >
+                    * Completar proveedor, fecha e ítems para enviar.
+                  </MDTypography>
+                )}
               </MDBox>
             </MDBox>
           </Grid>
@@ -498,4 +592,4 @@ const NewOrder = () => {
   );
 };
 
-export default NewOrder;
+export default EditOrder;

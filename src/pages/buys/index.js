@@ -31,13 +31,15 @@ import {
   useGetBuysQuery,
   useGetBuysSummaryQuery,
 } from "api/buyApi";
+import { useGetPurchaseAdjustmentsQuery } from "api/purchaseAdjustmentApi";
 import { formatPrice } from "utils/formaPrice";
-import { adjustments as mockAdjustments } from "./mockData";
 
 function BuyPage() {
   const { data: purchaseOrders, isLoading: l1 } = useGetPurchaseOrdersQuery();
   const { data: dataBuys, isLoading: l2 } = useGetBuysQuery();
   const { data: dataBuyPayments, isLoading: l3 } = useGetBuyPaymentsQuery();
+  const { data: dataAdjustments, isLoading: l4 } =
+    useGetPurchaseAdjustmentsQuery();
 
   const { data: summaryData } = useGetBuysSummaryQuery();
 
@@ -244,7 +246,7 @@ function BuyPage() {
                           <Icon fontSize="small" sx={{ mr: 1 }}>
                             settings_suggest
                           </Icon>
-                          Ajustes ({mockAdjustments.length})
+                          Ajustes ({dataAdjustments?.length || 0})
                         </div>
                       }
                     />
@@ -307,7 +309,10 @@ function BuyPage() {
                         ¿Hubo diferencias o devoluciones?
                       </MDTypography>
                       <MDTypography variant="body2" color="text">
-                        <AdjustmentsTable />
+                        <AdjustmentsTable
+                          adjustments={dataAdjustments}
+                          isLoading={l4}
+                        />
                       </MDTypography>
                     </MDBox>
                   )}

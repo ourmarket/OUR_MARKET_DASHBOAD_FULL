@@ -26,7 +26,7 @@ export const goodsReceiptApi = apiSlice.injectEndpoints({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["GoodsReceipt", "PurchaseOrder"],
+      invalidatesTags: ["GoodsReceipt", "PurchaseOrder", "Buy"],
     }),
   }),
 });

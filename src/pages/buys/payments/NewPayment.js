@@ -103,7 +103,8 @@ const NewPayment = () => {
       Swal.fire(
         "Error",
         "Por favor complete todos los campos requeridos",
-        "error"
+        "error",
+        { confirmButtonColor: "#d41f1a" }
       );
       return;
     }
@@ -142,12 +143,18 @@ const NewPayment = () => {
         icon: "success",
         title: "Pago Registrado",
         text: "El pago ha sido registrado exitosamente.",
+        confirmButtonColor: "#4CAF50",
       }).then(() => {
         navigate("/compras");
       });
     } catch (error) {
       console.error(error);
-      Swal.fire("Error", "Ocurrió un error al registrar el pago", "error");
+      Swal.fire({
+        title: "Error",
+        text: "Ocurrió un error al registrar el pago",
+        icon: "error",
+        confirmButtonColor: "#d41f1a",
+      });
     }
   };
 
