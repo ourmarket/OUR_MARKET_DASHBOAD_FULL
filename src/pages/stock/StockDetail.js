@@ -10,6 +10,7 @@ import MDBadge from "components/MDBadge";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import Icon from "@mui/material/Icon";
+import Divider from "@mui/material/Divider";
 
 import { DataGrid } from "@mui/x-data-grid";
 
@@ -215,114 +216,100 @@ const StockDetail = ({ stockData }) => {
         {/* Main Content */}
         <Grid item xs={12} lg={8}>
           <MDBox display="flex" flexDirection="column" gap={3}>
-            {/* Stock Summary Card */}
+            {/* Resumen de Inventario Integrado */}
             <Card>
               <MDBox p={3}>
-                <Grid container spacing={3}>
-                  <Grid item xs={6} sm={3}>
-                    <MDBox
-                      textAlign="center"
-                      p={2}
-                      borderRadius="lg"
-                      bgColor="grey-100"
-                      sx={{ border: "1px solid #ccc" }}
-                    >
-                      <Icon color="primary" sx={{ mb: 1 }}>
-                        inventory_2
-                      </Icon>
-                      <MDTypography variant="h4" fontWeight="bold">
-                        {currentStock}
-                      </MDTypography>
-                      <MDTypography
-                        variant="caption"
-                        color="text"
-                        fontWeight="medium"
-                        textTransform="uppercase"
-                      >
-                        Stock Total
-                      </MDTypography>
-                    </MDBox>
-                  </Grid>
-                  <Grid item xs={6} sm={3}>
-                    <MDBox
-                      textAlign="center"
-                      p={2}
-                      borderRadius="lg"
-                      bgColor="grey-100"
-                      sx={{ border: "1px solid #ccc" }}
-                    >
-                      <Icon color="warning" sx={{ mb: 1 }}>
-                        schedule
-                      </Icon>
-                      <MDTypography variant="h4" fontWeight="bold">
-                        {reservedStock}
-                      </MDTypography>
-                      <MDTypography
-                        variant="caption"
-                        color="text"
-                        fontWeight="medium"
-                        textTransform="uppercase"
-                      >
-                        Reservado
-                      </MDTypography>
-                    </MDBox>
-                  </Grid>
-                  <Grid item xs={6} sm={3}>
-                    <MDBox
-                      textAlign="center"
-                      p={2}
-                      borderRadius="lg"
-                      bgColor="grey-100"
-                      variant="outlined"
-                      sx={{ border: "1px solid #ccc" }}
-                    >
-                      <Icon color="success" sx={{ mb: 1 }}>
-                        check_circle
-                      </Icon>
-                      <MDTypography variant="h4" fontWeight="bold">
-                        {availableStock}
-                      </MDTypography>
-                      <MDTypography
-                        variant="caption"
-                        color="text"
-                        fontWeight="medium"
-                        textTransform="uppercase"
-                      >
-                        Disponible
-                      </MDTypography>
-                    </MDBox>
-                  </Grid>
-                  <Grid item xs={6} sm={3}>
-                    <MDBox
-                      textAlign="center"
-                      p={2}
-                      borderRadius="lg"
-                      bgColor="grey-100"
-                      display="flex"
-                      flexDirection="column"
-                      justifyContent="center"
-                      height="100%"
-                      sx={{ border: "1px solid #ccc" }}
-                    >
-                      <MDBox mb={1}>
-                        <MDBadge
-                          variant="gradient"
-                          color={getStatusColor(stockStatus)}
-                          badgeContent={getStatusLabel(stockStatus)}
-                          size="sm"
-                        />
+                <MDBox display="flex" alignItems="center" mb={2}>
+                  <Icon sx={{ mr: 1, color: "info.main" }}>inventory_2</Icon>
+                  <MDTypography variant="h6" fontWeight="medium">
+                    Resumen de Inventario
+                  </MDTypography>
+                  <MDBox ml="auto">
+                    <MDBadge
+                      variant="gradient"
+                      color={getStatusColor(stockStatus)}
+                      badgeContent={getStatusLabel(stockStatus)}
+                      size="sm"
+                    />
+                  </MDBox>
+                </MDBox>
+
+                <MDBox
+                  p={2}
+                  sx={{
+                    border: "1px dashed #ddd",
+                    borderRadius: "10px",
+                    bgcolor: "#fafafa",
+                  }}
+                >
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={4}>
+                      <MDBox textAlign="center">
+                        <MDTypography
+                          variant="caption"
+                          color="text"
+                          fontWeight="bold"
+                          textTransform="uppercase"
+                        >
+                          Disponible
+                        </MDTypography>
+                        <MDTypography variant="h4" color="success">
+                          {availableStock}
+                        </MDTypography>
                       </MDBox>
-                      <MDTypography
-                        variant="caption"
-                        color="text"
-                        fontWeight="medium"
-                        textTransform="uppercase"
-                      >
-                        Estado
-                      </MDTypography>
-                    </MDBox>
+                    </Grid>
+                    <Grid
+                      item
+                      xs={12}
+                      sm={4}
+                      sx={{
+                        borderLeft: { sm: "1px solid #ddd" },
+                        borderRight: { sm: "1px solid #ddd" },
+                      }}
+                    >
+                      <MDBox textAlign="center">
+                        <MDTypography
+                          variant="caption"
+                          color="text"
+                          fontWeight="bold"
+                          textTransform="uppercase"
+                        >
+                          Reservado
+                        </MDTypography>
+                        <MDTypography variant="h4" color="warning">
+                          {reservedStock}
+                        </MDTypography>
+                      </MDBox>
+                    </Grid>
+                    <Grid item xs={12} sm={4}>
+                      <MDBox textAlign="center">
+                        <MDTypography
+                          variant="caption"
+                          color="text"
+                          fontWeight="bold"
+                          textTransform="uppercase"
+                        >
+                          Stock Total
+                        </MDTypography>
+                        <MDTypography variant="h4" color="dark">
+                          {currentStock}
+                        </MDTypography>
+                      </MDBox>
+                    </Grid>
                   </Grid>
-                </Grid>
+                </MDBox>
+
+                <MDBox mt={2}>
+                  <MDTypography
+                    variant="caption"
+                    color="text"
+                    fontStyle="italic"
+                  >
+                    * El stock disponible es el que puede venderse
+                    inmediatamente. El reservado pertenece a pedidos pendientes
+                    de entrega.
+                  </MDTypography>
+                </MDBox>
               </MDBox>
             </Card>
 
@@ -385,102 +372,54 @@ const StockDetail = ({ stockData }) => {
             {/* Product Info */}
             <Card>
               <MDBox p={2} display="flex" alignItems="center">
-                <Icon sx={{ mr: 1 }}>label</Icon>
+                <Icon sx={{ mr: 1, color: "info.main" }}>info</Icon>
                 <MDTypography variant="h6" fontWeight="medium">
-                  Información del Producto
+                  Información Logística
                 </MDTypography>
               </MDBox>
               <MDBox p={2} pt={0}>
-                <MDBox display="flex" alignItems="center" mb={2}>
-                  <Icon
-                    fontSize="small"
-                    sx={{ mr: 1.5, color: "text.secondary" }}
-                  >
-                    layers
-                  </Icon>
-                  <MDBox>
-                    <MDTypography
-                      variant="caption"
-                      color="text"
-                      display="block"
-                    >
-                      Categoría
-                    </MDTypography>
-                    <MDTypography variant="button" fontWeight="medium">
-                      {product.category?.name || "Sin categoría"}
-                    </MDTypography>
-                  </MDBox>
+                <MDBox display="flex" justifyContent="space-between" mb={1.5}>
+                  <MDTypography variant="button" color="text">
+                    Categoría:
+                  </MDTypography>
+                  <MDTypography variant="button" fontWeight="medium">
+                    {product.category?.name || "Sin categoría"}
+                  </MDTypography>
                 </MDBox>
-                <MDBox display="flex" alignItems="center" mb={2}>
-                  <Icon
-                    fontSize="small"
-                    sx={{ mr: 1.5, color: "text.secondary" }}
+                <MDBox display="flex" justifyContent="space-between" mb={1.5}>
+                  <MDTypography variant="button" color="text">
+                    Unidad de Medida:
+                  </MDTypography>
+                  <MDTypography
+                    variant="button"
+                    fontWeight="medium"
+                    textTransform="capitalize"
                   >
-                    inventory_2
-                  </Icon>
-                  <MDBox>
-                    <MDTypography
-                      variant="caption"
-                      color="text"
-                      display="block"
-                    >
-                      Unidad
-                    </MDTypography>
+                    {product.unit || "Unidad"}
+                  </MDTypography>
+                </MDBox>
+                <MDBox display="flex" justifyContent="space-between" mb={1.5}>
+                  <MDTypography variant="button" color="text">
+                    Stock Mínimo:
+                  </MDTypography>
+                  <MDBox display="flex" alignItems="center">
+                    <Icon fontSize="inherit" color="error" sx={{ mr: 0.5 }}>
+                      report_problem
+                    </Icon>
                     <MDTypography
                       variant="button"
-                      fontWeight="medium"
-                      sx={{ textTransform: "capitalize" }}
+                      fontWeight="bold"
+                      color="error"
                     >
-                      {product.unit || "Unidad"}
+                      {product.minStock || 0}
                     </MDTypography>
                   </MDBox>
                 </MDBox>
-                <MDBox
-                  display="flex"
-                  alignItems="center"
-                  mb={lastMovement ? 2 : 0}
-                >
-                  <Icon
-                    fontSize="small"
-                    sx={{ mr: 1.5, color: "text.secondary" }}
-                  >
-                    report_problem
-                  </Icon>
-                  <MDBox>
-                    <MDTypography
-                      variant="caption"
-                      color="text"
-                      display="block"
-                    >
-                      Stock Mínimo
-                    </MDTypography>
-                    <MDTypography variant="button" fontWeight="medium">
-                      {product.minStock || 0} {"Unid."}
-                    </MDTypography>
-                  </MDBox>
-                </MDBox>
-                {/*  {stockItem && stockItem?.lastMovementDate && (
-                    <MDBox display="flex" alignItems="center">
-                      <Icon
-                        fontSize="small"
-                        sx={{ mr: 1.5, color: "text.secondary" }}
-                      >
-                        calendar_today
-                      </Icon>
-                      <MDBox>
-                        <MDTypography
-                          variant="caption"
-                          color="text"
-                          display="block"
-                        >
-                          Último Movimiento
-                        </MDTypography>
-                        <MDTypography variant="button" fontWeight="medium">
-                          {dateToLocalDate(lastMovement.createdAt)}
-                        </MDTypography>
-                      </MDBox>
-                    </MDBox>
-                  )} */}
+                <Divider />
+                <MDTypography variant="caption" color="text" display="block">
+                  * El sistema alertará cuando el stock disponible sea menor al
+                  mínimo definido.
+                </MDTypography>
               </MDBox>
             </Card>
 
