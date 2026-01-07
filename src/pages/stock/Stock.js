@@ -23,6 +23,7 @@ import Select from "@mui/material/Select";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import { DataGrid } from "@mui/x-data-grid";
+import CustomNoRowsOverlay from "components/OUTables/CustomNoRowsOverlay";
 
 // Data
 import { useGetStockListQuery, useGetStockSummaryQuery } from "api/stockApi";
@@ -528,6 +529,14 @@ const StockPage = () => {
                 pageSizeOptions={[10, 20, 50]}
                 processRowUpdate={handleProcessRowUpdate}
                 experimentalFeatures={{ newEditingApi: true }}
+                slots={{
+                  noRowsOverlay: () => (
+                    <CustomNoRowsOverlay
+                      title="No se encontraron productos"
+                      message="Intenta ajustar los filtros o verifica el inventario"
+                    />
+                  ),
+                }}
                 disableRowSelectionOnClick
                 /* onRowClick={({ row }) =>
                   navigate(`/productos/stock/detalle/${row.productId}`)

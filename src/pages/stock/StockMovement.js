@@ -20,7 +20,10 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
+import TextField from "@mui/material/TextField";
+import Autocomplete from "@mui/material/Autocomplete";
 import { DataGrid } from "@mui/x-data-grid";
+import CustomNoRowsOverlay from "components/OUTables/CustomNoRowsOverlay";
 
 // Data
 //import { formatDate } from "./mockData";
@@ -30,14 +33,14 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { dateToLocalDate } from "utils/dateFormat";
 
 const getMovementTypeLabel = (type) => {
-  switch (type) {
-    case "in":
+  switch (type?.toUpperCase()) {
+    case "IN":
       return "Ingreso";
-    case "out":
+    case "OUT":
       return "Egreso";
-    case "reserved":
+    case "RESERVED":
       return "Reserva";
-    case "released":
+    case "RELEASED":
       return "Liberación";
     default:
       return type;
@@ -45,14 +48,14 @@ const getMovementTypeLabel = (type) => {
 };
 
 const getMovementTypeColor = (type) => {
-  switch (type) {
-    case "in":
+  switch (type?.toUpperCase()) {
+    case "IN":
       return "success";
-    case "out":
+    case "OUT":
       return "error";
-    case "reserved":
+    case "RESERVED":
       return "warning";
-    case "released":
+    case "RELEASED":
       return "info";
     default:
       return "secondary";
@@ -141,7 +144,8 @@ const StockMovements = () => {
   // Local sorting as fallback or additional layer
   const sortedMovements = useMemo(() => {
     return [...movements].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
   }, [movements]);
 
@@ -152,11 +156,13 @@ const StockMovements = () => {
     return sortedMovements.filter((mov) => {
       // If API already filtered, these will mostly be true
       const productName = mov.product?.name || "";
+      const movementCode = mov.code || "";
+      const referenceId = mov.reference || "";
+
       const matchesSearch =
         productName.toLowerCase().includes(search.toLowerCase()) ||
-        mov.movementNumber.toLowerCase().includes(search.toLowerCase()) ||
-        (mov.documentNumber &&
-          mov.documentNumber.toLowerCase().includes(search.toLowerCase()));
+        movementCode.toLowerCase().includes(search.toLowerCase()) ||
+        referenceId.toLowerCase().includes(search.toLowerCase());
 
       const matchesProduct =
         selectedProduct === "all" || mov.productId === selectedProduct;
@@ -234,10 +240,14 @@ const StockMovements = () => {
           <Icon
             fontSize="small"
             color={
-              row.type === "in" || row.type === "released" ? "success" : "error"
+              row.type?.toUpperCase() === "IN" ||
+              row.type?.toUpperCase() === "RELEASED"
+                ? "success"
+                : "error"
             }
           >
-            {row.type === "in" || row.type === "released"
+            {row.type?.toUpperCase() === "IN" ||
+            row.type?.toUpperCase() === "RELEASED"
               ? "arrow_upward"
               : "arrow_downward"}
           </Icon>
@@ -409,31 +419,46 @@ const StockMovements = () => {
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={12} lg={4}>
                 <MDInput
-                  label="Buscar por producto o Nº documento..."
+                  label="Buscar por nombre del producto..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   fullWidth
                 />
               </Grid>
               <Grid item xs={12} sm={4} lg={3}>
-                <FormControl fullWidth>
-                  <InputLabel id="product-filter-label">Producto</InputLabel>
-                  <Select
-                    labelId="product-filter-label"
-                    value={selectedProduct}
-                    label="Producto"
-                    onChange={(e) => setSelectedProduct(e.target.value)}
-                    sx={{ height: "45px" }}
-                  >
-                    <MenuItem value="all">Todos los productos</MenuItem>
-                    {products &&
-                      products.map((prod) => (
-                        <MenuItem key={prod.id} value={prod.id}>
-                          {prod.name}
-                        </MenuItem>
-                      ))}
-                  </Select>
-                </FormControl>
+                <Autocomplete
+                  options={[
+                    { name: "Todos los productos", id: "all" },
+                    ...products.map((p) => ({
+                      name: p.name,
+                      id: p.id || p._id,
+                    })),
+                  ]}
+                  getOptionLabel={(option) => option.name}
+                  value={
+                    selectedProduct === "all"
+                      ? { name: "Todos los productos", id: "all" }
+                      : products.find(
+                          (p) => (p.id || p._id) === selectedProduct
+                        ) || { name: "Todos los productos", id: "all" }
+                  }
+                  onChange={(event, newValue) => {
+                    setSelectedProduct(newValue ? newValue.id : "all");
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Producto"
+                      sx={{
+                        "& .MuiInputBase-root": {
+                          height: "45px",
+                          paddingTop: "0px !important",
+                        },
+                      }}
+                    />
+                  )}
+                  disableClearable
+                />
               </Grid>
               <Grid item xs={12} sm={4} lg={2.5}>
                 <FormControl fullWidth>
@@ -446,10 +471,10 @@ const StockMovements = () => {
                     sx={{ height: "45px" }}
                   >
                     <MenuItem value="all">Todos</MenuItem>
-                    <MenuItem value="in">Ingreso</MenuItem>
-                    <MenuItem value="out">Egreso</MenuItem>
-                    <MenuItem value="reserved">Reserva</MenuItem>
-                    <MenuItem value="released">Liberación</MenuItem>
+                    <MenuItem value="IN">Ingreso</MenuItem>
+                    <MenuItem value="OUT">Egreso</MenuItem>
+                    <MenuItem value="RESERVED">Reserva</MenuItem>
+                    <MenuItem value="RELEASED">Liberación</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
@@ -464,10 +489,11 @@ const StockMovements = () => {
                     sx={{ height: "45px" }}
                   >
                     <MenuItem value="all">Todos</MenuItem>
-                    <MenuItem value="receipt">Recepción</MenuItem>
-                    <MenuItem value="sale">Venta</MenuItem>
-                    <MenuItem value="adjustment">Ajuste</MenuItem>
-                    <MenuItem value="transfer">Transferencia</MenuItem>
+                    <MenuItem value="BUY">Compra</MenuItem>
+                    <MenuItem value="SALE">Venta</MenuItem>
+                    <MenuItem value="ORDER">Pedido</MenuItem>
+                    <MenuItem value="ADJUST">Ajuste</MenuItem>
+                    <MenuItem value="RETURN">Devolución</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
@@ -534,6 +560,7 @@ const StockMovements = () => {
                 rowsPerPageOptions={[10, 20, 50]}
                 disableSelectionOnClick
                 getRowId={(row) => row.id || row._id}
+                slots={{ noRowsOverlay: CustomNoRowsOverlay }}
                 sx={{
                   border: "none",
                   "& .MuiDataGrid-columnHeaders": {

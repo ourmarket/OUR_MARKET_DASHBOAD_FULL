@@ -18,15 +18,18 @@ import Divider from "@mui/material/Divider";
 import { DataGrid } from "@mui/x-data-grid";
 
 // Data
-import { getStockItem, getMovementsForProduct, formatDate } from "./mockData";
+// Data
+import { useGetStockByProductQuery } from "api/stockApi";
+import CircularProgress from "@mui/material/CircularProgress";
+import { dateToLocalDate } from "utils/dateFormat";
 
 const getStatusLabel = (status) => {
   switch (status) {
-    case "normal":
+    case "NORMAL":
       return "Normal";
-    case "low":
+    case "LOW":
       return "Bajo";
-    case "out":
+    case "ZERO":
       return "Sin Stock";
     default:
       return status;
@@ -35,11 +38,11 @@ const getStatusLabel = (status) => {
 
 const getStatusColor = (status) => {
   switch (status) {
-    case "normal":
+    case "NORMAL":
       return "success";
-    case "low":
+    case "LOW":
       return "warning";
-    case "out":
+    case "ZERO":
       return "error";
     default:
       return "secondary";
@@ -47,14 +50,14 @@ const getStatusColor = (status) => {
 };
 
 const getMovementTypeLabel = (type) => {
-  switch (type) {
-    case "in":
+  switch (type?.toUpperCase()) {
+    case "IN":
       return "Ingreso";
-    case "out":
+    case "OUT":
       return "Egreso";
-    case "reserved":
+    case "RESERVED":
       return "Reserva";
-    case "released":
+    case "RELEASED":
       return "Liberación";
     default:
       return type;
@@ -62,14 +65,14 @@ const getMovementTypeLabel = (type) => {
 };
 
 const getMovementTypeColor = (type) => {
-  switch (type) {
-    case "in":
+  switch (type?.toUpperCase()) {
+    case "IN":
       return "success";
-    case "out":
+    case "OUT":
       return "error";
-    case "reserved":
+    case "RESERVED":
       return "warning";
-    case "released":
+    case "RELEASED":
       return "info";
     default:
       return "secondary";
@@ -80,10 +83,25 @@ const StockDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const stockItem = getStockItem(id || "");
-  const movements = getMovementsForProduct(id || "").slice(0, 5);
+  const { data: stockData, isLoading, isError } = useGetStockByProductQuery(id);
 
-  if (!stockItem) {
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <DashboardNavbar />
+        <MDBox
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          minHeight="50vh"
+        >
+          <CircularProgress color="info" />
+        </MDBox>
+      </DashboardLayout>
+    );
+  }
+
+  if (isError || !stockData) {
     return (
       <DashboardLayout>
         <DashboardNavbar />
@@ -101,7 +119,9 @@ const StockDetail = () => {
             Producto no encontrado
           </MDTypography>
           <MDTypography variant="button" color="text" mb={3}>
-            El producto que buscas no existe en el inventario.
+            {isError
+              ? "Ocurrió un error al cargar los datos."
+              : "El producto que buscas no existe en el inventario."}
           </MDTypography>
           <MDButton
             variant="gradient"
@@ -115,16 +135,30 @@ const StockDetail = () => {
     );
   }
 
+  const { product, stock, lastMovements = [] } = stockData;
+
+  const currentStock = stock.available + stock.reserved;
+  const reservedStock = stock.reserved;
+  const availableStock = stock.available;
+
+  let stockStatus = "NORMAL";
+  if (availableStock <= 0) {
+    stockStatus = "ZERO";
+  } else if (availableStock < (product.minStock || 0)) {
+    stockStatus = "LOW";
+  }
+
+  const movements = lastMovements;
   const lastMovement = movements[0];
 
   const movementColumns = [
     {
-      field: "date",
+      field: "createdAt",
       headerName: "Fecha",
       flex: 1,
       renderCell: ({ row }) => (
         <MDTypography variant="button" fontWeight="light" color="text">
-          {formatDate(row.date)}
+          {dateToLocalDate(row.createdAt)}
         </MDTypography>
       ),
     },
@@ -184,7 +218,7 @@ const StockDetail = () => {
         >
           <MDBox>
             <MDTypography variant="h4" fontWeight="medium">
-              {stockItem.product.name}
+              {product.name}
             </MDTypography>
             <MDBox display="flex" alignItems="center">
               <MDButton
@@ -197,7 +231,7 @@ const StockDetail = () => {
                 <Icon>arrow_back</Icon>&nbsp;Volver
               </MDButton>
               <MDTypography variant="button" color="text" ml={1}>
-                / Código: {stockItem.product.code}
+                / Código: {product.code || "N/A"}
               </MDTypography>
             </MDBox>
           </MDBox>
@@ -243,7 +277,7 @@ const StockDetail = () => {
                           inventory_2
                         </Icon>
                         <MDTypography variant="h4" fontWeight="bold">
-                          {stockItem.currentStock}
+                          {currentStock}
                         </MDTypography>
                         <MDTypography
                           variant="caption"
@@ -267,7 +301,7 @@ const StockDetail = () => {
                           schedule
                         </Icon>
                         <MDTypography variant="h4" fontWeight="bold">
-                          {stockItem.reservedStock}
+                          {reservedStock}
                         </MDTypography>
                         <MDTypography
                           variant="caption"
@@ -288,11 +322,11 @@ const StockDetail = () => {
                         variant="outlined"
                         sx={{ border: "1px solid #ccc" }}
                       >
-                        <Icon color="white" sx={{ mb: 1 }}>
+                        <Icon color="success" sx={{ mb: 1 }}>
                           check_circle
                         </Icon>
                         <MDTypography variant="h4" fontWeight="bold">
-                          {stockItem.availableStock}
+                          {availableStock}
                         </MDTypography>
                         <MDTypography
                           variant="caption"
@@ -319,8 +353,8 @@ const StockDetail = () => {
                         <MDBox mb={1}>
                           <MDBadge
                             variant="gradient"
-                            color={getStatusColor(stockItem.status)}
-                            badgeContent={getStatusLabel(stockItem.status)}
+                            color={getStatusColor(stockStatus)}
+                            badgeContent={getStatusLabel(stockStatus)}
                             size="sm"
                           />
                         </MDBox>
@@ -374,6 +408,7 @@ const StockDetail = () => {
                   <DataGrid
                     rows={movements}
                     columns={movementColumns}
+                    getRowId={(row) => row.id || row._id || row.code}
                     pageSize={5}
                     rowsPerPageOptions={[5]}
                     disableSelectionOnClick
@@ -418,7 +453,7 @@ const StockDetail = () => {
                         Categoría
                       </MDTypography>
                       <MDTypography variant="button" fontWeight="medium">
-                        {stockItem.product.category}
+                        {product.category?.name || "Sin categoría"}
                       </MDTypography>
                     </MDBox>
                   </MDBox>
@@ -442,7 +477,7 @@ const StockDetail = () => {
                         fontWeight="medium"
                         sx={{ textTransform: "capitalize" }}
                       >
-                        {stockItem.product.unit}
+                        {product.unit || "Unidad"}
                       </MDTypography>
                     </MDBox>
                   </MDBox>
@@ -466,11 +501,11 @@ const StockDetail = () => {
                         Stock Mínimo
                       </MDTypography>
                       <MDTypography variant="button" fontWeight="medium">
-                        {stockItem.product.minStock} {stockItem.product.unit}s
+                        {product.minStock || 0} {"Unid."}
                       </MDTypography>
                     </MDBox>
                   </MDBox>
-                  {stockItem.lastMovementDate && (
+                  {/*  {stockItem && stockItem?.lastMovementDate && (
                     <MDBox display="flex" alignItems="center">
                       <Icon
                         fontSize="small"
@@ -487,11 +522,11 @@ const StockDetail = () => {
                           Último Movimiento
                         </MDTypography>
                         <MDTypography variant="button" fontWeight="medium">
-                          {formatDate(stockItem.lastMovementDate)}
+                          {dateToLocalDate(lastMovement.createdAt)}
                         </MDTypography>
                       </MDBox>
                     </MDBox>
-                  )}
+                  )} */}
                 </MDBox>
               </Card>
 
@@ -551,7 +586,7 @@ const StockDetail = () => {
                         Fecha
                       </MDTypography>
                       <MDTypography variant="caption" fontWeight="medium">
-                        {formatDate(lastMovement.date)}
+                        {dateToLocalDate(lastMovement.createdAt)}
                       </MDTypography>
                     </MDBox>
                     <MDBox
@@ -598,7 +633,7 @@ const StockDetail = () => {
                           fontWeight="medium"
                           sx={{ fontFamily: "monospace" }}
                         >
-                          {lastMovement.documentNumber}
+                          {lastMovement.code}
                         </MDTypography>
                       </MDBox>
                     )}
@@ -607,7 +642,8 @@ const StockDetail = () => {
                         Usuario
                       </MDTypography>
                       <MDTypography variant="caption" fontWeight="medium">
-                        {lastMovement.createdBy}
+                        {lastMovement.createdBy.name}{" "}
+                        {lastMovement.createdBy.lastName}
                       </MDTypography>
                     </MDBox>
                   </MDBox>
