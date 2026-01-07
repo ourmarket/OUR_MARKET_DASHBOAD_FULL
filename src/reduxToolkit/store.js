@@ -1,11 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
+import { apiSlice } from "api/apiSlice";
 import { authApi } from "api/authApi";
-import { categoryApi } from "api/categoryApi";
-import { deliveryZoneApi } from "api/deliveryZoneApi";
-import { ofertApi } from "api/ofertApi";
 import { orderApi } from "api/orderApi";
-import { productApi } from "api/productApi";
-import { userApi } from "api/userApi";
 import authReducer from "./authSlice";
 import cartReducer from "./cartSlice";
 import buyReducer from "./buySlice";
@@ -25,22 +21,16 @@ export const store = configureStore({
     positions: positionsReducer,
     mapAutocomplete: mapAutocompleteReducer,
     map: mapReducer,
-    [userApi.reducerPath]: userApi.reducer,
-    [productApi.reducerPath]: productApi.reducer,
-    [categoryApi.reducerPath]: categoryApi.reducer,
-    [ofertApi.reducerPath]: ofertApi.reducer,
+    [apiSlice.reducerPath]: apiSlice.reducer,
+    // Note: authApi and orderApi might have their own reducerPath if they don't use apiSlice
     [authApi.reducerPath]: authApi.reducer,
     [orderApi.reducerPath]: orderApi.reducer,
-    [deliveryZoneApi.reducerPath]: deliveryZoneApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
     })
-      .concat(userApi.middleware)
-      .concat(productApi.middleware)
-      .concat(categoryApi.middleware)
-      .concat(ofertApi.middleware)
+      .concat(apiSlice.middleware)
       .concat(authApi.middleware)
-      .concat(deliveryZoneApi.middleware),
+      .concat(orderApi.middleware),
 });

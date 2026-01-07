@@ -42,16 +42,34 @@ const getTotalAdjustments = (purchaseId) => {
 };
 
 const ACTION_CONFIG = {
-  CREATED: { label: "Compra Creada", color: "dark" },
-  GOODS_RECEIVED: { label: "Mercadería Recibida", color: "success" },
-  PARTIAL_RECEIPT: { label: "Recepción Parcial", color: "warning" },
-  PAYMENT_ADDED: { label: "Pago Registrado", color: "success" },
-  PAYMENT_REMOVED: { label: "Pago Eliminado", color: "error" },
-  STATUS_CHANGED: { label: "Estado Actualizado", color: "info" },
-  ADJUSTMENT_LINKED: { label: "Ajuste Vinculado", color: "primary" },
-  DOCUMENT_ATTACHED: { label: "Documento Adjunto", color: "info" },
-  NOTE_ADDED: { label: "Nota Agregada", color: "secondary" },
-  CANCELLED: { label: "Compra Anulada", color: "error" },
+  CREATED: { label: "Compra Creada", color: "dark", icon: "add_shopping_cart" },
+  GOODS_RECEIVED: {
+    label: "Recepción Completa",
+    color: "success",
+    icon: "inventory_2",
+  },
+  PARTIAL_RECEIPT: {
+    label: "Recepción Parcial",
+    color: "warning",
+    icon: "inventory_2",
+  },
+  ADJUSTMENT_AUTO: {
+    label: "Ajuste Automático",
+    color: "primary",
+    icon: "settings_suggest",
+  },
+  PAYMENT_ADDED: {
+    label: "Pago Registrado",
+    color: "success",
+    icon: "account_balance_wallet",
+  },
+  PAYMENT_REMOVED: {
+    label: "Pago Eliminado",
+    color: "error",
+    icon: "money_off",
+  },
+  STATUS_CHANGED: { label: "Estado Actualizado", color: "info", icon: "sync" },
+  CANCELLED: { label: "Compra Anulada", color: "error", icon: "block" },
 };
 
 const PurchaseDetail = () => {
@@ -269,26 +287,24 @@ const PurchaseDetail = () => {
             </MDBox>
           </MDBox>
           <MDBox display="flex" gap={1}>
+            {buy?.receiptStatus !== "complete" && (
+              <Link to={`/compras/recepciones/nueva/${buy._id}`}>
+                <MDButton variant="outlined" color="info">
+                  <Icon>inventory_2</Icon>&nbsp;Registrar Recepción
+                </MDButton>
+              </Link>
+            )}
             {balanceDue > 0 && (
-              <>
-                {hasReceipts && hasDifferences && (
-                  <Link to={`/compras/ajustes/nuevo?buy=${buy._id}`}>
-                    <MDButton variant="outlined" color="error">
-                      <Icon>settings_suggest</Icon>&nbsp;Registrar Ajuste
-                    </MDButton>
-                  </Link>
-                )}
-                <Link to={`/compras/pagos/registrar-pago/${buy._id}`}>
-                  <MDButton variant="gradient" color="success">
-                    <Icon>account_balance_wallet</Icon>&nbsp;Registrar Pago
-                  </MDButton>
-                </Link>
-              </>
+              <Link to={`/compras/pagos/registrar-pago/${buy._id}`}>
+                <MDButton variant="gradient" color="success">
+                  <Icon>account_balance_wallet</Icon>&nbsp;Registrar Pago
+                </MDButton>
+              </Link>
             )}
           </MDBox>
         </MDBox>
 
-        {/* Historical Record Notice */}
+        {/* Frozen Document Notice */}
         <MDBox
           bgColor="grey-100"
           borderRadius="lg"
@@ -297,12 +313,10 @@ const PurchaseDetail = () => {
           display="flex"
           alignItems="flex-start"
           sx={{
-            border: ({ borders: { borderWidth, borderColor } }) =>
-              `${borderWidth[1]} solid ${borderColor}`,
+            borderLeft: "4px solid #7b809a",
           }}
         >
           <Icon
-            color="inherit"
             fontSize="medium"
             sx={{ color: "text.secondary", mr: 2, mt: 0.5 }}
           >
@@ -310,12 +324,12 @@ const PurchaseDetail = () => {
           </Icon>
           <MDBox>
             <MDTypography variant="subtitle2" fontWeight="bold">
-              Registro Histórico
+              Documento Cerrado e Inmutable
             </MDTypography>
             <MDTypography variant="caption" color="text">
-              Esta compra es un documento cerrado y no puede ser modificada. Se
-              han congelado los costos y nombres de productos al momento de la
-              compra.
+              Esta compra es un documento cerrado. Los costos y productos fueron
+              congelados al momento de la compra para garantizar la integridad
+              contable.
             </MDTypography>
           </MDBox>
         </MDBox>
@@ -327,76 +341,96 @@ const PurchaseDetail = () => {
               {/* Summary Card */}
               <Card>
                 <MDBox p={3}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={6} sm={3}>
-                      <MDTypography
-                        variant="caption"
-                        color="text"
-                        fontWeight="bold"
-                        textTransform="uppercase"
-                      >
-                        Fecha
-                      </MDTypography>
-                      <MDBox display="flex" alignItems="center" mt={0.5}>
-                        <Icon
-                          fontSize="small"
-                          color="disabled"
-                          sx={{ mr: 0.5 }}
+                  <Grid container spacing={3} alignItems="center">
+                    <Grid item xs={12} sm={3}>
+                      <MDBox display="flex" flexDirection="column">
+                        <MDTypography
+                          variant="caption"
+                          color="text"
+                          fontWeight="bold"
+                          textTransform="uppercase"
                         >
-                          event
-                        </Icon>
-                        <MDTypography variant="button" fontWeight="medium">
-                          {dateToLocalDate(buy.date)}
+                          Fecha de Compra
+                        </MDTypography>
+                        <MDBox display="flex" alignItems="center" mt={0.5}>
+                          <Icon
+                            fontSize="small"
+                            color="disabled"
+                            sx={{ mr: 0.5 }}
+                          >
+                            event
+                          </Icon>
+                          <MDTypography variant="button" fontWeight="medium">
+                            {dateToLocalDate(buy.date)}
+                          </MDTypography>
+                        </MDBox>
+                      </MDBox>
+                    </Grid>
+                    <Grid item xs={12} sm={3}>
+                      <MDBox
+                        display="flex"
+                        flexDirection="column"
+                        alignItems="center"
+                      >
+                        <MDTypography
+                          variant="caption"
+                          color="text"
+                          fontWeight="bold"
+                          textTransform="uppercase"
+                        >
+                          Estado Pago
+                        </MDTypography>
+                        <MDBox mt={0.5}>
+                          <MDBadge
+                            badgeContent={getStatusLabel(buy.status)}
+                            color={getStatusColor(buy.status)}
+                            variant="gradient"
+                            size="sm"
+                          />
+                        </MDBox>
+                      </MDBox>
+                    </Grid>
+                    <Grid item xs={12} sm={3}>
+                      <MDBox
+                        display="flex"
+                        flexDirection="column"
+                        alignItems="center"
+                      >
+                        <MDTypography
+                          variant="caption"
+                          color="text"
+                          fontWeight="bold"
+                          textTransform="uppercase"
+                        >
+                          Total
+                        </MDTypography>
+                        <MDTypography variant="h6" mt={0.5}>
+                          {formatPrice(buy.total)}
                         </MDTypography>
                       </MDBox>
                     </Grid>
-                    <Grid item xs={6} sm={3}>
-                      <MDTypography
-                        variant="caption"
-                        color="text"
-                        fontWeight="bold"
-                        textTransform="uppercase"
+                    <Grid item xs={12} sm={3}>
+                      <MDBox
+                        display="flex"
+                        flexDirection="column"
+                        alignItems="flex-end"
                       >
-                        Estado Pago
-                      </MDTypography>
-                      <MDBox mt={0.5}>
-                        <MDBadge
-                          badgeContent={getStatusLabel(buy.status)}
-                          color={getStatusColor(buy.status)}
-                          variant="gradient"
-                          size="sm"
-                        />
+                        <MDTypography
+                          variant="caption"
+                          color="text"
+                          fontWeight="bold"
+                          textTransform="uppercase"
+                        >
+                          Saldo Pendiente
+                        </MDTypography>
+                        <MDTypography
+                          variant="h6"
+                          mt={0.5}
+                          color={adjustedBalance > 0 ? "error" : "success"}
+                        >
+                          {formatPrice(Math.max(0, adjustedBalance))}
+                        </MDTypography>
                       </MDBox>
-                    </Grid>
-                    <Grid item xs={6} sm={3}>
-                      <MDTypography
-                        variant="caption"
-                        color="text"
-                        fontWeight="bold"
-                        textTransform="uppercase"
-                      >
-                        Total
-                      </MDTypography>
-                      <MDTypography variant="h6" mt={0.5}>
-                        {formatPrice(buy.total)}
-                      </MDTypography>
-                    </Grid>
-                    <Grid item xs={6} sm={3}>
-                      <MDTypography
-                        variant="caption"
-                        color="text"
-                        fontWeight="bold"
-                        textTransform="uppercase"
-                      >
-                        Saldo Pendiente
-                      </MDTypography>
-                      <MDTypography
-                        variant="h6"
-                        mt={0.5}
-                        color={balanceDue > 0 ? "error" : "success"}
-                      >
-                        {formatPrice(balanceDue)}
-                      </MDTypography>
                     </Grid>
                   </Grid>
                 </MDBox>
@@ -429,18 +463,31 @@ const PurchaseDetail = () => {
                           <TableCell align="right">{item.quantity}</TableCell>
                           {hasReceipts && (
                             <TableCell align="right">
-                              <MDTypography
-                                variant="button"
-                                fontWeight="bold"
-                                color={
-                                  getReceivedQuantity(item.product) <
-                                  item.quantity
-                                    ? "error"
-                                    : "success"
-                                }
+                              <MDBox
+                                display="flex"
+                                flexDirection="column"
+                                alignItems="flex-end"
                               >
-                                {getReceivedQuantity(item.product)}
-                              </MDTypography>
+                                <MDTypography
+                                  variant="button"
+                                  fontWeight="bold"
+                                  color={
+                                    getReceivedQuantity(item.product) ===
+                                    item.quantity
+                                      ? "success"
+                                      : "error"
+                                  }
+                                >
+                                  {getReceivedQuantity(item.product)}
+                                </MDTypography>
+                                <MDTypography
+                                  variant="caption"
+                                  color="text"
+                                  sx={{ fontSize: "0.7rem" }}
+                                >
+                                  de {item.quantity}
+                                </MDTypography>
+                              </MDBox>
                             </TableCell>
                           )}
                           <TableCell align="right">
@@ -456,18 +503,33 @@ const PurchaseDetail = () => {
                     </TableBody>
                   </Table>
                 </TableContainer>
-                <MDBox p={2} borderTop="1px solid #f0f2f5">
-                  <Grid container justifyContent="flex-end">
-                    <Grid item xs={12} sm={6} md={4}>
+                <MDBox p={2} borderTop="1px solid #f0f2f5" bgColor="grey-100">
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={7}>
+                      <MDBox display="flex" alignItems="center" height="100%">
+                        <Icon color="info" sx={{ mr: 1 }}>
+                          info
+                        </Icon>
+                        <MDTypography
+                          variant="caption"
+                          color="text"
+                          sx={{ fontStyle: "italic" }}
+                        >
+                          * Los ajustes reducen el saldo a pagar pero no
+                          modifican la compra original.
+                        </MDTypography>
+                      </MDBox>
+                    </Grid>
+                    <Grid item xs={12} md={5}>
                       <MDBox
                         display="flex"
                         justifyContent="space-between"
                         mb={1}
                       >
-                        <MDTypography variant="body2" color="text">
-                          Total
+                        <MDTypography variant="button" color="text">
+                          Total Compra
                         </MDTypography>
-                        <MDTypography variant="body2" fontWeight="medium">
+                        <MDTypography variant="button" fontWeight="medium">
                           {formatPrice(buy.total)}
                         </MDTypography>
                       </MDBox>
@@ -476,11 +538,11 @@ const PurchaseDetail = () => {
                         justifyContent="space-between"
                         mb={1}
                       >
-                        <MDTypography variant="body2" color="text">
+                        <MDTypography variant="button" color="text">
                           Pagado
                         </MDTypography>
                         <MDTypography
-                          variant="body2"
+                          variant="button"
                           fontWeight="medium"
                           color="success"
                         >
@@ -493,11 +555,11 @@ const PurchaseDetail = () => {
                           justifyContent="space-between"
                           mb={1}
                         >
-                          <MDTypography variant="body2" color="text">
-                            Ajustes
+                          <MDTypography variant="button" color="text">
+                            Ajustes Automáticos
                           </MDTypography>
                           <MDTypography
-                            variant="body2"
+                            variant="button"
                             fontWeight="medium"
                             color="error"
                           >
@@ -505,17 +567,13 @@ const PurchaseDetail = () => {
                           </MDTypography>
                         </MDBox>
                       )}
-                      <Divider />
-                      <MDBox
-                        display="flex"
-                        justifyContent="space-between"
-                        mt={1}
-                      >
-                        <MDTypography variant="body1" fontWeight="bold">
-                          Saldo final
+                      <Divider sx={{ my: 1 }} />
+                      <MDBox display="flex" justifyContent="space-between">
+                        <MDTypography variant="body2" fontWeight="bold">
+                          Saldo Real a Pagar
                         </MDTypography>
                         <MDTypography
-                          variant="body1"
+                          variant="body2"
                           fontWeight="bold"
                           color={adjustedBalance > 0 ? "error" : "success"}
                         >
@@ -621,9 +679,20 @@ const PurchaseDetail = () => {
                       info
                     </Icon>
                     <MDBox>
-                      <MDTypography variant="caption" color="text">
-                        La recepción documenta lo recibido físicamente y no
-                        modifica el monto de la compra ni los pagos.
+                      <MDTypography
+                        variant="caption"
+                        color="text"
+                        fontWeight="medium"
+                      >
+                        Información Operativa
+                      </MDTypography>
+                      <MDTypography
+                        variant="caption"
+                        color="text"
+                        display="block"
+                      >
+                        La recepción registra lo recibido físicamente y no
+                        afecta los montos originales de la compra.
                       </MDTypography>
                     </MDBox>
                   </MDBox>
@@ -724,9 +793,20 @@ const PurchaseDetail = () => {
                     >
                       <Icon sx={{ color: "#fff", mr: 1, mt: 0.5 }}>info</Icon>
                       <MDBox>
-                        <MDTypography variant="caption" color="white">
-                          Los ajustes representan créditos otorgados por el
-                          proveedor y reducen el saldo a pagar.
+                        <MDTypography
+                          variant="caption"
+                          color="white"
+                          fontWeight="medium"
+                        >
+                          Consecuencia de Recepción
+                        </MDTypography>
+                        <MDTypography
+                          variant="caption"
+                          color="white"
+                          display="block"
+                        >
+                          Los ajustes se generan automáticamente por diferencias
+                          entre lo comprado y lo recibido físicamente.
                         </MDTypography>
                       </MDBox>
                     </MDBox>
@@ -954,18 +1034,7 @@ const PurchaseDetail = () => {
                               boxShadow="0rem 0.25rem 0.25rem 0rem rgba(0, 0, 0, 0.05)"
                             >
                               <Icon sx={{ fontSize: "16px !important" }}>
-                                {entry.action === "CREATED"
-                                  ? "add_shopping_cart"
-                                  : entry.action.includes("RECEIPT") ||
-                                    entry.action === "GOODS_RECEIVED"
-                                  ? "inventory_2"
-                                  : entry.action.includes("PAYMENT")
-                                  ? "account_balance_wallet"
-                                  : entry.action === "STATUS_CHANGED"
-                                  ? "sync"
-                                  : entry.action === "CANCELLED"
-                                  ? "block"
-                                  : "notifications"}
+                                {config.icon}
                               </Icon>
                             </MDBox>
                             <MDBox

@@ -14,9 +14,6 @@ import CreateProduct from "pages/products/product/product-create";
 import ListSuppliers from "pages/suppliers/list-suppliers";
 import CreateNewSupplier from "pages/suppliers/create-suppliers";
 import EditSupplier from "pages/suppliers/edit-suppliers";
-import StockMain from "pages/productsLots";
-import CreateProductsLots from "pages/productsLots/create-productsLots";
-import EditProductsLots from "pages/productsLots/edit-productsLots";
 import ListClients from "pages/clients/list-clients";
 import CreateSimpleClient from "pages/clients/create-simple-client";
 import EditClient from "pages/clients/edit-clients";
@@ -66,6 +63,9 @@ import PaymentByBuyId from "pages/buys/payments/PaymentByBuyId";
 import NewAdjustment from "pages/buys/adjustments/NewAdjustment";
 import AdjustmentDetail from "pages/buys/adjustments/AdjustmentDetail";
 import NewReceipt from "pages/buys/buys/NewReceipt";
+import StockPage from "pages/stock/Stock";
+import StockDetail from "pages/stock/StockDetail";
+import StockMovements from "pages/stock/StockMovement";
 
 export const routes_dr = [
   //dashboard
@@ -137,21 +137,6 @@ export const routes_dr = [
   {
     route: "/productos/proveedores/editar/:id",
     component: <EditSupplier />,
-  },
-
-  /* Stock */
-
-  {
-    route: "/productos/stock/lista",
-    component: <StockMain />,
-  },
-  {
-    route: "/productos/stock/nuevo",
-    component: <CreateProductsLots />,
-  },
-  {
-    route: "/productos/stock/editar/:id",
-    component: <EditProductsLots />,
   },
 
   /* Clientes */
@@ -376,6 +361,20 @@ export const routes_dr = [
     route: "/compras/recepciones/nueva/:id",
     component: <NewReceipt />,
   },
+
+  /* Stock */
+  {
+    route: "/productos/stock/lista",
+    component: <StockPage />,
+  },
+  {
+    route: "/productos/stock/detalle/:id",
+    component: <StockDetail />,
+  },
+  {
+    route: "/productos/stock/movimientos",
+    component: <StockMovements />,
+  },
 ];
 export const routes_full = [
   //dashboard
@@ -447,21 +446,6 @@ export const routes_full = [
   {
     route: "/productos/proveedores/editar/:id",
     component: <EditSupplier />,
-  },
-
-  /* Stock */
-
-  {
-    route: "/productos/stock/lista",
-    component: <StockMain />,
-  },
-  {
-    route: "/productos/stock/nuevo",
-    component: <CreateProductsLots />,
-  },
-  {
-    route: "/productos/stock/editar/:id",
-    component: <EditProductsLots />,
   },
 
   /* Clientes */
@@ -726,21 +710,6 @@ export const routes_lite = [
   {
     route: "/productos/proveedores/editar/:id",
     component: <EditSupplier />,
-  },
-
-  /* Stock */
-
-  {
-    route: "/productos/stock/lista",
-    component: <StockMain />,
-  },
-  {
-    route: "/productos/stock/nuevo",
-    component: <CreateProductsLots />,
-  },
-  {
-    route: "/productos/stock/editar/:id",
-    component: <EditProductsLots />,
   },
 
   /* Clientes */

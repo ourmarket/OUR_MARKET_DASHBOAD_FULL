@@ -53,6 +53,11 @@ export const menuList_dr = [
         icon: "warehouse", // Almacenamiento/Existencias
         url: "/productos/stock/lista",
       },
+      {
+        name: "Stock Movimientos",
+        icon: "warehouse", // Almacenamiento/Existencias
+        url: "/productos/stock/movimientos",
+      },
     ],
   },
   {
@@ -62,7 +67,7 @@ export const menuList_dr = [
     subRoutes: [
       {
         name: "Nuevo cliente",
-        icon: "person_add", 
+        icon: "person_add",
         url: "/clientes/nuevo",
       },
       {
@@ -128,7 +133,7 @@ export const menuList_dr = [
       },
       {
         name: "Lista ventas",
-        icon: "list_alt", 
+        icon: "list_alt",
         url: "/ordenes/lista",
       },
       {

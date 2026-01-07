@@ -38,7 +38,7 @@ export const productApi = apiSlice.injectEndpoints({
         method: "put",
         body: items,
       }),
-      invalidatesTags: ["products"],
+      invalidatesTags: ["products", "Stock"],
       extraOptions: { maxRetries: 0 },
     }),
 

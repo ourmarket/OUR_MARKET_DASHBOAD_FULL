@@ -14,8 +14,8 @@ const baseQuery = fetchBaseQuery({
       headers.set("Authorization", `Bearer ${token}`);
     }
 
-    headers.set('X-App-Id', import.meta.env.VITE_APP_ID);
-    headers.set('x-tenant', import.meta.env.VITE_TENANT_ID);
+    headers.set("X-App-Id", import.meta.env.VITE_APP_ID);
+    headers.set("x-tenant", import.meta.env.VITE_TENANT_ID);
 
     return headers;
   },
@@ -24,5 +24,12 @@ const baseQuery = fetchBaseQuery({
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery,
+  tagTypes: [
+    "Stock",
+    "StockMovement",
+    "StockAdjustment",
+    "products",
+    "Purchase",
+  ],
   endpoints: () => ({}),
 });
