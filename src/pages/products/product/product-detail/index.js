@@ -23,12 +23,14 @@ import {
   useGetProductQuery,
   useGetProductsTotalByIDQuery,
   useGetTotalIndividualProductLast30DaysQuery,
+  useGetProductHistoryQuery,
 } from "api/productApi";
 
 // Child components
 import DataProduct from "./productData/DataProduct";
 import EditProductoForm from "components/OUForms/Product/edit-product/EditProduct";
 import StockDetail from "pages/stock/StockDetail";
+import ProductHistory from "./ProductHistory";
 import { useGetStockByProductQuery } from "api/stockApi";
 
 function ProductDetail() {
@@ -75,8 +77,14 @@ function ProductDetail() {
     isError: e5,
   } = useGetStockByProductQuery(id);
 
-  const isLoading = l1 || l2 || l3 || l4 || l5;
-  const hasError = e1 || e2 || e3 || e4 || e5;
+  const {
+    data: productHistory,
+    isLoading: l6,
+    error: e6,
+  } = useGetProductHistoryQuery(id);
+
+  const isLoading = l1 || l2 || l3 || l4 || l5 || l6;
+  const hasError = e1 || e2 || e3 || e4 || e5 || e6;
 
   return (
     <DashboardLayout>
@@ -143,6 +151,10 @@ function ProductDetail() {
                     label="Configuración y Edición"
                     sx={{ fontWeight: "bold" }}
                   />
+                  <Tab
+                    label="Historial de Auditoría"
+                    sx={{ fontWeight: "bold" }}
+                  />
                 </Tabs>
                 <Divider sx={{ mt: 0, mb: 3 }} />
               </MDBox>
@@ -199,6 +211,11 @@ function ProductDetail() {
                           listCategories={categoryData}
                           productData={productById}
                         />
+                      </MDBox>
+                    )}
+                    {tabIndex === 3 && productHistory && (
+                      <MDBox animate={{ opacity: 1 }}>
+                        <ProductHistory history={productHistory.data || []} />
                       </MDBox>
                     )}
                   </>

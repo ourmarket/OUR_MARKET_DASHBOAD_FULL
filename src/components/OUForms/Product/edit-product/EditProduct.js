@@ -46,7 +46,7 @@ import colors from "assets/theme/base/colors";
  * @param {Array} listCategories - Lista de categorías disponibles
  */
 function EditProductForm({ productData, listCategories }) {
-  console.log(productData)
+  console.log(productData);
   const navigate = useNavigate();
   const [urlImage, setUrlImage] = useState(productData?.img || null);
   const [openCategoryModal, setOpenCategoryModal] = useState(false);
@@ -83,14 +83,31 @@ function EditProductForm({ productData, listCategories }) {
         : "",
       available: productData?.available ?? true,
       isFeatured: productData?.isFeatured ?? false,
+      reason: "", // Motivo del cambio
     },
     enableReinitialize: true, // IMPORTANTE: permite que el form se llene cuando lleguen los datos
     validationSchema: creteProductSchema,
     onSubmit: async (values) => {
+      // Detectar cambio en precios
+      const priceChanged =
+        Number(values.price) !== Number(productData.price) ||
+        Number(values.offerPrice) !== Number(productData.offerPrice) ||
+        values.hasOffer !== productData.hasOffer;
+
+      if (priceChanged && !values.reason.trim()) {
+        Swal.fire({
+          icon: "warning",
+          title: "Motivo Requerido",
+          text: "Al modificar precios u ofertas, debe especificar el motivo del cambio (ej: Ajuste por inflación).",
+          confirmButtonColor: colors.info.main,
+        });
+        return;
+      }
+
       try {
         const updatedProduct = {
           ...values,
-          _id: productData._id, // Aseguramos que viaje el ID
+          _id: productData._id,
           img: urlImage,
           offerPrice: values.hasOffer ? values.offerPrice : null,
           offerFrom:
@@ -304,6 +321,26 @@ function EditProductForm({ productData, listCategories }) {
                     </Grid>
                   </>
                 )}
+
+                {/* MOTIVO DEL CAMBIO - Visible si hay cambios en precios o siempre disponible */}
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Motivo de la modificación (Audit)"
+                    name="reason"
+                    value={formik.values.reason}
+                    onChange={formik.handleChange}
+                    placeholder="Ej: Ajuste de precios trimestral, error en carga, etc."
+                    helperText="Requerido si modifica el precio o la oferta activo"
+                    error={
+                      (Number(formik.values.price) !==
+                        Number(productData.price) ||
+                        Number(formik.values.offerPrice) !==
+                          Number(productData.offerPrice)) &&
+                      !formik.values.reason
+                    }
+                  />
+                </Grid>
               </Grid>
             </Paper>
 

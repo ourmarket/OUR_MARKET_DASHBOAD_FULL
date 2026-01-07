@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useDeleteProductMutation } from "api/productApi";
 import Swal from "sweetalert2";
 import { useEffect } from "react";
+import colors from "assets/theme/base/colors";
 
 function MenuListProducts({ open, handleCloseMenu, productId }) {
   const navigate = useNavigate();
@@ -17,16 +18,28 @@ function MenuListProducts({ open, handleCloseMenu, productId }) {
   const handlerDelete = () => {
     handleCloseMenu();
     Swal.fire({
-      title: "Deseas borrar este producto?",
-      text: "Al borrar el producto también se borraran la oferta y el stock asociado.",
-      icon: "danger",
+      title: "¿Deseas borrar este producto?",
+      text: "Se realizará un borrado lógico (quedará oculto). Por favor, indique el motivo:",
+      icon: "warning",
+      input: "text",
+      inputPlaceholder: "Ej: Producto descatalogado, error de carga...",
       showCancelButton: true,
-      confirmButtonColor: "#3085d6",
+      confirmButtonColor: colors.info.main,
       cancelButtonColor: "#d33",
-      confirmButtonText: "Borrar",
+      confirmButtonText: "Confirmar Borrado",
+      cancelButtonText: "Cancelar",
+      inputValidator: (value) => {
+        if (!value) {
+          return "¡Debes escribir un motivo para el historial!";
+        }
+      },
     }).then(async (result) => {
       if (result.isConfirmed) {
-        await deleteProduct(productId).unwrap();
+        try {
+          await deleteProduct({ id: productId, reason: result.value }).unwrap();
+        } catch (error) {
+          // El error se maneja en el useEffect
+        }
       }
     });
   };

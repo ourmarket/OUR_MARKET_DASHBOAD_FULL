@@ -43,8 +43,10 @@ export const productApi = apiSlice.injectEndpoints({
     }),
 
     deleteProduct: builder.mutation({
-      query: (id) => ({
-        url: `/products/${id}`,
+      query: ({ id, reason }) => ({
+        url: `/products/${id}${
+          reason ? `?reason=${encodeURIComponent(reason)}` : ""
+        }`,
         method: "delete",
       }),
       invalidatesTags: ["products"],
@@ -65,6 +67,12 @@ export const productApi = apiSlice.injectEndpoints({
       extraOptions: { maxRetries: 5 },
       providesTags: ["products"],
     }),
+
+    getProductHistory: builder.query({
+      query: (id) => `/products/${id}/history`,
+      extraOptions: { maxRetries: 3 },
+      providesTags: ["products"],
+    }),
   }),
 });
 
@@ -76,4 +84,5 @@ export const {
   useDeleteProductMutation,
   useGetProductsTotalByIDQuery,
   useGetTotalIndividualProductLast30DaysQuery,
+  useGetProductHistoryQuery,
 } = productApi;

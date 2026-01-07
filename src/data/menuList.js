@@ -144,6 +144,33 @@ export const menuList_dr = [
     ],
   },
   {
+    name: "Manufactura",
+    icon: "precision_manufacturing",
+    key: "manufactura",
+    subRoutes: [
+      {
+        name: "Órdenes de Producción",
+        icon: "assignment",
+        url: "/manufactura/ordenes",
+      },
+      {
+        name: "Nueva Producción",
+        icon: "play_circle",
+        url: "/manufactura/nueva",
+      },
+      {
+        name: "Recetas (BOM)",
+        icon: "menu_book",
+        url: "/manufactura/recetas",
+      },
+      {
+        name: "Reportes",
+        icon: "analytics",
+        url: "/manufactura/reportes",
+      },
+    ],
+  },
+  {
     name: "Gastos",
     icon: "payments", // Salida de billetes
     key: "gastos",
@@ -337,6 +364,33 @@ export const menuList_full = [
     ],
   },
   {
+    name: "Manufactura",
+    icon: "precision_manufacturing",
+    key: "manufactura",
+    subRoutes: [
+      {
+        name: "Órdenes de Producción",
+        icon: "assignment",
+        url: "/manufactura/ordenes",
+      },
+      {
+        name: "Nueva Producción",
+        icon: "play_circle",
+        url: "/manufactura/nueva",
+      },
+      {
+        name: "Recetas (BOM)",
+        icon: "menu_book",
+        url: "/manufactura/recetas",
+      },
+      {
+        name: "Reportes",
+        icon: "analytics",
+        url: "/manufactura/reportes",
+      },
+    ],
+  },
+  {
     name: "Gastos",
     icon: "assignment_returned_icon",
     key: "gastos",
@@ -490,11 +544,37 @@ export const menuList_lite = [
         icon: "add_circle_outline_icon",
         url: "/ordenes/nueva-local",
       },
-
       {
         name: "Lista ordenes",
         icon: "format_list_bulleted_icon",
         url: "/ordenes/lista",
+      },
+    ],
+  },
+  {
+    name: "Manufactura",
+    icon: "precision_manufacturing",
+    key: "manufactura",
+    subRoutes: [
+      {
+        name: "Órdenes de Producción",
+        icon: "assignment",
+        url: "/manufactura/ordenes",
+      },
+      {
+        name: "Nueva Producción",
+        icon: "play_circle",
+        url: "/manufactura/nueva",
+      },
+      {
+        name: "Recetas (BOM)",
+        icon: "menu_book",
+        url: "/manufactura/recetas",
+      },
+      {
+        name: "Reportes",
+        icon: "analytics",
+        url: "/manufactura/reportes",
       },
     ],
   },

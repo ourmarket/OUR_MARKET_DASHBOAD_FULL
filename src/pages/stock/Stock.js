@@ -121,10 +121,30 @@ const StockPage = () => {
       return oldRow;
     }
 
+    // Pedir motivo del cambio para el historial
+    const { value: reason, isConfirmed } = await Swal.fire({
+      title: "Motivo del cambio",
+      text: "¿Por qué se está modificando el stock mínimo?",
+      input: "text",
+      inputPlaceholder: "Ej: Ajuste de stock de seguridad, reabastecimiento...",
+      showCancelButton: true,
+      confirmButtonText: "Guardar",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: colors.info.main,
+      inputValidator: (value) => {
+        if (!value) {
+          return "Debe ingresar un motivo para el historial de cambios.";
+        }
+      },
+    });
+
+    if (!isConfirmed) return oldRow;
+
     try {
       await putProduct({
         id: newRow.productId,
         minStock: Number(newRow.minStock),
+        reason: reason, // Incluimos el motivo
       }).unwrap();
       return newRow;
     } catch (error) {

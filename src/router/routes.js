@@ -66,6 +66,11 @@ import NewReceipt from "pages/buys/buys/NewReceipt";
 import StockPage from "pages/stock/Stock";
 import StockDetail from "pages/stock/StockDetail";
 import StockMovements from "pages/stock/StockMovement";
+import Manufacturing from "pages/manufacturing/Manufacturing";
+import NewProduction from "pages/manufacturing/NewProduction";
+import ManufacturingDetail from "pages/manufacturing/ManufacturingDetail";
+import Recipes from "pages/manufacturing/Recipes";
+import ManufacturingReports from "pages/manufacturing/ManufacturingReports";
 
 export const routes_dr = [
   //dashboard
@@ -375,6 +380,28 @@ export const routes_dr = [
     route: "/productos/stock/movimientos",
     component: <StockMovements />,
   },
+
+  /* Manufactura */
+  {
+    route: "/manufactura/ordenes",
+    component: <Manufacturing />,
+  },
+  {
+    route: "/manufactura/nueva",
+    component: <NewProduction />,
+  },
+  {
+    route: "/manufactura/detalle/:id",
+    component: <ManufacturingDetail />,
+  },
+  {
+    route: "/manufactura/recetas",
+    component: <Recipes />,
+  },
+  {
+    route: "/manufactura/reportes",
+    component: <ManufacturingReports />,
+  },
 ];
 export const routes_full = [
   //dashboard
@@ -646,6 +673,28 @@ export const routes_full = [
     route: "/compras/ajustes/:id",
     component: <AdjustmentDetail />,
   },
+
+  /* Manufactura */
+  {
+    route: "/manufactura/ordenes",
+    component: <Manufacturing />,
+  },
+  {
+    route: "/manufactura/nueva",
+    component: <NewProduction />,
+  },
+  {
+    route: "/manufactura/detalle/:id",
+    component: <ManufacturingDetail />,
+  },
+  {
+    route: "/manufactura/recetas",
+    component: <Recipes />,
+  },
+  {
+    route: "/manufactura/reportes",
+    component: <ManufacturingReports />,
+  },
 ];
 export const routes_lite = [
   //dashboard
@@ -799,5 +848,27 @@ export const routes_lite = [
   {
     route: "/gastos/editar/:id",
     component: <EditExpenses />,
+  },
+
+  /* Manufactura */
+  {
+    route: "/manufactura/ordenes",
+    component: <Manufacturing />,
+  },
+  {
+    route: "/manufactura/nueva",
+    component: <NewProduction />,
+  },
+  {
+    route: "/manufactura/detalle/:id",
+    component: <ManufacturingDetail />,
+  },
+  {
+    route: "/manufactura/recetas",
+    component: <Recipes />,
+  },
+  {
+    route: "/manufactura/reportes",
+    component: <ManufacturingReports />,
   },
 ];

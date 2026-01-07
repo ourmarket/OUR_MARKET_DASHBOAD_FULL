@@ -67,6 +67,7 @@ function AddProductForm({ listCategories }) {
       offerTo: "",
       available: true,
       isFeatured: false,
+      reason: "Alta de nuevo producto",
     },
     validationSchema: creteProductSchema,
     onSubmit: async (values) => {

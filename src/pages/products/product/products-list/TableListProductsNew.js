@@ -217,13 +217,14 @@ function TableListProducts({ products }) {
   const dispatch = useDispatch();
 
   const processRowUpdate = async (newRow) => {
-    
     try {
       const result = await editProduct({
         id: newRow._id,
         price: newRow.price,
         available: newRow.available,
         isFeatured: newRow.isFeatured,
+        reason:
+          "Edicion por tabla de productos, cambios en precio, visibilidad y destacado",
       }).unwrap();
       console.log("result:", result);
 
