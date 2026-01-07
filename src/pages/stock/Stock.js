@@ -310,7 +310,7 @@ const StockPage = () => {
           size="small"
           onClick={(e) => {
             e.stopPropagation();
-            navigate(`/productos/stock/detalle/${row.productId}`);
+            navigate(`/productos/detalle/${row.productId}?tab=1`);
           }}
         >
           Ver&nbsp;<Icon>arrow_forward</Icon>

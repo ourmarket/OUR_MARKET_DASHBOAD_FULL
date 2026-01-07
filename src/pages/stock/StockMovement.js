@@ -215,7 +215,7 @@ const StockMovements = () => {
       flex: 1.5,
       renderCell: ({ row }) => (
         <Link
-          to={`/productos/stock/detalle/${row.productId}`}
+          to={`/productos/detalle/${row.productId}`}
           style={{ textDecoration: "none" }}
         >
           <MDTypography
@@ -234,6 +234,8 @@ const StockMovements = () => {
     {
       field: "type",
       headerName: "Tipo",
+      align: "center",
+      headerAlign: "center",
       flex: 1.2,
       renderCell: ({ row }) => (
         <MDBox display="flex" alignItems="center" gap={1}>
@@ -263,6 +265,8 @@ const StockMovements = () => {
     {
       field: "reason",
       headerName: "Motivo",
+      align: "center",
+      headerAlign: "center",
       flex: 1,
       renderCell: ({ row }) => (
         <MDTypography variant="caption" color="text">
@@ -274,8 +278,8 @@ const StockMovements = () => {
       field: "quantity",
       headerName: "Cantidad",
       flex: 0.8,
-      align: "right",
-      headerAlign: "right",
+      align: "center",
+      headerAlign: "center",
       renderCell: ({ row }) => (
         <MDTypography
           variant="button"
@@ -286,18 +290,7 @@ const StockMovements = () => {
         </MDTypography>
       ),
     },
-    {
-      field: "balanceAfter",
-      headerName: "Saldo",
-      flex: 0.8,
-      align: "right",
-      headerAlign: "right",
-      renderCell: ({ row }) => (
-        <MDTypography variant="button" fontWeight="medium">
-          {row.balanceAfter}
-        </MDTypography>
-      ),
-    },
+
     {
       field: "reference",
       headerName: "Documento",
@@ -354,6 +347,8 @@ const StockMovements = () => {
     {
       field: "createdBy",
       headerName: "Usuario",
+      align: "center",
+      headerAlign: "center",
       flex: 1,
       renderCell: ({ row }) => (
         <MDBox display="flex" alignItems="center" gap={1}>
