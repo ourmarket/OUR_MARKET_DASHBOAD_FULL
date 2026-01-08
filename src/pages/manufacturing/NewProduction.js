@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useFormik, FieldArray, FormikProvider } from "formik";
+import { useFormik, FormikProvider } from "formik";
 import * as Yup from "yup";
 import Swal from "sweetalert2";
 
@@ -24,7 +24,6 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
-import Alert from "@mui/material/Alert";
 import { DataGrid } from "@mui/x-data-grid";
 
 // Data and Helpers
@@ -36,29 +35,24 @@ import {
 } from "./mockData";
 import colors from "assets/theme/base/colors";
 
-// Validation Schema
 const validationSchema = Yup.object().shape({
   productionDate: Yup.string().required("La fecha es requerida"),
   inputs: Yup.array()
     .of(
       Yup.object().shape({
         productId: Yup.string().required("Requerido"),
-        quantity: Yup.number()
-          .positive("Debe ser mayor a 0")
-          .required("Requerido"),
+        quantity: Yup.number().positive("Mayor a 0").required("Requerido"),
       })
     )
-    .min(1, "Debe tener al menos un insumo"),
+    .min(1, "Al menos un insumo"),
   outputs: Yup.array()
     .of(
       Yup.object().shape({
         productId: Yup.string().required("Requerido"),
-        quantity: Yup.number()
-          .positive("Debe ser mayor a 0")
-          .required("Requerido"),
+        quantity: Yup.number().positive("Mayor a 0").required("Requerido"),
       })
     )
-    .min(1, "Debe tener al menos un producto resultante"),
+    .min(1, "Al menos un producto"),
 });
 
 const NewProduction = () => {
@@ -67,26 +61,26 @@ const NewProduction = () => {
 
   const formik = useFormik({
     initialValues: {
+      code: "OP-2024-006",
       productionDate: new Date().toISOString().split("T")[0],
       selectedRecipeId: "",
       observations: "",
       inputs: [{ id: "1", productId: "", quantity: 0 }],
       outputs: [{ id: "1", productId: "", quantity: 0 }],
     },
-    validationSchema: validationSchema,
-    onSubmit: (values) => {
-      // Handled by specific manual buttons to distinguish draft vs execution
-    },
+    validationSchema,
+    onSubmit: (values) => {},
   });
 
-  const { values, setFieldValue, errors, touched } = formik;
+  const { values, setFieldValue } = formik;
 
-  // Load Recipe Logic
-  const handleLoadRecipe = (recipeId) => {
-    const recipe = recipes.find((r) => r.id === recipeId);
-    if (!recipe) return;
+  const handleLoadRecipe = () => {
+    const recipe = recipes.find((r) => r.id === values.selectedRecipeId);
+    if (!recipe) {
+      Swal.fire("Aviso", "Seleccione una receta primero", "info");
+      return;
+    }
 
-    setFieldValue("selectedRecipeId", recipeId);
     setFieldValue(
       "inputs",
       recipe.inputs.map((input, idx) => ({
@@ -107,85 +101,71 @@ const NewProduction = () => {
     Swal.fire({
       icon: "success",
       title: "Receta Cargada",
-      text: `Parámetros de "${recipe.name}" aplicados`,
-      timer: 1500,
+      timer: 1000,
       showConfirmButton: false,
     });
   };
 
-  // Calculations
-  const calculateTotalInputCost = () => {
+  const calculateTotalInputs = () => {
     return values.inputs.reduce((sum, item) => {
-      const product = manufacturingProducts.find(
-        (p) => p.id === item.productId
+      const p = manufacturingProducts.find(
+        (prod) => prod.id === item.productId
       );
-      return product ? sum + product.unitCost * item.quantity : sum;
+      return p ? sum + p.unitCost * item.quantity : sum;
     }, 0);
   };
 
-  const calculateTotalOutputCost = () => {
+  const calculateTotalOutputs = () => {
     return values.outputs.reduce((sum, item) => {
-      const product = manufacturingProducts.find(
-        (p) => p.id === item.productId
+      const p = manufacturingProducts.find(
+        (prod) => prod.id === item.productId
       );
-      return product ? sum + product.unitCost * item.quantity : sum;
+      return p ? sum + p.unitCost * item.quantity : sum;
     }, 0);
   };
 
-  const totalInputCost = calculateTotalInputCost();
-  const totalOutputCost = calculateTotalOutputCost();
-  const estimatedMargin = totalOutputCost - totalInputCost;
+  const totalInsumos = calculateTotalInputs();
+  const valorProduccion = calculateTotalOutputs();
+  const margenEstimado = valorProduccion - totalInsumos;
+
+  // Costo por Unidad (Total Insumos / Total Cantidad Productos Resultantes)
+  const totalQtyProduced = values.outputs.reduce(
+    (sum, o) => sum + (o.quantity || 0),
+    0
+  );
+  const costoPorUnidad =
+    totalQtyProduced > 0 ? totalInsumos / totalQtyProduced : 0;
 
   const handleExecute = () => {
-    if (!formik.isValid || values.inputs.length === 0) {
-      Swal.fire(
-        "Error",
-        "Por favor complete todos los campos obligatorios",
-        "error"
-      );
-      return;
-    }
-
     Swal.fire({
-      title: "¿Ejecutar Producción?",
-      html: `
-        <div style="text-align: left; font-size: 0.9rem;">
-          <p>Esta acción generará los movimientos de stock correspondientes:</p>
-          <p>• Egreso de Insumos: <b style="color:red">${formatCurrency(
-            totalInputCost
-          )}</b></p>
-          <p>• Ingreso de Productos: <b style="color:green">${formatCurrency(
-            totalOutputCost
-          )}</b></p>
-        </div>
-      `,
-      icon: "warning",
+      title: "¿Confirmar Producción?",
+      text: "Se actualizará el stock inmediatamente",
+      icon: "question",
       showCancelButton: true,
       confirmButtonColor: colors.info.main,
-      confirmButtonText: "EJECUTAR",
+      confirmButtonText: "SÍ, EJECUTAR",
       cancelButtonText: "CANCELAR",
     }).then((result) => {
       if (result.isConfirmed) {
-        Swal.fire("Éxito", "Producción realizada correctamente", "success");
+        Swal.fire("Éxito", "Producción ejecutada", "success");
         navigate("/manufactura/ordenes");
       }
     });
   };
 
-  // Table Columns
   const inputColumns = [
     {
       field: "productId",
-      headerName: "Insumo",
+      headerName: "Producto",
       flex: 2,
       renderCell: ({ row, id }) => {
-        const index = values.inputs.findIndex((i) => i.id === id);
+        const idx = values.inputs.findIndex((i) => i.id === id);
         return (
           <FormControl fullWidth size="small">
             <Select
               value={row.productId}
               onChange={(e) =>
-                setFieldValue(`inputs[${index}].productId`, e.target.value)
+                setFieldValue(`inputs[${idx}].productId`, e.target.value)
               }
               sx={{ height: "40px" }}
             >
@@ -203,19 +183,18 @@ const NewProduction = () => {
     },
     {
       field: "stock",
-      headerName: "Stock",
-      flex: 1,
+      headerName: "Stock Disponible",
+      flex: 1.2,
+      align: "center",
+      headerAlign: "center",
       renderCell: ({ row }) => {
-        const product = manufacturingProducts.find(
-          (p) => p.id === row.productId
-        );
-        if (!product) return "-";
-        const hasWarning = row.quantity > product.stockAvailable;
+        const p = manufacturingProducts.find((p) => p.id === row.productId);
+        if (!p) return "-";
         return (
           <MDBadge
             variant="gradient"
-            color={hasWarning ? "error" : "success"}
-            badgeContent={`${product.stockAvailable} ${product.unit}`}
+            color={row.quantity > p.stockAvailable ? "error" : "success"}
+            badgeContent={`${p.stockAvailable} ${p.unit}`}
             size="xs"
           />
         );
@@ -226,7 +205,7 @@ const NewProduction = () => {
       headerName: "Cantidad",
       flex: 1,
       renderCell: ({ row, id }) => {
-        const index = values.inputs.findIndex((i) => i.id === id);
+        const idx = values.inputs.findIndex((i) => i.id === id);
         return (
           <MDInput
             type="number"
@@ -234,28 +213,42 @@ const NewProduction = () => {
             value={row.quantity}
             onChange={(e) =>
               setFieldValue(
-                `inputs[${index}].quantity`,
+                `inputs[${idx}].quantity`,
                 parseFloat(e.target.value) || 0
               )
             }
-            sx={{ width: "100%" }}
           />
         );
       },
     },
     {
-      field: "delete",
+      field: "cost",
+      headerName: "Costo",
+      flex: 1,
+      align: "right",
+      headerAlign: "right",
+      renderCell: ({ row }) => {
+        const p = manufacturingProducts.find((p) => p.id === row.productId);
+        return (
+          <MDTypography variant="button" fontWeight="medium">
+            {p ? formatCurrency(p.unitCost * row.quantity) : "-"}
+          </MDTypography>
+        );
+      },
+    },
+    {
+      field: "actions",
       headerName: "",
       width: 50,
       renderCell: ({ id }) => (
         <Icon
           sx={{ cursor: "pointer", color: "error.main" }}
           onClick={() => {
-            const newInputs = values.inputs.filter((item) => item.id !== id);
+            const list = values.inputs.filter((i) => i.id !== id);
             setFieldValue(
               "inputs",
-              newInputs.length > 0
-                ? newInputs
+              list.length
+                ? list
                 : [{ id: Date.now().toString(), productId: "", quantity: 0 }]
             );
           }}
@@ -269,24 +262,30 @@ const NewProduction = () => {
   const outputColumns = [
     {
       field: "productId",
-      headerName: "Producto Final",
+      headerName: "Producto",
       flex: 2,
       renderCell: ({ row, id }) => {
-        const index = values.outputs.findIndex((o) => o.id === id);
+        const idx = values.outputs.findIndex((o) => o.id === id);
         return (
           <FormControl fullWidth size="small">
             <Select
               value={row.productId}
               onChange={(e) =>
-                setFieldValue(`outputs[${index}].productId`, e.target.value)
+                setFieldValue(`outputs[${idx}].productId`, e.target.value)
               }
               sx={{ height: "40px" }}
             >
-              {manufacturingProducts.map((p) => (
-                <MenuItem key={p.id} value={p.id}>
-                  {p.name}
-                </MenuItem>
-              ))}
+              {manufacturingProducts
+                .filter(
+                  (p) =>
+                    p.category === "Producto Terminado" ||
+                    p.category === "Sub-producto"
+                )
+                .map((p) => (
+                  <MenuItem key={p.id} value={p.id}>
+                    {p.name}
+                  </MenuItem>
+                ))}
             </Select>
           </FormControl>
         );
@@ -297,7 +296,7 @@ const NewProduction = () => {
       headerName: "Cantidad",
       flex: 1,
       renderCell: ({ row, id }) => {
-        const index = values.outputs.findIndex((o) => o.id === id);
+        const idx = values.outputs.findIndex((o) => o.id === id);
         return (
           <MDInput
             type="number"
@@ -305,7 +304,7 @@ const NewProduction = () => {
             value={row.quantity}
             onChange={(e) =>
               setFieldValue(
-                `outputs[${index}].quantity`,
+                `outputs[${idx}].quantity`,
                 parseFloat(e.target.value) || 0
               )
             }
@@ -314,18 +313,33 @@ const NewProduction = () => {
       },
     },
     {
-      field: "delete",
+      field: "cost",
+      headerName: "Costo",
+      flex: 1,
+      align: "right",
+      headerAlign: "right",
+      renderCell: ({ row }) => {
+        const p = manufacturingProducts.find((p) => p.id === row.productId);
+        return (
+          <MDTypography variant="button" fontWeight="medium">
+            {p ? formatCurrency(p.unitCost * row.quantity) : "-"}
+          </MDTypography>
+        );
+      },
+    },
+    {
+      field: "actions",
       headerName: "",
       width: 50,
       renderCell: ({ id }) => (
         <Icon
           sx={{ cursor: "pointer", color: "error.main" }}
           onClick={() => {
-            const newOutputs = values.outputs.filter((item) => item.id !== id);
+            const list = values.outputs.filter((o) => o.id !== id);
             setFieldValue(
               "outputs",
-              newOutputs.length > 0
-                ? newOutputs
+              list.length
+                ? list
                 : [{ id: Date.now().toString(), productId: "", quantity: 0 }]
             );
           }}
@@ -339,39 +353,39 @@ const NewProduction = () => {
   return (
     <DashboardLayout>
       <DashboardNavbar />
-      <MDBox pt={6} pb={3}>
-        <MDBox
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          mb={4}
-        >
-          <MDBox>
-            <MDTypography variant="h4" fontWeight="bold">
-              Nueva Producción
-            </MDTypography>
-            <MDTypography variant="button" color="text">
-              Registro y transformación de materiales
-            </MDTypography>
-          </MDBox>
-          <MDButton
-            variant="outlined"
-            color="dark"
-            component={Link}
-            to="/manufactura/ordenes"
-          >
-            VOLVER
-          </MDButton>
+      <MDBox pt={4} pb={3}>
+        <MDBox mb={4}>
+          <MDTypography variant="h4" fontWeight="bold">
+            Nueva Orden de Producción
+          </MDTypography>
+          <MDTypography variant="button" color="text">
+            Registro de producción y transformación de materiales
+          </MDTypography>
         </MDBox>
 
         <FormikProvider value={formik}>
           <Grid container spacing={3}>
+            {/* IZQUIERDA: Formulario */}
             <Grid item xs={12} lg={8}>
               <MDBox display="flex" flexDirection="column" gap={3}>
-                {/* Cabecera */}
+                {/* 1. Información General */}
                 <Card>
                   <MDBox p={3}>
+                    <MDBox display="flex" alignItems="center" mb={3} gap={1}>
+                      <Icon color="dark">assignment</Icon>
+                      <MDTypography variant="h6" fontWeight="bold">
+                        Información General
+                      </MDTypography>
+                    </MDBox>
                     <Grid container spacing={3}>
+                      <Grid item xs={12} md={6}>
+                        <MDInput
+                          label="Código"
+                          fullWidth
+                          value={values.code}
+                          disabled
+                        />
+                      </Grid>
                       <Grid item xs={12} md={6}>
                         <MDInput
                           label="Fecha de Producción"
@@ -383,32 +397,13 @@ const NewProduction = () => {
                           InputLabelProps={{ shrink: true }}
                         />
                       </Grid>
-                      <Grid item xs={12} md={6}>
-                        <FormControl fullWidth size="small">
-                          <InputLabel>Receta (Opcional)</InputLabel>
-                          <Select
-                            value={values.selectedRecipeId}
-                            onChange={(e) => handleLoadRecipe(e.target.value)}
-                            label="Receta (Opcional)"
-                            sx={{ height: "45px" }}
-                          >
-                            <MenuItem value="">
-                              <em>Ninguna (Producción Manual)</em>
-                            </MenuItem>
-                            {activeRecipes.map((r) => (
-                              <MenuItem key={r.id} value={r.id}>
-                                {r.name}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-                      </Grid>
                       <Grid item xs={12}>
                         <MDInput
                           label="Observaciones"
                           multiline
-                          rows={2}
+                          rows={3}
                           fullWidth
+                          placeholder="Notas adicionales sobre esta producción..."
                           name="observations"
                           value={values.observations}
                           onChange={formik.handleChange}
@@ -418,7 +413,56 @@ const NewProduction = () => {
                   </MDBox>
                 </Card>
 
-                {/* Tabla Insumos */}
+                {/* 2. Selección de Receta */}
+                <Card>
+                  <MDBox p={3}>
+                    <MDBox display="flex" alignItems="center" mb={3} gap={1}>
+                      <Icon color="dark">menu_book</Icon>
+                      <MDTypography variant="h6" fontWeight="bold">
+                        Selección de Receta (Opcional)
+                      </MDTypography>
+                    </MDBox>
+                    <MDBox display="flex" gap={2} alignItems="flex-end">
+                      <Grid container spacing={3} sx={{ flex: 1 }}>
+                        <Grid item xs={12}>
+                          <FormControl fullWidth size="small">
+                            <InputLabel>Receta / BOM</InputLabel>
+                            <Select
+                              label="Receta / BOM"
+                              value={values.selectedRecipeId}
+                              onChange={(e) =>
+                                setFieldValue(
+                                  "selectedRecipeId",
+                                  e.target.value
+                                )
+                              }
+                              sx={{ height: "45px" }}
+                            >
+                              <MenuItem value="">
+                                <em>Ninguna (Producción Manual)</em>
+                              </MenuItem>
+                              {activeRecipes.map((r) => (
+                                <MenuItem key={r.id} value={r.id}>
+                                  {r.name} - {r.outputProduct.name}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+                        </Grid>
+                      </Grid>
+                      <MDButton
+                        variant="outlined"
+                        color="info"
+                        onClick={handleLoadRecipe}
+                        sx={{ height: "45px" }}
+                      >
+                        CARGAR RECETA
+                      </MDButton>
+                    </MDBox>
+                  </MDBox>
+                </Card>
+
+                {/* 3. Insumos */}
                 <Card>
                   <MDBox p={3}>
                     <MDBox
@@ -427,18 +471,15 @@ const NewProduction = () => {
                       alignItems="center"
                       mb={2}
                     >
-                      <MDTypography
-                        variant="h6"
-                        display="flex"
-                        alignItems="center"
-                        gap={1}
-                      >
-                        <Icon color="error">arrow_downward</Icon> Insumos
-                        Consumidos
-                      </MDTypography>
+                      <MDBox display="flex" alignItems="center" gap={1}>
+                        <Icon color="error">arrow_downward</Icon>
+                        <MDTypography variant="h6" fontWeight="bold">
+                          Insumos (Inputs)
+                        </MDTypography>
+                      </MDBox>
                       <MDButton
-                        variant="text"
-                        color="info"
+                        variant="outlined"
+                        color="dark"
                         size="small"
                         onClick={() =>
                           setFieldValue("inputs", [
@@ -454,7 +495,7 @@ const NewProduction = () => {
                         <Icon>add</Icon>&nbsp;AGREGAR
                       </MDButton>
                     </MDBox>
-                    <MDBox sx={{ height: 350, width: "100%" }}>
+                    <MDBox sx={{ height: "auto", width: "100%" }}>
                       <DataGrid
                         rows={values.inputs}
                         columns={inputColumns}
@@ -463,10 +504,25 @@ const NewProduction = () => {
                         sx={{ border: "none" }}
                       />
                     </MDBox>
+                    <Divider />
+                    <MDBox display="flex" justifyContent="flex-end" px={2}>
+                      <MDBox textAlign="right">
+                        <MDTypography
+                          variant="button"
+                          color="text"
+                          display="block"
+                        >
+                          Total Insumos
+                        </MDTypography>
+                        <MDTypography variant="h6" fontWeight="bold">
+                          {formatCurrency(totalInsumos)}
+                        </MDTypography>
+                      </MDBox>
+                    </MDBox>
                   </MDBox>
                 </Card>
 
-                {/* Tabla Resultados */}
+                {/* 4. Resultados */}
                 <Card>
                   <MDBox p={3}>
                     <MDBox
@@ -475,18 +531,15 @@ const NewProduction = () => {
                       alignItems="center"
                       mb={2}
                     >
-                      <MDTypography
-                        variant="h6"
-                        display="flex"
-                        alignItems="center"
-                        gap={1}
-                      >
-                        <Icon color="success">arrow_upward</Icon> Productos
-                        Generados
-                      </MDTypography>
+                      <MDBox display="flex" alignItems="center" gap={1}>
+                        <Icon color="success">arrow_upward</Icon>
+                        <MDTypography variant="h6" fontWeight="bold">
+                          Productos Resultantes (Outputs)
+                        </MDTypography>
+                      </MDBox>
                       <MDButton
-                        variant="text"
-                        color="info"
+                        variant="outlined"
+                        color="dark"
                         size="small"
                         onClick={() =>
                           setFieldValue("outputs", [
@@ -502,7 +555,7 @@ const NewProduction = () => {
                         <Icon>add</Icon>&nbsp;AGREGAR
                       </MDButton>
                     </MDBox>
-                    <MDBox sx={{ height: 250, width: "100%" }}>
+                    <MDBox sx={{ height: "auto", width: "100%" }}>
                       <DataGrid
                         rows={values.outputs}
                         columns={outputColumns}
@@ -511,50 +564,94 @@ const NewProduction = () => {
                         sx={{ border: "none" }}
                       />
                     </MDBox>
+                    <Divider />
+                    <MDBox display="flex" justifyContent="flex-end" px={2}>
+                      <MDBox textAlign="right">
+                        <MDTypography
+                          variant="button"
+                          color="text"
+                          display="block"
+                        >
+                          Valor Producción
+                        </MDTypography>
+                        <MDTypography
+                          variant="h6"
+                          fontWeight="bold"
+                          color="success"
+                        >
+                          {formatCurrency(valorProduccion)}
+                        </MDTypography>
+                      </MDBox>
+                    </MDBox>
                   </MDBox>
                 </Card>
               </MDBox>
             </Grid>
 
-            {/* Sidebar Resumen */}
+            {/* DERECHA: Resumen */}
             <Grid item xs={12} lg={4}>
               <MDBox display="flex" flexDirection="column" gap={3}>
                 <Card sx={{ p: 3 }}>
-                  <MDTypography variant="h6" mb={2}>
-                    Resumen Económico
+                  <MDTypography variant="h6" fontWeight="bold" mb={3}>
+                    Resumen de Costos
                   </MDTypography>
+
                   <MDBox display="flex" justifyContent="space-between" mb={1}>
                     <MDTypography variant="button" color="text">
-                      Costo Insumos
+                      Total Insumos
                     </MDTypography>
                     <MDTypography
                       variant="button"
-                      fontWeight="medium"
-                      color="error"
+                      fontWeight="bold"
+                      color="dark"
                     >
-                      -{formatCurrency(totalInputCost)}
+                      {formatCurrency(totalInsumos)}
                     </MDTypography>
                   </MDBox>
-                  <MDBox display="flex" justifyContent="space-between" mb={1}>
+
+                  <MDBox display="flex" justifyContent="space-between" mb={3}>
                     <MDTypography variant="button" color="text">
                       Valor Producción
                     </MDTypography>
                     <MDTypography
                       variant="button"
-                      fontWeight="medium"
+                      fontWeight="bold"
                       color="success"
                     >
-                      +{formatCurrency(totalOutputCost)}
+                      {formatCurrency(valorProduccion)}
                     </MDTypography>
                   </MDBox>
+
                   <Divider />
-                  <MDBox display="flex" justifyContent="space-between" mb={3}>
-                    <MDTypography variant="h6">Margen</MDTypography>
+
+                  <MDBox
+                    display="flex"
+                    justifyContent="space-between"
+                    mb={1}
+                    mt={1}
+                  >
+                    <MDTypography variant="h6" fontWeight="bold">
+                      Margen Estimado
+                    </MDTypography>
                     <MDTypography
                       variant="h6"
-                      color={estimatedMargin >= 0 ? "success" : "error"}
+                      fontWeight="bold"
+                      color={margenEstimado >= 0 ? "success" : "error"}
                     >
-                      {formatCurrency(estimatedMargin)}
+                      {formatCurrency(margenEstimado)}
+                    </MDTypography>
+                  </MDBox>
+
+                  <MDBox display="flex" justifyContent="space-between" mb={3}>
+                    <MDTypography variant="button" color="text">
+                      Costo por Unidad
+                    </MDTypography>
+                    <MDTypography
+                      variant="button"
+                      fontWeight="bold"
+                      color="dark"
+                    >
+                      {formatCurrency(costoPorUnidad)}
                     </MDTypography>
                   </MDBox>
 
@@ -564,41 +661,37 @@ const NewProduction = () => {
                     fullWidth
                     size="large"
                     onClick={handleExecute}
+                    sx={{ mb: 2 }}
                   >
-                    <Icon sx={{ mr: 1 }}>play_circle</Icon> EJECUTAR
+                    <Icon sx={{ mr: 1 }}>play_circle</Icon> EJECUTAR PRODUCCIÓN
                   </MDButton>
 
                   <MDButton
                     variant="outlined"
                     color="dark"
                     fullWidth
-                    sx={{ mt: 2 }}
                     onClick={() => {
-                      Swal.fire("Éxito", "Borrador guardado", "info");
+                      Swal.fire(
+                        "Borrador",
+                        "Orden guardada como borrador",
+                        "info"
+                      );
                       navigate("/manufactura/ordenes");
                     }}
                   >
-                    <Icon sx={{ mr: 1 }}>save</Icon> GUARDAR BORRADOR
+                    <Icon sx={{ mr: 1 }}>save</Icon> GUARDAR COMO BORRADOR
                   </MDButton>
                 </Card>
 
-                <Alert
-                  severity="info"
-                  sx={{
-                    "& .MuiAlert-icon": { color: "white !important" },
-                    bgcolor: "info.main",
-                    color: "white",
-                  }}
-                >
-                  <MDTypography
-                    variant="caption"
-                    color="white"
-                    fontWeight="regular"
-                  >
-                    Al ejecutar esta orden, el stock de los productos se
-                    actualizará automáticamente en el inventario.
-                  </MDTypography>
-                </Alert>
+                <Card sx={{ p: 2, bgcolor: "grey-100", boxShadow: "none" }}>
+                  <MDBox display="flex" gap={1}>
+                    <Icon color="info">info</Icon>
+                    <MDTypography variant="caption" color="text">
+                      Puede guardar como borrador para revisar y ejecutar más
+                      tarde, o ejecutar directamente si los datos son correctos.
+                    </MDTypography>
+                  </MDBox>
+                </Card>
               </MDBox>
             </Grid>
           </Grid>
