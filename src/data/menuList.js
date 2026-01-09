@@ -164,6 +164,11 @@ export const menuList_dr = [
         url: "/manufactura/recetas",
       },
       {
+        name: "Simulación",
+        icon: "calculate",
+        url: "/manufactura/simulacion",
+      },
+      {
         name: "Reportes",
         icon: "analytics",
         url: "/manufactura/reportes",
@@ -384,6 +389,11 @@ export const menuList_full = [
         url: "/manufactura/recetas",
       },
       {
+        name: "Simulación",
+        icon: "calculate",
+        url: "/manufactura/simulacion",
+      },
+      {
         name: "Reportes",
         icon: "analytics",
         url: "/manufactura/reportes",
@@ -570,6 +580,11 @@ export const menuList_lite = [
         name: "Recetas (BOM)",
         icon: "menu_book",
         url: "/manufactura/recetas",
+      },
+      {
+        name: "Simulación",
+        icon: "calculate",
+        url: "/manufactura/simulacion",
       },
       {
         name: "Reportes",

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
 // Material Dashboard 2 React components
@@ -23,25 +23,32 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import { DataGrid } from "@mui/x-data-grid";
 import Tooltip from "@mui/material/Tooltip";
+import LinearProgress from "@mui/material/LinearProgress";
 
-// Data
-import {
-  productionOrders,
-  getManufacturingStats,
-  formatCurrency,
-  formatDate,
-} from "./mockData";
+// API
+import { useGetManufacturingOrdersQuery } from "api/manufacturingOrderApi";
+
+// Utils
+import { formatPrice } from "utils/formaPrice";
 import CustomNoRowsOverlay from "components/OUTables/CustomNoRowsOverlay";
+
+const formatDate = (dateString) => {
+  if (!dateString) return "-";
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat("es-ES", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+};
 
 const getStatusLabel = (status) => {
   switch (status) {
-    case "draft":
+    case "DRAFT":
       return "Borrador";
-    case "in_progress":
-      return "En Proceso";
-    case "completed":
-      return "Completada";
-    case "cancelled":
+    case "EXECUTED":
+      return "Ejecutada";
+    case "CANCELLED":
       return "Cancelada";
     default:
       return status;
@@ -50,13 +57,11 @@ const getStatusLabel = (status) => {
 
 const getStatusColor = (status) => {
   switch (status) {
-    case "draft":
+    case "DRAFT":
       return "secondary";
-    case "in_progress":
-      return "warning";
-    case "completed":
+    case "EXECUTED":
       return "success";
-    case "cancelled":
+    case "CANCELLED":
       return "error";
     default:
       return "info";
@@ -65,31 +70,97 @@ const getStatusColor = (status) => {
 
 const Manufacturing = () => {
   const navigate = useNavigate();
-  const stats = getManufacturingStats();
 
+  // State for filters
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("");
 
+  // API Query
+  const { data, isLoading } = useGetManufacturingOrdersQuery({
+    limit: 100, // Fetching 100 for now to get a good list for the stats
+    page: 1,
+    // Status filtering could be done on backend, but we do client side for the generic 'search'
+    // If we wanted to use backend filter: status: statusFilter !== 'all' ? statusFilter : undefined
+  });
+
+  const orders = data?.data || [];
+
+  // Client-side filtering
+  const filteredOrders = useMemo(() => {
+    return orders.filter((order) => {
+      const matchesSearch =
+        order.code.toLowerCase().includes(search.toLowerCase()) ||
+        order.outputs.some((o) =>
+          o.product?.name?.toLowerCase().includes(search.toLowerCase())
+        );
+
+      const matchesStatus =
+        statusFilter === "all" || order.status === statusFilter;
+
+      const orderDate = new Date(order.productionDate || order.createdAt)
+        .toISOString()
+        .split("T")[0];
+      const matchesDate = !dateFilter || orderDate >= dateFilter;
+
+      return matchesSearch && matchesStatus && matchesDate;
+    });
+  }, [orders, search, statusFilter, dateFilter]);
+
+  // Statistics Calculation (based on loaded data)
+  const stats = useMemo(() => {
+    const total = filteredOrders.length;
+    const executed = filteredOrders.filter(
+      (o) => o.status === "EXECUTED"
+    ).length;
+    const drafts = filteredOrders.filter((o) => o.status === "DRAFT").length;
+    const inProgress = 0; // Backend doesn't have 'in_progress', immediate execution
+
+    // Avg Cost Per Unit (Total Output Cost / Total Output Quantity)
+    // Only for executed orders
+    let totalCost = 0;
+    let totalUnits = 0;
+    filteredOrders.forEach((o) => {
+      if (o.status === "EXECUTED") {
+        totalCost += o.totalOutputCost || 0;
+        totalUnits += o.outputs.reduce(
+          (acc, out) => acc + (out.quantity || 0),
+          0
+        );
+      }
+    });
+
+    const avgCost = totalUnits > 0 ? totalCost / totalUnits : 0;
+
+    return {
+      productions: total, // Using filtered count for now
+      executed: executed,
+      drafts: drafts,
+      inProgress: inProgress,
+      avgCostPerUnit: avgCost,
+    };
+  }, [filteredOrders]);
+
   const getOutputsSummary = (outputs) => {
     if (!outputs || outputs.length === 0) return "-";
     if (outputs.length === 1)
-      return `${outputs[0].quantityProduced} ${outputs[0].product.name}`;
+      return `${outputs[0].quantity} ${outputs[0].product?.name || "Unknown"}`;
     return `${outputs.length} productos`;
   };
 
   const getInputsSummary = (inputs) => {
     if (!inputs || inputs.length === 0) return "-";
     if (inputs.length === 1)
-      return `${inputs[0].quantityRequired} ${inputs[0].product.name}`;
+      return `${inputs[0].quantity} ${inputs[0].product?.name || "Unknown"}`;
     return `${inputs.length} insumos`;
   };
 
   const columns = [
     {
-      field: "orderNumber",
+      field: "code", // Changed from orderNumber
       headerName: "Código",
       flex: 1,
+      minWidth: 120,
       renderCell: ({ value }) => (
         <MDTypography
           variant="button"
@@ -101,12 +172,12 @@ const Manufacturing = () => {
       ),
     },
     {
-      field: "date",
+      field: "productionDate", // Changed from date
       headerName: "Fecha",
       flex: 1,
-      renderCell: ({ value }) => (
+      renderCell: ({ row }) => (
         <MDTypography variant="button" color="text">
-          {formatDate(value)}
+          {formatDate(row.productionDate || row.createdAt)}
         </MDTypography>
       ),
     },
@@ -125,36 +196,39 @@ const Manufacturing = () => {
     },
     {
       field: "outputs",
-      headerName: "Productos Generados",
+      headerName: "Productos",
       flex: 1.5,
       renderCell: ({ value }) => (
         <Tooltip title={getOutputsSummary(value)}>
-          <MDTypography variant="button" color="text">
-            {getOutputsSummary(value)}
-          </MDTypography>
+          <MDBox>
+            <MDTypography variant="button" color="text" display="block">
+              {getOutputsSummary(value)}
+            </MDTypography>
+          </MDBox>
         </Tooltip>
       ),
     },
     {
       field: "inputs",
-      headerName: "Insumos Consumidos",
+      headerName: "Insumos",
       flex: 1.5,
       renderCell: ({ value }) => (
         <Tooltip title={getInputsSummary(value)}>
-          <MDTypography variant="button" color="secondary">
-            {getInputsSummary(value)}
-          </MDTypography>
+          <MDBox>
+            <MDTypography variant="button" color="secondary" display="block">
+              {getInputsSummary(value)}
+            </MDTypography>
+          </MDBox>
         </Tooltip>
       ),
     },
     {
-      field: "user",
+      field: "createdBy", // Changed from user
       headerName: "Usuario",
       flex: 1.2,
-      valueGetter: (params) => params.row.executedBy || params.row.createdBy,
       renderCell: ({ value }) => (
         <MDTypography variant="button" color="text">
-          {value}
+          {value ? `${value.name} ${value.lastName}` : "Sistema"}
         </MDTypography>
       ),
     },
@@ -172,36 +246,31 @@ const Manufacturing = () => {
           size="small"
           onClick={(e) => {
             e.stopPropagation();
-            navigate(`/manufactura/detalle/${row.id}`);
+            if (row.status === "DRAFT") {
+              // For DRAFT, maybe we want to go to Edit/Execute page?
+              // For now let's assume 'NewProduction' can load an existing draft or detail view has an Execute button.
+              // The 'detalle' route probably needs to handle execution.
+              navigate(`/manufactura/detalle/${row._id}`);
+            } else {
+              navigate(`/manufactura/detalle/${row._id}`);
+            }
           }}
         >
-          {row.status === "draft" ? "EJECUTAR" : "VER"}
+          {row.status === "DRAFT" ? "GESTIONAR" : "VER"}
           <Icon sx={{ ml: 1 }}>
-            {row.status === "draft" ? "play_circle" : "arrow_forward"}
+            {row.status === "DRAFT" ? "settings" : "visibility"}
           </Icon>
         </MDButton>
       ),
     },
   ];
 
-  const filteredOrders = productionOrders.filter((order) => {
-    const matchesSearch =
-      order.orderNumber.toLowerCase().includes(search.toLowerCase()) ||
-      order.outputs.some((o) =>
-        o.product.name.toLowerCase().includes(search.toLowerCase())
-      );
-
-    const matchesStatus =
-      statusFilter === "all" || order.status === statusFilter;
-    const matchesDate = !dateFilter || order.date >= dateFilter;
-
-    return matchesSearch && matchesStatus && matchesDate;
-  });
-
   return (
     <DashboardLayout>
       <DashboardNavbar />
       <MDBox pt={6} pb={3}>
+        {isLoading && <LinearProgress color="info" sx={{ mb: 2 }} />}
+
         <MDBox
           display="flex"
           justifyContent="space-between"
@@ -227,17 +296,31 @@ const Manufacturing = () => {
           </MDButton>
         </MDBox>
 
+        {/* Statistics Cards */}
         <MDBox mb={4}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={6} lg={3}>
               <ComplexStatisticsCard
-                color="success"
+                color="dark"
                 icon="factory"
-                title="Producciones del Mes"
-                count={stats.productionsThisMonth}
+                title="Total Registros"
+                count={stats.productions}
                 percentage={{
                   color: "success",
-                  amount: "completadas",
+                  amount: "órdenes listadas",
+                  label: "",
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} md={6} lg={3}>
+              <ComplexStatisticsCard
+                color="success"
+                icon="check_circle"
+                title="Ejecutadas"
+                count={stats.executed}
+                percentage={{
+                  color: "success",
+                  amount: "finalizadas",
                   label: "",
                 }}
               />
@@ -245,25 +328,12 @@ const Manufacturing = () => {
             <Grid item xs={12} md={6} lg={3}>
               <ComplexStatisticsCard
                 color="warning"
-                icon="play_circle"
-                title="En Proceso"
-                count={stats.inProgress}
-                percentage={{
-                  color: "warning",
-                  amount: "órdenes activas",
-                  label: "",
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} md={6} lg={3}>
-              <ComplexStatisticsCard
-                color="dark"
-                icon="description"
+                icon="edit_note"
                 title="Borradores"
                 count={stats.drafts}
                 percentage={{
                   color: "secondary",
-                  amount: "pendientes de ejecutar",
+                  amount: "pendientes",
                   label: "",
                 }}
               />
@@ -271,12 +341,12 @@ const Manufacturing = () => {
             <Grid item xs={12} md={6} lg={3}>
               <ComplexStatisticsCard
                 color="info"
-                icon="check_circle"
-                title="Costo Promedio"
-                count={formatCurrency(stats.avgCostPerUnit)}
+                icon="attach_money"
+                title="Costo Unit. Prom."
+                count={formatPrice(stats.avgCostPerUnit)}
                 percentage={{
                   color: "info",
-                  amount: "por unidad producida",
+                  amount: "sobre ejecutadas",
                   label: "",
                 }}
               />
@@ -328,10 +398,9 @@ const Manufacturing = () => {
                 sx={{ height: "45px" }}
               >
                 <MenuItem value="all">Todos</MenuItem>
-                <MenuItem value="draft">Borrador</MenuItem>
-                <MenuItem value="in_progress">En Proceso</MenuItem>
-                <MenuItem value="completed">Completada</MenuItem>
-                <MenuItem value="cancelled">Cancelada</MenuItem>
+                <MenuItem value="DRAFT">Borrador</MenuItem>
+                <MenuItem value="EXECUTED">Ejecutada</MenuItem>
+                <MenuItem value="CANCELLED">Cancelada</MenuItem>
               </Select>
             </FormControl>
           </MDBox>
@@ -351,11 +420,12 @@ const Manufacturing = () => {
             <DataGrid
               rows={filteredOrders}
               columns={columns}
+              getRowId={(row) => row._id}
               pageSize={10}
               rowsPerPageOptions={[10, 25, 50]}
               disableSelectionOnClick
               onRowClick={(params) =>
-                navigate(`/manufactura/detalle/${params.row.id}`)
+                navigate(`/manufactura/detalle/${params.row._id}`)
               }
               components={{
                 NoRowsOverlay: () => (
@@ -378,5 +448,4 @@ const Manufacturing = () => {
     </DashboardLayout>
   );
 };
-
 export default Manufacturing;

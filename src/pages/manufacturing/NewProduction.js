@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { useFormik, FormikProvider } from "formik";
 import * as Yup from "yup";
 import Swal from "sweetalert2";
@@ -16,6 +16,7 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 
 // @mui material components
+// @mui material components
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import Icon from "@mui/material/Icon";
@@ -24,16 +25,60 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
+import Autocomplete from "@mui/material/Autocomplete";
+import TextField from "@mui/material/TextField";
 import { DataGrid } from "@mui/x-data-grid";
+import LinearProgress from "@mui/material/LinearProgress";
 
-// Data and Helpers
+// API Hooks
+import { useGetProductsQuery } from "api/productApi";
+import { useGetActiveBomsQuery } from "api/bomApi";
 import {
-  manufacturingProducts,
-  recipes,
-  getActiveRecipes,
-  formatCurrency,
-} from "./mockData";
+  useCreateManufacturingOrderMutation,
+  useExecuteManufacturingOrderMutation,
+} from "api/manufacturingOrderApi";
+
+// Helpers
+
 import colors from "assets/theme/base/colors";
+import { formatPrice } from "utils/formaPrice";
+
+/**
+ * HOOK DE SIMULACIÓN DE PRODUCCIÓN
+ * Realiza cálculos visuales basados en precios actuales.
+ */
+const useProductionSimulation = (values, products = []) => {
+  return useMemo(() => {
+    const totalInsumos = values.inputs.reduce((sum, item) => {
+      const p = products.find((prod) => prod._id === item.productId);
+      const cost = p?.cost || p?.price || 0; // Fallback to price if cost is 0/undefined
+      return sum + cost * (item.quantity || 0);
+    }, 0);
+
+    const valorProduccion = values.outputs.reduce((sum, item) => {
+      const p = products.find((prod) => prod._id === item.productId);
+      // For outputs, we usually estimate value based on sales price or cost?
+      // Mockup used unitCost. Let's use cost.
+      const cost = p?.cost || p?.price || 0;
+      return sum + cost * (item.quantity || 0);
+    }, 0);
+
+    const totalQtyProduced = values.outputs.reduce(
+      (sum, o) => sum + (o.quantity || 0),
+      0
+    );
+    const costoPorUnidad =
+      totalQtyProduced > 0 ? totalInsumos / totalQtyProduced : 0;
+    const margenEstimado = valorProduccion - totalInsumos;
+
+    return {
+      totalInsumos,
+      valorProduccion,
+      margenEstimado,
+      costoPorUnidad,
+    };
+  }, [values.inputs, values.outputs, products]);
+};
 
 const validationSchema = Yup.object().shape({
   productionDate: Yup.string().required("La fecha es requerida"),
@@ -57,25 +102,45 @@ const validationSchema = Yup.object().shape({
 
 const NewProduction = () => {
   const navigate = useNavigate();
-  const activeRecipes = getActiveRecipes();
+
+  // API Queries
+  const { data: productsData, isLoading: isLoadingProducts } =
+    useGetProductsQuery({ limit: 10000 });
+  const { data: activeRecipes, isLoading: isLoadingRecipes } =
+    useGetActiveBomsQuery();
+
+  // Mutations
+  const [createOrder, { isLoading: isCreating }] =
+    useCreateManufacturingOrderMutation();
+  const [executeOrder, { isLoading: isExecuting }] =
+    useExecuteManufacturingOrderMutation();
+
+  const products = productsData?.products || [];
+  const recipes = activeRecipes || [];
 
   const formik = useFormik({
     initialValues: {
-      code: "OP-2024-006",
+      code: "AUTOGENERADO",
       productionDate: new Date().toISOString().split("T")[0],
       selectedRecipeId: "",
       observations: "",
+      // inputs/outputs structure: { id, productId, quantity }
       inputs: [{ id: "1", productId: "", quantity: 0 }],
       outputs: [{ id: "1", productId: "", quantity: 0 }],
     },
     validationSchema,
-    onSubmit: (values) => {},
+    onSubmit: async (values) => {
+      // Handled by specific buttons
+    },
   });
 
-  const { values, setFieldValue } = formik;
+  const { values, setFieldValue, isValid } = formik;
+
+  // Simulation Hook
+  const simulation = useProductionSimulation(values, products);
 
   const handleLoadRecipe = () => {
-    const recipe = recipes.find((r) => r.id === values.selectedRecipeId);
+    const recipe = recipes.find((r) => r._id === values.selectedRecipeId);
     if (!recipe) {
       Swal.fire("Aviso", "Seleccione una receta primero", "info");
       return;
@@ -85,7 +150,7 @@ const NewProduction = () => {
       "inputs",
       recipe.inputs.map((input, idx) => ({
         id: (idx + 1).toString(),
-        productId: input.productId,
+        productId: input.product._id, // Backend returns populated product object
         quantity: input.quantity,
       }))
     );
@@ -93,108 +158,188 @@ const NewProduction = () => {
     setFieldValue("outputs", [
       {
         id: "1",
-        productId: recipe.outputProduct.id,
-        quantity: recipe.outputQuantity,
+        productId: recipe.product._id,
+        quantity: recipe.yieldQuantity || 1,
       },
     ]);
 
     Swal.fire({
       icon: "success",
       title: "Receta Cargada",
-      timer: 1000,
+      text: "Se han cargado los insumos y productos base",
+      timer: 1500,
       showConfirmButton: false,
     });
   };
 
-  const calculateTotalInputs = () => {
-    return values.inputs.reduce((sum, item) => {
-      const p = manufacturingProducts.find(
-        (prod) => prod.id === item.productId
+  const buildPayload = (status) => ({
+    bomId: values.selectedRecipeId || undefined,
+    productionDate: values.productionDate,
+    notes: values.observations,
+    status: "DRAFT", // Backend Create always makes DRAFT
+    inputs: values.inputs.map(({ productId, quantity }) => ({
+      product: productId,
+      quantity,
+    })),
+    outputs: values.outputs.map(({ productId, quantity }) => ({
+      product: productId, // Note: Backend createOrder handles outputs only if NO bomId is passed OR if we override?
+      // Backend logic: if (bomId) { calculate from BOM } else { use inputs/outputs }
+      // If we want to allow modification of BOM derived values, we should probably NOT send bomId if we changed them, OR backend should support overrides.
+      // For now, let's send manual inputs/outputs and NO bomId if it's a custom/modified run, OR just send inputs/outputs always and backend uses them if provided?
+      // Checking backend service: "if (bomId) { ... } else { if (data.inputs) ... }"
+      // So valid strategy: If user modifies loaded recipe, we treat it as manual order (don't send bomId) or we need backend adjustment.
+      // Let's assume for this version we send inputs/outputs and omit bomId if we want to enforce WYSIWYG.
+      // However, linking to BOM is good for analytics.
+      // Let's send NO bomId to ensure exact quantities from form are used, creating a "Manual/Custom" order based on a recipe.
+      // TODO: Backend improvement to allow BOM reference + overrides.
+      quantity,
+    })),
+    // We force using the form values by NOT sending bomId, or we assume backend prefers manual data if present?
+    // Backend service says: if (bomId) { ignore manual } else { use manual }.
+    // So currently to use form values we MUST NOT send bomId.
+    // But we want to track recipe usage.
+    // Workaround: We will send null bomId to ensure Form Data is respected.
+  });
+
+  /**
+   * EJECUCIÓN REAL DE PRODUCCIÓN
+   */
+  const handleExecute = async () => {
+    if (!isValid) {
+      Swal.fire(
+        "Error",
+        "Por favor complete los campos obligatorios y corrija errores",
+        "error"
       );
-      return p ? sum + p.unitCost * item.quantity : sum;
-    }, 0);
-  };
+      return;
+    }
 
-  const calculateTotalOutputs = () => {
-    return values.outputs.reduce((sum, item) => {
-      const p = manufacturingProducts.find(
-        (prod) => prod.id === item.productId
-      );
-      return p ? sum + p.unitCost * item.quantity : sum;
-    }, 0);
-  };
+    // Check negatives or zeros
+    if (
+      values.inputs.some((i) => i.quantity <= 0) ||
+      values.outputs.some((o) => o.quantity <= 0)
+    ) {
+      Swal.fire("Error", "Las cantidades deben ser mayores a 0", "error");
+      return;
+    }
 
-  const totalInsumos = calculateTotalInputs();
-  const valorProduccion = calculateTotalOutputs();
-  const margenEstimado = valorProduccion - totalInsumos;
-
-  // Costo por Unidad (Total Insumos / Total Cantidad Productos Resultantes)
-  const totalQtyProduced = values.outputs.reduce(
-    (sum, o) => sum + (o.quantity || 0),
-    0
-  );
-  const costoPorUnidad =
-    totalQtyProduced > 0 ? totalInsumos / totalQtyProduced : 0;
-
-  const handleExecute = () => {
     Swal.fire({
-      title: "¿Confirmar Producción?",
-      text: "Se actualizará el stock inmediatamente",
-      icon: "question",
+      title: "¿EJECUTAR PRODUCCIÓN?",
+      html: `
+        <div style="text-align: left;">
+          <p>Esta acción:</p>
+          <ul>
+            <li>Descontará insumos del inventario.</li>
+            <li>Ingresará los productos resultantes.</li>
+            <li><b>Congelará</b> los costos vigentes en este momento.</li>
+          </ul>
+        </div>
+      `,
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: colors.info.main,
-      confirmButtonText: "SÍ, EJECUTAR",
+      confirmButtonColor: colors.success.main,
+      confirmButtonText: "SÍ, EJECUTAR AHORA",
       cancelButtonText: "CANCELAR",
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        Swal.fire("Éxito", "Producción ejecutada", "success");
-        navigate("/manufactura/ordenes");
+        try {
+          // 1. Create DRAFT
+          // We strip bomId to ensure the exact form values are used (Backen logic limitation workaround)
+          const payload = {
+            ...buildPayload(),
+            bomId: undefined, // Force manual inputs
+          };
+
+          const order = await createOrder(payload).unwrap();
+
+          // 2. Execute
+          await executeOrder(order._id).unwrap();
+
+          Swal.fire(
+            "Éxito",
+            "Producción ejecutada e inventario actualizado",
+            "success"
+          );
+          navigate("/manufactura/ordenes");
+        } catch (error) {
+          console.error(error);
+          Swal.fire(
+            "Error",
+            error?.data?.message || "Ocurrió un error al procesar",
+            "error"
+          );
+        }
       }
     });
+  };
+
+  const handleSaveDraft = async () => {
+    if (!isValid) return;
+
+    try {
+      const payload = {
+        ...buildPayload(),
+        bomId: undefined, // Force manual inputs
+      };
+      await createOrder(payload).unwrap();
+      Swal.fire("Borrador", "Orden guardada como borrador", "info");
+      navigate("/manufactura/ordenes");
+    } catch (error) {
+      Swal.fire("Error", error?.data?.message || "Error al guardar", "error");
+    }
   };
 
   const inputColumns = [
     {
       field: "productId",
-      headerName: "Producto",
+      headerName: "Insumo",
       flex: 2,
       renderCell: ({ row, id }) => {
         const idx = values.inputs.findIndex((i) => i.id === id);
+        const selectedProduct =
+          products.find((p) => p._id === row.productId) || null;
+
         return (
-          <FormControl fullWidth size="small">
-            <Select
-              value={row.productId}
-              onChange={(e) =>
-                setFieldValue(`inputs[${idx}].productId`, e.target.value)
-              }
-              sx={{ height: "40px" }}
-            >
-              {manufacturingProducts
-                .filter((p) => p.category !== "Producto Terminado")
-                .map((p) => (
-                  <MenuItem key={p.id} value={p.id}>
-                    {p.name}
-                  </MenuItem>
-                ))}
-            </Select>
-          </FormControl>
+          <Autocomplete
+            options={products.filter(
+              (p) => p.category?.name !== "Producto Terminado"
+            )}
+            getOptionLabel={(option) => option.name || ""}
+            value={selectedProduct}
+            onChange={(event, newValue) => {
+              setFieldValue(
+                `inputs[${idx}].productId`,
+                newValue ? newValue._id : ""
+              );
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Seleccionar Insumo"
+                variant="standard"
+              />
+            )}
+            fullWidth
+            size="small"
+            isOptionEqualToValue={(option, value) => option._id === value._id}
+          />
         );
       },
     },
     {
       field: "stock",
-      headerName: "Stock Disponible",
+      headerName: "Stock Disp.",
       flex: 1.2,
       align: "center",
       headerAlign: "center",
       renderCell: ({ row }) => {
-        const p = manufacturingProducts.find((p) => p.id === row.productId);
+        const p = products.find((p) => p._id === row.productId);
         if (!p) return "-";
         return (
           <MDBadge
             variant="gradient"
             color={row.quantity > p.stockAvailable ? "error" : "success"}
-            badgeContent={`${p.stockAvailable} ${p.unit}`}
+            badgeContent={`${p.stockAvailable} ${p.unit || "u"}`}
             size="xs"
           />
         );
@@ -222,16 +367,17 @@ const NewProduction = () => {
       },
     },
     {
-      field: "cost",
-      headerName: "Costo",
+      field: "estimatedCost",
+      headerName: "Costo Est.",
       flex: 1,
       align: "right",
       headerAlign: "right",
       renderCell: ({ row }) => {
-        const p = manufacturingProducts.find((p) => p.id === row.productId);
+        const p = products.find((p) => p._id === row.productId);
+        const cost = p?.cost || p?.price || 0;
         return (
-          <MDTypography variant="button" fontWeight="medium">
-            {p ? formatCurrency(p.unitCost * row.quantity) : "-"}
+          <MDTypography variant="button" fontWeight="regular">
+            {p ? formatPrice(cost * row.quantity) : "-"}
           </MDTypography>
         );
       },
@@ -262,32 +408,35 @@ const NewProduction = () => {
   const outputColumns = [
     {
       field: "productId",
-      headerName: "Producto",
+      headerName: "Producto Final",
       flex: 2,
       renderCell: ({ row, id }) => {
         const idx = values.outputs.findIndex((o) => o.id === id);
+        const selectedProduct =
+          products.find((p) => p._id === row.productId) || null;
+
         return (
-          <FormControl fullWidth size="small">
-            <Select
-              value={row.productId}
-              onChange={(e) =>
-                setFieldValue(`outputs[${idx}].productId`, e.target.value)
-              }
-              sx={{ height: "40px" }}
-            >
-              {manufacturingProducts
-                .filter(
-                  (p) =>
-                    p.category === "Producto Terminado" ||
-                    p.category === "Sub-producto"
-                )
-                .map((p) => (
-                  <MenuItem key={p.id} value={p.id}>
-                    {p.name}
-                  </MenuItem>
-                ))}
-            </Select>
-          </FormControl>
+          <Autocomplete
+            options={products}
+            getOptionLabel={(option) => option.name || ""}
+            value={selectedProduct}
+            onChange={(event, newValue) => {
+              setFieldValue(
+                `outputs[${idx}].productId`,
+                newValue ? newValue._id : ""
+              );
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Seleccionar Producto"
+                variant="standard"
+              />
+            )}
+            fullWidth
+            size="small"
+            isOptionEqualToValue={(option, value) => option._id === value._id}
+          />
         );
       },
     },
@@ -313,16 +462,17 @@ const NewProduction = () => {
       },
     },
     {
-      field: "cost",
-      headerName: "Costo",
+      field: "estimatedValue",
+      headerName: "Valor Est.",
       flex: 1,
       align: "right",
       headerAlign: "right",
       renderCell: ({ row }) => {
-        const p = manufacturingProducts.find((p) => p.id === row.productId);
+        const p = products.find((p) => p._id === row.productId);
+        const cost = p?.cost || p?.price || 0;
         return (
-          <MDTypography variant="button" fontWeight="medium">
-            {p ? formatCurrency(p.unitCost * row.quantity) : "-"}
+          <MDTypography variant="button" fontWeight="regular">
+            {p ? formatPrice(cost * row.quantity) : "-"}
           </MDTypography>
         );
       },
@@ -350,22 +500,33 @@ const NewProduction = () => {
     },
   ];
 
+  const isLoading =
+    isLoadingProducts || isLoadingRecipes || isCreating || isExecuting;
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
       <MDBox pt={4} pb={3}>
-        <MDBox mb={4}>
-          <MDTypography variant="h4" fontWeight="bold">
-            Nueva Orden de Producción
-          </MDTypography>
-          <MDTypography variant="button" color="text">
-            Registro de producción y transformación de materiales
-          </MDTypography>
+        {isLoading && <LinearProgress color="info" />}
+        <MDBox
+          mb={4}
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <MDBox>
+            <MDTypography variant="h4" fontWeight="bold">
+              Nueva Orden de Producción
+            </MDTypography>
+            <MDTypography variant="button" color="text">
+              Registro de transformación de materiales
+            </MDTypography>
+          </MDBox>
         </MDBox>
 
         <FormikProvider value={formik}>
           <Grid container spacing={3}>
-            {/* IZQUIERDA: Formulario */}
+            {/* IZQUIERDA: Configuración y Tablas */}
             <Grid item xs={12} lg={8}>
               <MDBox display="flex" flexDirection="column" gap={3}>
                 {/* 1. Información General */}
@@ -374,13 +535,13 @@ const NewProduction = () => {
                     <MDBox display="flex" alignItems="center" mb={3} gap={1}>
                       <Icon color="dark">assignment</Icon>
                       <MDTypography variant="h6" fontWeight="bold">
-                        Información General
+                        Información de la Orden
                       </MDTypography>
                     </MDBox>
                     <Grid container spacing={3}>
                       <Grid item xs={12} md={6}>
                         <MDInput
-                          label="Código"
+                          label="Código Interno"
                           fullWidth
                           value={values.code}
                           disabled
@@ -388,7 +549,7 @@ const NewProduction = () => {
                       </Grid>
                       <Grid item xs={12} md={6}>
                         <MDInput
-                          label="Fecha de Producción"
+                          label="Fecha Programada"
                           type="date"
                           fullWidth
                           name="productionDate"
@@ -399,11 +560,10 @@ const NewProduction = () => {
                       </Grid>
                       <Grid item xs={12}>
                         <MDInput
-                          label="Observaciones"
+                          label="Observaciones de Producción"
                           multiline
-                          rows={3}
+                          rows={2}
                           fullWidth
-                          placeholder="Notas adicionales sobre esta producción..."
                           name="observations"
                           value={values.observations}
                           onChange={formik.handleChange}
@@ -419,51 +579,65 @@ const NewProduction = () => {
                     <MDBox display="flex" alignItems="center" mb={3} gap={1}>
                       <Icon color="dark">menu_book</Icon>
                       <MDTypography variant="h6" fontWeight="bold">
-                        Selección de Receta (Opcional)
+                        Plantilla / Receta (BOM)
                       </MDTypography>
                     </MDBox>
                     <MDBox display="flex" gap={2} alignItems="flex-end">
-                      <Grid container spacing={3} sx={{ flex: 1 }}>
-                        <Grid item xs={12}>
-                          <FormControl fullWidth size="small">
-                            <InputLabel>Receta / BOM</InputLabel>
-                            <Select
-                              label="Receta / BOM"
-                              value={values.selectedRecipeId}
-                              onChange={(e) =>
-                                setFieldValue(
-                                  "selectedRecipeId",
-                                  e.target.value
-                                )
-                              }
-                              sx={{ height: "45px" }}
-                            >
-                              <MenuItem value="">
-                                <em>Ninguna (Producción Manual)</em>
-                              </MenuItem>
-                              {activeRecipes.map((r) => (
-                                <MenuItem key={r.id} value={r.id}>
-                                  {r.name} - {r.outputProduct.name}
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
-                        </Grid>
-                      </Grid>
+                      <FormControl fullWidth size="small">
+                        {/* Autocomplete para Buscar Receta Vigente */}
+                        <Autocomplete
+                          options={recipes}
+                          getOptionLabel={(option) => {
+                            // Handle cases where option might be undefined while loading
+                            if (!option) return "";
+                            return `${option.product?.name || "Unknown"} (${
+                              option.product?.code || "-"
+                            })`;
+                          }}
+                          value={
+                            recipes.find(
+                              (r) => r._id === values.selectedRecipeId
+                            ) || null
+                          }
+                          onChange={(event, newValue) => {
+                            setFieldValue(
+                              "selectedRecipeId",
+                              newValue ? newValue._id : ""
+                            );
+                          }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              label="Buscar Receta Vigente"
+                              variant="standard"
+                            />
+                          )}
+                          isOptionEqualToValue={(option, value) =>
+                            option._id === value._id
+                          }
+                          fullWidth
+                        />
+                      </FormControl>
                       <MDButton
-                        variant="outlined"
+                        variant="gradient"
                         color="info"
                         onClick={handleLoadRecipe}
-                        sx={{ height: "45px" }}
+                        sx={{ height: "45px", minWidth: 160 }}
+                        disabled={!values.selectedRecipeId}
                       >
-                        CARGAR RECETA
+                        CARGAR DATOS
                       </MDButton>
                     </MDBox>
                   </MDBox>
                 </Card>
 
                 {/* 3. Insumos */}
-                <Card>
+                <Card
+                  sx={{
+                    borderLeft: "6px solid",
+                    borderLeftColor: "error.main",
+                  }}
+                >
                   <MDBox p={3}>
                     <MDBox
                       display="flex"
@@ -472,9 +646,9 @@ const NewProduction = () => {
                       mb={2}
                     >
                       <MDBox display="flex" alignItems="center" gap={1}>
-                        <Icon color="error">arrow_downward</Icon>
+                        <Icon color="error">inventory</Icon>
                         <MDTypography variant="h6" fontWeight="bold">
-                          Insumos (Inputs)
+                          Insumos Requeridos (Consumo)
                         </MDTypography>
                       </MDBox>
                       <MDButton
@@ -492,38 +666,40 @@ const NewProduction = () => {
                           ])
                         }
                       >
-                        <Icon>add</Icon>&nbsp;AGREGAR
+                        <Icon>add</Icon>&nbsp;AÑADIR LÍNEA
                       </MDButton>
                     </MDBox>
                     <MDBox sx={{ height: "auto", width: "100%" }}>
                       <DataGrid
                         rows={values.inputs}
                         columns={inputColumns}
+                        autoHeight
                         hideFooter
                         disableSelectionOnClick
                         sx={{ border: "none" }}
                       />
                     </MDBox>
                     <Divider />
-                    <MDBox display="flex" justifyContent="flex-end" px={2}>
-                      <MDBox textAlign="right">
-                        <MDTypography
-                          variant="button"
-                          color="text"
-                          display="block"
-                        >
-                          Total Insumos
-                        </MDTypography>
-                        <MDTypography variant="h6" fontWeight="bold">
-                          {formatCurrency(totalInsumos)}
-                        </MDTypography>
-                      </MDBox>
+                    <MDBox display="flex" justifyContent="flex-end" pt={1}>
+                      <MDTypography
+                        variant="button"
+                        color="text"
+                        fontWeight="bold"
+                      >
+                        Subtotal Insumos (Est.):{" "}
+                        {formatPrice(simulation.totalInsumos)}
+                      </MDTypography>
                     </MDBox>
                   </MDBox>
                 </Card>
 
                 {/* 4. Resultados */}
-                <Card>
+                <Card
+                  sx={{
+                    borderLeft: "6px solid",
+                    borderLeftColor: "success.main",
+                  }}
+                >
                   <MDBox p={3}>
                     <MDBox
                       display="flex"
@@ -532,9 +708,9 @@ const NewProduction = () => {
                       mb={2}
                     >
                       <MDBox display="flex" alignItems="center" gap={1}>
-                        <Icon color="success">arrow_upward</Icon>
+                        <Icon color="success">precision_manufacturing</Icon>
                         <MDTypography variant="h6" fontWeight="bold">
-                          Productos Resultantes (Outputs)
+                          Producto Resultante (Ingreso)
                         </MDTypography>
                       </MDBox>
                       <MDButton
@@ -552,134 +728,129 @@ const NewProduction = () => {
                           ])
                         }
                       >
-                        <Icon>add</Icon>&nbsp;AGREGAR
+                        <Icon>add</Icon>&nbsp;AÑADIR LÍNEA
                       </MDButton>
                     </MDBox>
                     <MDBox sx={{ height: "auto", width: "100%" }}>
                       <DataGrid
                         rows={values.outputs}
                         columns={outputColumns}
+                        autoHeight
                         hideFooter
                         disableSelectionOnClick
                         sx={{ border: "none" }}
                       />
                     </MDBox>
                     <Divider />
-                    <MDBox display="flex" justifyContent="flex-end" px={2}>
-                      <MDBox textAlign="right">
-                        <MDTypography
-                          variant="button"
-                          color="text"
-                          display="block"
-                        >
-                          Valor Producción
-                        </MDTypography>
-                        <MDTypography
-                          variant="h6"
-                          fontWeight="bold"
-                          color="success"
-                        >
-                          {formatCurrency(valorProduccion)}
-                        </MDTypography>
-                      </MDBox>
+                    <MDBox display="flex" justifyContent="flex-end" pt={1}>
+                      <MDTypography
+                        variant="button"
+                        color="success"
+                        fontWeight="bold"
+                      >
+                        Valor Prod. Final (Est.):{" "}
+                        {formatPrice(simulation.valorProduccion)}
+                      </MDTypography>
                     </MDBox>
                   </MDBox>
                 </Card>
               </MDBox>
             </Grid>
 
-            {/* DERECHA: Resumen */}
+            {/* DERECHA: Simulación y Acciones */}
             <Grid item xs={12} lg={4}>
-              <MDBox display="flex" flexDirection="column" gap={3}>
+              <MDBox
+                display="flex"
+                flexDirection="column"
+                gap={3}
+                position="sticky"
+                top={20}
+              >
                 <Card sx={{ p: 3 }}>
-                  <MDTypography variant="h6" fontWeight="bold" mb={3}>
-                    Resumen de Costos
-                  </MDTypography>
+                  <MDBox display="flex" alignItems="center" gap={1} mb={3}>
+                    <Icon color="info">analytics</Icon>
+                    <MDTypography variant="h6" fontWeight="bold">
+                      Simulación de Costos
+                    </MDTypography>
+                  </MDBox>
 
                   <MDBox display="flex" justifyContent="space-between" mb={1}>
                     <MDTypography variant="button" color="text">
-                      Total Insumos
+                      Costo Insumos (Est.):
                     </MDTypography>
                     <MDTypography
                       variant="button"
                       fontWeight="bold"
                       color="dark"
                     >
-                      {formatCurrency(totalInsumos)}
+                      {formatPrice(simulation.totalInsumos)}
                     </MDTypography>
                   </MDBox>
 
                   <MDBox display="flex" justifyContent="space-between" mb={3}>
                     <MDTypography variant="button" color="text">
-                      Valor Producción
+                      Valor de Salida (Est.):
                     </MDTypography>
                     <MDTypography
                       variant="button"
                       fontWeight="bold"
                       color="success"
                     >
-                      {formatCurrency(valorProduccion)}
+                      {formatPrice(simulation.valorProduccion)}
                     </MDTypography>
                   </MDBox>
 
-                  <Divider />
+                  <Divider sx={{ my: 2 }} />
 
-                  <MDBox
-                    display="flex"
-                    justifyContent="space-between"
-                    mb={1}
-                    mt={1}
-                  >
+                  <MDBox display="flex" justifyContent="space-between" mb={1}>
                     <MDTypography variant="h6" fontWeight="bold">
-                      Margen Estimado
+                      Margen Estimado:
                     </MDTypography>
                     <MDTypography
                       variant="h6"
                       fontWeight="bold"
-                      color={margenEstimado >= 0 ? "success" : "error"}
+                      color={
+                        simulation.margenEstimado >= 0 ? "success" : "error"
+                      }
                     >
-                      {formatCurrency(margenEstimado)}
+                      {formatPrice(simulation.margenEstimado)}
                     </MDTypography>
                   </MDBox>
 
-                  <MDBox display="flex" justifyContent="space-between" mb={3}>
+                  <MDBox display="flex" justifyContent="space-between" mb={4}>
                     <MDTypography variant="button" color="text">
-                      Costo por Unidad
+                      Costo Unitario Promedio:
                     </MDTypography>
                     <MDTypography
                       variant="button"
                       fontWeight="bold"
                       color="dark"
                     >
-                      {formatCurrency(costoPorUnidad)}
+                      {formatPrice(simulation.costoPorUnidad)}
                     </MDTypography>
                   </MDBox>
 
                   <MDButton
                     variant="gradient"
-                    color="info"
+                    color="success"
                     fullWidth
                     size="large"
                     onClick={handleExecute}
                     sx={{ mb: 2 }}
+                    disabled={isLoading || !isValid}
                   >
-                    <Icon sx={{ mr: 1 }}>play_circle</Icon> EJECUTAR PRODUCCIÓN
+                    <Icon sx={{ mr: 1 }}>rocket_launch</Icon> EJECUTAR
+                    PRODUCCIÓN
                   </MDButton>
 
                   <MDButton
                     variant="outlined"
                     color="dark"
                     fullWidth
-                    onClick={() => {
-                      Swal.fire(
-                        "Borrador",
-                        "Orden guardada como borrador",
-                        "info"
-                      );
-                      navigate("/manufactura/ordenes");
-                    }}
+                    onClick={handleSaveDraft}
+                    disabled={isLoading || !isValid}
                   >
-                    <Icon sx={{ mr: 1 }}>save</Icon> GUARDAR COMO BORRADOR
+                    <Icon sx={{ mr: 1 }}>save</Icon> GUARDAR BORRADOR
                   </MDButton>
                 </Card>
 
@@ -687,8 +858,9 @@ const NewProduction = () => {
                   <MDBox display="flex" gap={1}>
                     <Icon color="info">info</Icon>
                     <MDTypography variant="caption" color="text">
-                      Puede guardar como borrador para revisar y ejecutar más
-                      tarde, o ejecutar directamente si los datos son correctos.
+                      <b>Nota:</b> Los costos mostrados son promedios simulados.
+                      El sistema financiero asignará el costo real basado en el
+                      método de valuación (FIFO/LP) al momento del cierre.
                     </MDTypography>
                   </MDBox>
                 </Card>

@@ -71,6 +71,8 @@ import NewProduction from "pages/manufacturing/NewProduction";
 import ManufacturingDetail from "pages/manufacturing/ManufacturingDetail";
 import Recipes from "pages/manufacturing/Recipes";
 import ManufacturingReports from "pages/manufacturing/ManufacturingReports";
+import NewRecipe from "pages/manufacturing/NewRecipe";
+import ProductionSimulation from "pages/manufacturing/ProductionSimulation";
 
 export const routes_dr = [
   //dashboard
@@ -399,6 +401,14 @@ export const routes_dr = [
     component: <Recipes />,
   },
   {
+    route: "/manufactura/recetas/nueva",
+    component: <NewRecipe />,
+  },
+  {
+    route: "/manufactura/simulacion",
+    component: <ProductionSimulation />,
+  },
+  {
     route: "/manufactura/reportes",
     component: <ManufacturingReports />,
   },
@@ -692,6 +702,14 @@ export const routes_full = [
     component: <Recipes />,
   },
   {
+    route: "/manufactura/recetas/nueva",
+    component: <NewRecipe />,
+  },
+  {
+    route: "/manufactura/simulacion",
+    component: <ProductionSimulation />,
+  },
+  {
     route: "/manufactura/reportes",
     component: <ManufacturingReports />,
   },
@@ -866,6 +884,14 @@ export const routes_lite = [
   {
     route: "/manufactura/recetas",
     component: <Recipes />,
+  },
+  {
+    route: "/manufactura/recetas/nueva",
+    component: <NewRecipe />,
+  },
+  {
+    route: "/manufactura/simulacion",
+    component: <ProductionSimulation />,
   },
   {
     route: "/manufactura/reportes",

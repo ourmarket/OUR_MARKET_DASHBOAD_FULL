@@ -73,7 +73,12 @@ const Recipes = () => {
               Plantillas de producción para transformación de materiales
             </MDTypography>
           </MDBox>
-          <MDButton variant="gradient" color="info">
+          <MDButton
+            variant="gradient"
+            color="info"
+            component={Link}
+            to="/manufactura/recetas/nueva"
+          >
             <Icon sx={{ mr: 1 }}>add</Icon> NUEVA RECETA
           </MDButton>
         </MDBox>
