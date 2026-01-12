@@ -51,7 +51,7 @@ const NewRecipe = () => {
 
   // API Hooks
   const { data: productsData, isLoading: isLoadingProducts } =
-    useGetProductsQuery();
+    useGetProductsQuery({ includeCost: true });
   const products = productsData?.products || [];
 
   const { data: existingRecipe, isLoading: isLoadingRecipe } =
@@ -305,10 +305,29 @@ const NewRecipe = () => {
     },
     {
       field: "subtotal",
-      headerName: "Costo Est.",
+      renderHeader: () => (
+        <MDBox display="flex" alignItems="center">
+          <MDTypography variant="caption" fontWeight="bold" color="secondary">
+            COSTO EST.
+          </MDTypography>
+          <Tooltip
+            title="Cálculo basado en el costo de la última compra (FIFO) o el costo base definido en el producto."
+            placement="top"
+            arrow
+          >
+            <Icon
+              fontSize="small"
+              sx={{ ml: 0.5, cursor: "help", opacity: 0.7 }}
+            >
+              help_outline
+            </Icon>
+          </Tooltip>
+        </MDBox>
+      ),
       flex: 1,
       renderCell: ({ row }) => {
         const p = productsList.find((prod) => prod._id === row.productId);
+
         return (
           <MDTypography variant="caption">
             {formatPrice((p?.cost || 0) * row.quantity)}
@@ -654,13 +673,28 @@ const NewRecipe = () => {
                             }
                           />
                           <MDBox>
-                            <MDTypography
-                              variant="button"
-                              fontWeight="regular"
-                              display="block"
-                            >
-                              Usar cantidades estimadas
-                            </MDTypography>
+                            <MDBox display="flex" alignItems="center">
+                              <MDTypography
+                                variant="button"
+                                fontWeight="regular"
+                                display="block"
+                              >
+                                Usar cantidades estimadas
+                              </MDTypography>
+                              <Tooltip
+                                title="Define la cantidad de producto que esperas obtener habitualmente. Se usa para calcular el rendimiento y pre-cargar las órdenes de producción."
+                                placement="top"
+                                arrow
+                              >
+                                <Icon
+                                  fontSize="small"
+                                  color="action"
+                                  sx={{ ml: 0.5, cursor: "help" }}
+                                >
+                                  help_outline
+                                </Icon>
+                              </Tooltip>
+                            </MDBox>
                             <MDBadge
                               color={
                                 useEstimatedQuantities ? "info" : "secondary"

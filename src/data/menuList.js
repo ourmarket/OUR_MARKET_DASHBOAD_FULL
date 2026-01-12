@@ -105,14 +105,9 @@ export const menuList_dr = [
     key: "compras",
     subRoutes: [
       {
-        name: "Nueva compra",
-        icon: "add_shopping_cart",
-        url: "/compras/nueva",
-      },
-      {
-        name: "Lista compras",
-        icon: "receipt_long", // Lista de facturas de compra
-        url: "/compras/lista",
+        name: "Compras",
+        icon: "date_range", // Filtro por fechas
+        url: "/compras",
       },
     ],
   },
@@ -223,28 +218,6 @@ export const menuList_dr = [
         name: "Rango de ventas",
         icon: "date_range", // Filtro por fechas
         url: "/reportes/productos-vendidos-por-rango",
-      },
-    ],
-  },
-  {
-    name: "Operaciones",
-    icon: "assessment", // Reporte de evaluación
-    key: "operaciones",
-    subRoutes: [
-      {
-        name: "Ventas",
-        icon: "date_range", // Filtro por fechas
-        url: "/ventas",
-      },
-      {
-        name: "Compras",
-        icon: "date_range", // Filtro por fechas
-        url: "/compras",
-      },
-      {
-        name: "Pagos",
-        icon: "date_range", // Filtro por fechas
-        url: "/pagos",
       },
     ],
   },

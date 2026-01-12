@@ -353,58 +353,59 @@ const Manufacturing = () => {
             </Grid>
           </Grid>
         </MDBox>
-
-        <MDBox
-          mb={3}
-          display="flex"
-          gap={2}
-          alignItems="center"
-          flexWrap="wrap"
-        >
-          <MDBox flex={1} minWidth="250px">
-            <MDInput
-              placeholder="Buscar por código o producto..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <Icon
-                    fontSize="small"
-                    sx={{ mr: 1, color: "text.secondary" }}
-                  >
-                    search
-                  </Icon>
-                ),
-              }}
-            />
+        <Card sx={{ mb: 2 }}>
+          <MDBox
+            display="flex"
+            gap={2}
+            alignItems="center"
+            flexWrap="wrap"
+            p={2}
+          >
+            <MDBox flex={1} minWidth="250px">
+              <MDInput
+                placeholder="Buscar por código o producto..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                fullWidth
+                InputProps={{
+                  startAdornment: (
+                    <Icon
+                      fontSize="small"
+                      sx={{ mr: 1, color: "text.secondary" }}
+                    >
+                      search
+                    </Icon>
+                  ),
+                }}
+              />
+            </MDBox>
+            <MDBox minWidth="160px">
+              <MDInput
+                type="date"
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+                fullWidth
+              />
+            </MDBox>
+            <MDBox minWidth="150px">
+              <FormControl fullWidth size="small">
+                <InputLabel id="status-filter-label">Estado</InputLabel>
+                <Select
+                  labelId="status-filter-label"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  label="Estado"
+                  sx={{ height: "45px" }}
+                >
+                  <MenuItem value="all">Todos</MenuItem>
+                  <MenuItem value="DRAFT">Borrador</MenuItem>
+                  <MenuItem value="EXECUTED">Ejecutada</MenuItem>
+                  <MenuItem value="CANCELLED">Cancelada</MenuItem>
+                </Select>
+              </FormControl>
+            </MDBox>
           </MDBox>
-          <MDBox minWidth="160px">
-            <MDInput
-              type="date"
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              fullWidth
-            />
-          </MDBox>
-          <MDBox minWidth="150px">
-            <FormControl fullWidth size="small">
-              <InputLabel id="status-filter-label">Estado</InputLabel>
-              <Select
-                labelId="status-filter-label"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                label="Estado"
-                sx={{ height: "45px" }}
-              >
-                <MenuItem value="all">Todos</MenuItem>
-                <MenuItem value="DRAFT">Borrador</MenuItem>
-                <MenuItem value="EXECUTED">Ejecutada</MenuItem>
-                <MenuItem value="CANCELLED">Cancelada</MenuItem>
-              </Select>
-            </FormControl>
-          </MDBox>
-        </MDBox>
+        </Card>
 
         <Card>
           <MDBox

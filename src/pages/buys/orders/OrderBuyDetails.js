@@ -24,7 +24,7 @@ import TableRow from "@mui/material/TableRow";
 
 // Helpers
 import { formatPrice } from "utils/formaPrice";
-import { formatDate, formatDateTime } from "./mockData";
+
 import { ORDER_STATUS } from "data/orderStatus";
 
 import {
@@ -34,6 +34,7 @@ import {
 } from "api/purchaseOrderApi";
 import Loading from "components/DRLoading";
 import { Alert } from "@mui/material";
+import { dateToLocalDate, formatDateOnly } from "utils/dateFormat";
 
 const OrderBuyDetails = () => {
   const { id } = useParams();
@@ -182,8 +183,6 @@ const OrderBuyDetails = () => {
 
   /* ===================== UI ===================== */
 
-  console.log(status);
-
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -299,7 +298,7 @@ const OrderBuyDetails = () => {
                           event
                         </Icon>
                         <MDTypography variant="button" fontWeight="medium">
-                          {formatDate(order.expectedDate)}
+                          {formatDateOnly(order.expectedDate)}
                         </MDTypography>
                       </MDBox>
                     </Grid>
@@ -468,7 +467,7 @@ const OrderBuyDetails = () => {
 
                           <MDBox>
                             <MDTypography variant="caption" color="text">
-                              {`${formatDateTime(entry.changedAt)} • ${
+                              {`${dateToLocalDate(entry.changedAt)} • ${
                                 entry.changedBy?.name || ""
                               } ${entry.changedBy?.lastName || ""}`}
                             </MDTypography>

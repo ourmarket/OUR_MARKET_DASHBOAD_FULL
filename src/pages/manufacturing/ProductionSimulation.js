@@ -31,39 +31,57 @@ import Alert from "@mui/material/Alert";
 import Tooltip from "@mui/material/Tooltip";
 
 // Data and Helpers
-import {
-  recipes,
-  manufacturingProducts,
-  formatCurrency,
-  getActiveRecipes,
-} from "./mockData";
+// Utils
+import { formatPrice as formatCurrency } from "utils/formaPrice";
+import LinearProgress from "@mui/material/LinearProgress";
+import { useGetActiveBomsQuery } from "api/bomApi";
+import { useGetProductsQuery } from "api/productApi";
 
 const ProductionSimulation = () => {
   const navigate = useNavigate();
   const [selectedRecipeId, setSelectedRecipeId] = useState("");
   const [quantityToProduce, setQuantityToProduce] = useState(1);
   const [estimatedDate, setEstimatedDate] = useState("");
+  const [overriddenOutputs, setOverriddenOutputs] = useState({});
 
-  const activeRecipes = getActiveRecipes();
+  // Reset overrides when recipe changes
+  useMemo(() => {
+    setOverriddenOutputs({});
+  }, [selectedRecipeId]);
+
+  // API Hooks
+  const { data: bomsData, isLoading: isLoadingBoms } = useGetActiveBomsQuery();
+  const { data: productsData, isLoading: isLoadingProducts } =
+    useGetProductsQuery();
+
+  const activeRecipes = bomsData || [];
+  const products = productsData?.products || [];
 
   const simulation = useMemo(() => {
-    if (!selectedRecipeId) return null;
+    if (!selectedRecipeId || !products.length) return null;
 
-    const recipe = recipes.find((r) => r.id === selectedRecipeId);
+    const recipe = activeRecipes.find((r) => r._id === selectedRecipeId);
     if (!recipe) return null;
 
     const multiplier = quantityToProduce;
-    const outputQuantity = recipe.outputQuantity * multiplier;
 
+    // --- 1. Process Inputs ---
+    let totalInputCost = 0;
     const inputs = recipe.inputs.map((input) => {
-      const requiredQuantity = input.quantity * multiplier;
-      const product = manufacturingProducts.find(
-        (p) => p.id === input.productId
+      const product = products.find(
+        (p) => p._id === input.product?._id || p._id === input.product
       );
-      const availableStock = product?.stockAvailable || 0;
+      const requiredQuantity = input.quantity * multiplier;
+      // FIX: Use 'stockAvailable' from product model (fallback to 'stock' if backend projection changed)
+      const availableStock = product?.stockAvailable ?? product?.stock ?? 0;
+
       const shortage = Math.max(0, requiredQuantity - availableStock);
-      const unitCost = product?.unitCost || 0;
+      const unitCost =
+        product?.cost || product?.averageCost || product?.price || 0;
+      // Note: Ideally backend provides precise cost. For now using product.cost or price.
       const totalCost = requiredQuantity * unitCost;
+
+      totalInputCost += totalCost;
 
       let status;
       if (availableStock === 0) {
@@ -75,98 +93,133 @@ const ProductionSimulation = () => {
       }
 
       return {
-        productId: input.productId,
-        productName: input.product.name,
+        productId: product?._id,
+        productName: product?.name || "Desconocido",
         requiredQuantity,
         availableStock,
         shortage,
-        unit: input.product.unit,
+        unit: product?.unit || "u",
         unitCost,
         totalCost,
         status,
       };
     });
 
-    const totalInputs = inputs.length;
+    // --- 2. Process Outputs & Financials ---
+    let totalPotentialSales = 0;
+    const outputs = (recipe.outputs || []).map((output) => {
+      const product = products.find(
+        (p) => p._id === output.product?._id || p._id === output.product
+      );
+
+      const productId = product?._id;
+      let expectedQuantity = 0;
+
+      if (overriddenOutputs[productId] !== undefined) {
+        expectedQuantity = parseFloat(overriddenOutputs[productId]) || 0;
+      } else {
+        expectedQuantity = (output.expectedQuantity || 0) * multiplier;
+      }
+
+      const sellingPrice = product?.price || 0;
+      const potentialSales = expectedQuantity * sellingPrice;
+
+      const costPercent = output.costPercent || 0; // % of total input cost assigned to this product
+      const allocatedCost = totalInputCost * (costPercent / 100);
+      const estimatedUnitCost =
+        expectedQuantity > 0 ? allocatedCost / expectedQuantity : 0;
+
+      totalPotentialSales += potentialSales;
+
+      return {
+        productId: product?._id,
+        productName: product?.name || "Desconocido",
+        expectedQuantity,
+        baseExpected: (output.expectedQuantity || 0) * multiplier,
+        unit: product?.unit || "u",
+        sellingPrice,
+        potentialSales,
+        costPercent,
+        allocatedCost,
+        estimatedUnitCost,
+      };
+    });
+
+    // If no outputs defined in array, maybe check recipe.product (legacy/simple model)
+    if (outputs.length === 0 && recipe.product) {
+      // ... (Similar logic if needed, but assuming outputs array based on model)
+    }
+
+    // --- 3. KPIs ---
+
+    // Inputs Analysis
+    const totalInputsCount = inputs.length;
     const inputsWithShortage = inputs.filter(
       (i) => i.status !== "available"
     ).length;
+
+    // Viability
+    const canProduce = inputsWithShortage === 0;
     const viabilityPercent =
-      totalInputs > 0
-        ? Math.round(((totalInputs - inputsWithShortage) / totalInputs) * 100)
+      totalInputsCount > 0
+        ? Math.round(
+            ((totalInputsCount - inputsWithShortage) / totalInputsCount) * 100
+          )
         : 0;
 
-    const estimatedTotalCost = inputs.reduce((acc, i) => acc + i.totalCost, 0);
-    const estimatedUnitCost =
-      outputQuantity > 0 ? estimatedTotalCost / outputQuantity : 0;
+    // Financials
+    const estimatedGrossMargin = totalPotentialSales - totalInputCost;
+    const estimatedGrossMarginPercent =
+      totalPotentialSales > 0
+        ? (estimatedGrossMargin / totalPotentialSales) * 100
+        : 0;
 
-    const canProduce = inputsWithShortage === 0;
-
+    // --- 4. Alerts ---
     const alerts = [];
-
-    const outOfStockInputs = inputs.filter((i) => i.status === "out_of_stock");
-    const insufficientInputs = inputs.filter(
-      (i) => i.status === "insufficient"
-    );
-
-    if (outOfStockInputs.length > 0) {
+    if (inputs.some((i) => i.status === "out_of_stock")) {
       alerts.push({
         type: "error",
-        message: `Sin stock: ${outOfStockInputs
-          .map((i) => i.productName)
-          .join(", ")}`,
+        message: "Hay insumos sin stock. No se puede producir.",
       });
-    }
-
-    if (insufficientInputs.length > 0) {
+    } else if (inputs.some((i) => i.status === "insufficient")) {
       alerts.push({
         type: "warning",
-        message: `Stock insuficiente: ${insufficientInputs
-          .map(
-            (i) =>
-              `${i.productName} (faltan ${i.shortage.toFixed(2)} ${i.unit})`
-          )
-          .join(", ")}`,
+        message: "Stock insuficiente para la cantidad solicitada.",
       });
-    }
-
-    const criticalInputs = inputs.filter((i) => {
-      if (i.availableStock === 0) return false;
-      const consumptionPercent = (i.requiredQuantity / i.availableStock) * 100;
-      return consumptionPercent > 80 && i.status === "available";
-    });
-
-    if (criticalInputs.length > 0) {
-      alerts.push({
-        type: "warning",
-        message: `Insumos críticos (consumo >80% del stock): ${criticalInputs
-          .map((i) => i.productName)
-          .join(", ")}`,
-      });
-    }
-
-    if (canProduce && alerts.length === 0) {
-      alerts.push({
-        type: "info",
-        message:
-          "Todos los insumos están disponibles. La producción puede ejecutarse.",
-      });
+    } else {
+      alerts.push({ type: "info", message: "Todos los insumos disponibles." });
     }
 
     return {
       recipe,
-      quantityToProduce,
-      outputQuantity,
       inputs,
-      totalInputs,
+      outputs,
+      totalInputsCount,
       inputsWithShortage,
       viabilityPercent,
-      estimatedTotalCost,
-      estimatedUnitCost,
       canProduce,
       alerts,
+      financials: {
+        totalInputCost,
+        totalPotentialSales,
+        estimatedGrossMargin,
+        estimatedGrossMarginPercent,
+      },
     };
-  }, [selectedRecipeId, quantityToProduce]);
+  }, [
+    selectedRecipeId,
+    quantityToProduce,
+    activeRecipes,
+    products,
+    overriddenOutputs,
+  ]);
+
+  const handleOutputChange = (productId, value) => {
+    setOverriddenOutputs((prev) => ({
+      ...prev,
+      [productId]: value,
+    }));
+  };
 
   const handleCreateOrder = () => {
     navigate(
@@ -181,7 +234,7 @@ const ProductionSimulation = () => {
           <MDBadge
             variant="gradient"
             color="success"
-            badgeContent="Disponible"
+            badgeContent="OK"
             size="xs"
           />
         );
@@ -190,7 +243,7 @@ const ProductionSimulation = () => {
           <MDBadge
             variant="gradient"
             color="warning"
-            badgeContent="Insuficiente"
+            badgeContent="Falta"
             size="xs"
           />
         );
@@ -208,6 +261,15 @@ const ProductionSimulation = () => {
     }
   };
 
+  if (isLoadingBoms || isLoadingProducts) {
+    return (
+      <DashboardLayout>
+        <DashboardNavbar />
+        <LinearProgress color="info" />
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -223,7 +285,7 @@ const ProductionSimulation = () => {
               Simulación de Producción
             </MDTypography>
             <MDTypography variant="button" color="text">
-              Evalúe la viabilidad de producción antes de crear una orden
+              Proyección de costos, insumos y rentabilidad
             </MDTypography>
           </MDBox>
           <MDButton
@@ -235,168 +297,119 @@ const ProductionSimulation = () => {
           </MDButton>
         </MDBox>
 
-        <MDBox mb={3}>
-          <Alert severity="info" variant="outlined">
-            <MDTypography variant="button" color="info" fontWeight="bold">
-              Herramienta de Planeamiento:
-            </MDTypography>{" "}
-            Esta simulación NO crea órdenes, NO mueve stock y NO impacta costos
-            reales. Es exclusivamente para evaluar la viabilidad de producción.
-          </Alert>
-        </MDBox>
-
         <Grid container spacing={3}>
+          {/* LEFT COLUMN: Controls & Recipe Selection */}
           <Grid item xs={12} lg={4}>
             <MDBox display="flex" flexDirection="column" gap={3}>
               <Card>
                 <MDBox p={3}>
-                  <MDBox display="flex" alignItems="center" gap={1} mb={2}>
-                    <Icon color="info">assignment</Icon>
-                    <MDTypography variant="h6" fontWeight="bold">
-                      Selección de Receta
-                    </MDTypography>
-                  </MDBox>
+                  <MDTypography variant="h6" fontWeight="bold" mb={2}>
+                    Configuración
+                  </MDTypography>
                   <FormControl fullWidth sx={{ mb: 2 }}>
-                    <InputLabel id="recipe-label">Receta</InputLabel>
+                    <InputLabel id="recipe-label">Receta / Proceso</InputLabel>
                     <Select
                       labelId="recipe-label"
-                      label="Receta"
+                      label="Receta / Proceso"
                       value={selectedRecipeId}
                       onChange={(e) => setSelectedRecipeId(e.target.value)}
                       sx={{ height: 45 }}
                     >
                       {activeRecipes.map((recipe) => (
-                        <MenuItem key={recipe.id} value={recipe.id}>
+                        <MenuItem key={recipe._id} value={recipe._id}>
                           {recipe.name}
                         </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
-
-                  {simulation && (
-                    <MDBox p={2} bgColor="grey-100" borderRadius="lg">
-                      <MDTypography
-                        variant="caption"
-                        color="text"
-                        fontWeight="bold"
-                        textTransform="uppercase"
-                      >
-                        Producto Resultante
-                      </MDTypography>
-                      <MDTypography
-                        variant="h6"
-                        fontWeight="bold"
-                        display="block"
-                      >
-                        {simulation.recipe.outputProduct.name}
-                      </MDTypography>
-                      <MDTypography variant="caption" color="text">
-                        Cantidad base: {simulation.recipe.outputQuantity}{" "}
-                        {simulation.recipe.outputProduct.unit}
-                      </MDTypography>
-                    </MDBox>
-                  )}
-                </MDBox>
-              </Card>
-
-              <Card>
-                <MDBox p={3}>
-                  <MDBox display="flex" alignItems="center" gap={1} mb={2}>
-                    <Icon color="info">settings</Icon>
-                    <MDTypography variant="h6" fontWeight="bold">
-                      Parámetros
-                    </MDTypography>
-                  </MDBox>
-                  <MDBox mb={2}>
-                    <MDInput
-                      type="number"
-                      label="Multiplicador de producción"
-                      fullWidth
-                      value={quantityToProduce}
-                      onChange={(e) =>
-                        setQuantityToProduce(
-                          Math.max(1, parseInt(e.target.value) || 1)
-                        )
-                      }
-                    />
-                  </MDBox>
-                  {simulation && (
-                    <MDTypography
-                      variant="caption"
-                      color="text"
-                      fontWeight="medium"
-                    >
-                      Producción total estimada: {simulation.outputQuantity}{" "}
-                      {simulation.recipe.outputProduct.unit}
-                    </MDTypography>
-                  )}
-                  <MDBox mt={2}>
-                    <MDInput
-                      type="date"
-                      label="Fecha Estimada"
-                      fullWidth
-                      value={estimatedDate}
-                      onChange={(e) => setEstimatedDate(e.target.value)}
-                      InputLabelProps={{ shrink: true }}
-                    />
-                  </MDBox>
+                  <MDInput
+                    type="number"
+                    label="Cantidad de Ejecuciones (Batch)"
+                    fullWidth
+                    value={quantityToProduce}
+                    onChange={(e) =>
+                      setQuantityToProduce(
+                        Math.max(1, parseInt(e.target.value) || 1)
+                      )
+                    }
+                    helperText="Multiplicador de la receta base"
+                  />
                 </MDBox>
               </Card>
 
               {simulation && (
                 <Card>
                   <MDBox p={3}>
-                    <MDBox display="flex" alignItems="center" gap={1} mb={2}>
-                      <Icon color="info">trending_up</Icon>
-                      <MDTypography variant="h6" fontWeight="bold">
-                        Costos Estimados
-                      </MDTypography>
-                    </MDBox>
-                    <MDBox
-                      display="flex"
-                      justifyContent="space-between"
-                      alignItems="center"
-                      py={1}
-                      borderBottom="1px solid #eee"
+                    <MDTypography
+                      variant="h6"
+                      fontWeight="bold"
+                      mb={2}
+                      color={
+                        simulation.financials.estimatedGrossMargin >= 0
+                          ? "success"
+                          : "error"
+                      }
                     >
+                      Rentabilidad Estimada
+                    </MDTypography>
+
+                    <MDBox display="flex" justifyContent="space-between" mb={1}>
                       <MDTypography variant="button" color="text">
-                        Total Estimado
-                      </MDTypography>
-                      <MDTypography variant="h6" fontWeight="bold">
-                        {formatCurrency(simulation.estimatedTotalCost)}
-                      </MDTypography>
-                    </MDBox>
-                    <MDBox
-                      display="flex"
-                      justifyContent="space-between"
-                      alignItems="center"
-                      py={1}
-                    >
-                      <MDTypography variant="button" color="text">
-                        Costo Unitario
+                        Venta Potencial Total:
                       </MDTypography>
                       <MDTypography variant="button" fontWeight="bold">
-                        {formatCurrency(simulation.estimatedUnitCost)}
+                        {formatCurrency(
+                          simulation.financials.totalPotentialSales
+                        )}
                       </MDTypography>
                     </MDBox>
-                    <MDBox mt={2}>
-                      <Alert
-                        severity="warning"
-                        variant="outlined"
-                        sx={{
-                          border: "none",
-                          bgcolor: "rgba(255, 152, 0, 0.1)",
-                        }}
+                    <MDBox display="flex" justifyContent="space-between" mb={1}>
+                      <MDTypography variant="button" color="text">
+                        Costo Insumos Total:
+                      </MDTypography>
+                      <MDTypography
+                        variant="button"
+                        fontWeight="bold"
+                        color="error"
                       >
+                        -{formatCurrency(simulation.financials.totalInputCost)}
+                      </MDTypography>
+                    </MDBox>
+                    <Divider />
+                    <MDBox
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <MDTypography variant="h6">Margen:</MDTypography>
+                      <MDBox textAlign="right">
+                        <MDTypography
+                          variant="h6"
+                          color={
+                            simulation.financials.estimatedGrossMargin >= 0
+                              ? "success"
+                              : "error"
+                          }
+                        >
+                          {formatCurrency(
+                            simulation.financials.estimatedGrossMargin
+                          )}
+                        </MDTypography>
                         <MDTypography
                           variant="caption"
-                          color="warning"
-                          fontWeight="medium"
+                          fontWeight="bold"
+                          color={
+                            simulation.financials.estimatedGrossMargin >= 0
+                              ? "success"
+                              : "error"
+                          }
                         >
-                          Costo estimado basado en últimos precios. No
-                          representa costo contable real.
+                          {simulation.financials.estimatedGrossMarginPercent.toFixed(
+                            2
+                          )}
+                          %
                         </MDTypography>
-                      </Alert>
+                      </MDBox>
                     </MDBox>
                   </MDBox>
                 </Card>
@@ -404,163 +417,128 @@ const ProductionSimulation = () => {
             </MDBox>
           </Grid>
 
+          {/* RIGHT COLUMN: Results Details */}
           <Grid item xs={12} lg={8}>
             {!simulation ? (
               <Card
                 sx={{
                   height: "100%",
-                  minHeight: 400,
                   display: "flex",
-                  alignItems: "center",
                   justifyContent: "center",
+                  alignItems: "center",
+                  minHeight: 400,
                 }}
               >
-                <MDBox textAlign="center">
-                  <Icon
-                    sx={{
-                      fontSize: "64px !important",
-                      color: "grey-300",
-                      mb: 2,
-                    }}
-                  >
-                    calculate
-                  </Icon>
-                  <MDTypography variant="h6" color="secondary">
-                    Seleccione una receta para comenzar la simulación
-                  </MDTypography>
-                </MDBox>
+                <MDTypography variant="h6" color="secondary">
+                  Seleccione una receta para calcular
+                </MDTypography>
               </Card>
             ) : (
               <MDBox display="flex" flexDirection="column" gap={3}>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={3}>
-                    <Card sx={{ p: 2, textAlign: "center" }}>
-                      <MDTypography
-                        variant="caption"
-                        color="text"
-                        fontWeight="bold"
-                      >
-                        A PRODUCIR
-                      </MDTypography>
-                      <MDTypography variant="h6" fontWeight="bold">
-                        {simulation.outputQuantity}{" "}
-                        {simulation.recipe.outputProduct.unit}
-                      </MDTypography>
-                    </Card>
-                  </Grid>
-                  <Grid item xs={12} sm={3}>
-                    <Card sx={{ p: 2, textAlign: "center" }}>
-                      <MDTypography
-                        variant="caption"
-                        color="text"
-                        fontWeight="bold"
-                      >
-                        INSUMOS
-                      </MDTypography>
-                      <MDTypography variant="h6" fontWeight="bold">
-                        {simulation.totalInputs}
-                      </MDTypography>
-                    </Card>
-                  </Grid>
-                  <Grid item xs={12} sm={3}>
-                    <Card sx={{ p: 2, textAlign: "center" }}>
-                      <MDTypography
-                        variant="caption"
-                        color="text"
-                        fontWeight="bold"
-                      >
-                        FALTANTES
-                      </MDTypography>
-                      <MDTypography
-                        variant="h6"
-                        fontWeight="bold"
-                        color={
-                          simulation.inputsWithShortage > 0
-                            ? "error"
-                            : "success"
-                        }
-                      >
-                        {simulation.inputsWithShortage}
-                      </MDTypography>
-                    </Card>
-                  </Grid>
-                  <Grid item xs={12} sm={3}>
-                    <Card sx={{ p: 2, textAlign: "center" }}>
-                      <MDTypography
-                        variant="caption"
-                        color="text"
-                        fontWeight="bold"
-                      >
-                        % VIABLE
-                      </MDTypography>
-                      <MDTypography
-                        variant="h6"
-                        fontWeight="bold"
-                        color={
-                          simulation.viabilityPercent < 100
-                            ? "warning"
-                            : "success"
-                        }
-                      >
-                        {simulation.viabilityPercent}%
-                      </MDTypography>
-                    </Card>
-                  </Grid>
-                </Grid>
-
+                {/* ALERTS */}
                 {simulation.alerts.map((alert, idx) => (
-                  <Alert
-                    key={idx}
-                    severity={alert.type}
-                    variant="filled"
-                    sx={{ color: "white" }}
-                  >
+                  <Alert key={idx} severity={alert.type}>
                     {alert.message}
                   </Alert>
                 ))}
 
+                {/* OUTPUTS TABLE */}
                 <Card>
                   <MDBox p={3}>
                     <MDTypography variant="h6" fontWeight="bold" mb={2}>
-                      Detalle de Insumos Requeridos
+                      Productos Resultantes (Salidas)
                     </MDTypography>
                     <TableContainer>
                       <Table size="small">
-                        <TableHead sx={{ display: "table-header-group" }}>
+                        <TableHead>
                           <TableRow>
-                            <TableCell sx={{ fontWeight: "bold" }}>
-                              Insumo
-                            </TableCell>
-                            <TableCell
-                              align="right"
-                              sx={{ fontWeight: "bold" }}
-                            >
-                              Requerido
-                            </TableCell>
-                            <TableCell
-                              align="right"
-                              sx={{ fontWeight: "bold" }}
-                            >
-                              Disponible
-                            </TableCell>
-                            <TableCell
-                              align="right"
-                              sx={{ fontWeight: "bold" }}
-                            >
-                              Faltante
-                            </TableCell>
-                            <TableCell
-                              align="right"
-                              sx={{ fontWeight: "bold" }}
-                            >
-                              Costo Est.
-                            </TableCell>
-                            <TableCell
-                              align="center"
-                              sx={{ fontWeight: "bold" }}
-                            >
-                              Estado
-                            </TableCell>
+                            <TableCell>Producto</TableCell>
+                            <TableCell align="right">Cant. Est.</TableCell>
+                            <TableCell align="right">Precio Venta</TableCell>
+                            <TableCell align="right">Total Venta</TableCell>
+                            <TableCell align="right">Distrib. Costo</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {simulation.outputs.map((out) => (
+                            <TableRow key={out.productId}>
+                              <TableCell>
+                                <MDTypography
+                                  variant="button"
+                                  fontWeight="medium"
+                                >
+                                  {out.productName}
+                                </MDTypography>
+                              </TableCell>
+                              <TableCell align="right" style={{ width: 140 }}>
+                                <MDInput
+                                  type="number"
+                                  size="small"
+                                  value={out.expectedQuantity}
+                                  onChange={(e) =>
+                                    handleOutputChange(
+                                      out.productId,
+                                      e.target.value
+                                    )
+                                  }
+                                  InputProps={{
+                                    endAdornment: (
+                                      <MDTypography
+                                        variant="caption"
+                                        color="text"
+                                      >
+                                        {out.unit}
+                                      </MDTypography>
+                                    ),
+                                  }}
+                                />
+                              </TableCell>
+                              <TableCell align="right">
+                                <MDTypography variant="button">
+                                  {formatCurrency(out.sellingPrice)}
+                                </MDTypography>
+                              </TableCell>
+                              <TableCell align="right">
+                                <MDTypography
+                                  variant="button"
+                                  fontWeight="bold"
+                                  color="success"
+                                >
+                                  {formatCurrency(out.potentialSales)}
+                                </MDTypography>
+                              </TableCell>
+                              <TableCell align="right">
+                                <MDTypography variant="button" display="block">
+                                  {out.costPercent}%
+                                </MDTypography>
+                                <MDTypography variant="caption" color="text">
+                                  ({formatCurrency(out.allocatedCost)})
+                                </MDTypography>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </MDBox>
+                </Card>
+
+                {/* INPUTS TABLE */}
+                <Card>
+                  <MDBox p={3}>
+                    <MDTypography variant="h6" fontWeight="bold" mb={2}>
+                      Insumos Requeridos
+                    </MDTypography>
+                    <TableContainer>
+                      <Table size="small">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Insumo</TableCell>
+                            <TableCell align="right">Requerido</TableCell>
+                            <TableCell align="right">Disponible</TableCell>
+                            <TableCell align="right">Faltante</TableCell>
+                            <TableCell align="right">Costo Est.</TableCell>
+                            <TableCell align="center">Estado</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
@@ -581,15 +559,7 @@ const ProductionSimulation = () => {
                                 </MDTypography>
                               </TableCell>
                               <TableCell align="right">
-                                <MDTypography
-                                  variant="button"
-                                  color={
-                                    input.availableStock <
-                                    input.requiredQuantity
-                                      ? "warning"
-                                      : "success"
-                                  }
-                                >
+                                <MDTypography variant="button">
                                   {input.availableStock.toFixed(2)}
                                 </MDTypography>
                               </TableCell>
@@ -603,9 +573,7 @@ const ProductionSimulation = () => {
                                     {input.shortage.toFixed(2)}
                                   </MDTypography>
                                 ) : (
-                                  <MDTypography variant="button" color="text">
-                                    —
-                                  </MDTypography>
+                                  "-"
                                 )}
                               </TableCell>
                               <TableCell align="right">
@@ -621,37 +589,14 @@ const ProductionSimulation = () => {
                         </TableBody>
                       </Table>
                     </TableContainer>
-                    <MDBox
-                      mt={3}
-                      p={2}
-                      bgColor="grey-100"
-                      borderRadius="lg"
-                      display="flex"
-                      justifyContent="space-between"
-                      alignItems="center"
-                    >
-                      <MDTypography variant="h6" fontWeight="bold">
-                        Total Costo Insumos
-                      </MDTypography>
-                      <MDTypography variant="h5" fontWeight="bold">
-                        {formatCurrency(simulation.estimatedTotalCost)}
-                      </MDTypography>
-                    </MDBox>
                   </MDBox>
                 </Card>
 
-                <MDBox display="flex" justifyContent="flex-end" gap={2}>
-                  <MDButton
-                    variant="outlined"
-                    color="dark"
-                    onClick={() => navigate("/manufactura/ordenes")}
-                  >
-                    CANCELAR
-                  </MDButton>
+                <MDBox display="flex" justifyContent="flex-end">
                   <Tooltip
                     title={
                       !simulation.canProduce
-                        ? "No se puede crear: hay insumos faltantes"
+                        ? "Resuelva las faltas de stock primero"
                         : ""
                     }
                   >
@@ -661,8 +606,10 @@ const ProductionSimulation = () => {
                         color="info"
                         disabled={!simulation.canProduce}
                         onClick={handleCreateOrder}
+                        size="large"
                       >
-                        <Icon sx={{ mr: 1 }}>add_circle</Icon> CREAR ORDEN
+                        <Icon sx={{ mr: 1 }}>check</Icon>
+                        Proceder a Producción
                       </MDButton>
                     </span>
                   </Tooltip>

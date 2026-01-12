@@ -15,6 +15,7 @@ import Card from "@mui/material/Card";
 import { formatPrice } from "utils/formaPrice";
 import { dateToLocalDate } from "utils/dateFormat";
 import PropTypes from "prop-types";
+import CustomNoRowsOverlay from "components/OUTables/CustomNoRowsOverlay";
 
 export function AdjustmentsTable({ adjustments = [], isLoading = false }) {
   const navigate = useNavigate();
@@ -181,6 +182,16 @@ export function AdjustmentsTable({ adjustments = [], isLoading = false }) {
             pageSizeOptions={[5, 10, 20]}
             checkboxSelection={false}
             disableRowSelectionOnClick
+            slots={{
+              noRowsOverlay: CustomNoRowsOverlay,
+            }}
+            slotProps={{
+              noRowsOverlay: {
+                title: "No se encontraron ajustes",
+                message: "No hay registros de ajustes de compra",
+                icon: "rule",
+              },
+            }}
             sx={{
               border: 0,
               "& .MuiDataGrid-cell": {

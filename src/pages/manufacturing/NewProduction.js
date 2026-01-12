@@ -28,7 +28,9 @@ import InputLabel from "@mui/material/InputLabel";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import { DataGrid } from "@mui/x-data-grid";
+import CircularProgress from "@mui/material/CircularProgress";
 import LinearProgress from "@mui/material/LinearProgress";
+import Tooltip from "@mui/material/Tooltip";
 
 // API Hooks
 import { useGetProductsQuery } from "api/productApi";
@@ -36,6 +38,7 @@ import { useGetActiveBomsQuery } from "api/bomApi";
 import {
   useCreateManufacturingOrderMutation,
   useExecuteManufacturingOrderMutation,
+  useCloseManufacturingOrderMutation,
 } from "api/manufacturingOrderApi";
 
 // Helpers
@@ -105,7 +108,7 @@ const NewProduction = () => {
 
   // API Queries
   const { data: productsData, isLoading: isLoadingProducts } =
-    useGetProductsQuery({ limit: 10000 });
+    useGetProductsQuery({ includeCost: true, limit: 10000 });
   const { data: activeRecipes, isLoading: isLoadingRecipes } =
     useGetActiveBomsQuery();
 
@@ -114,6 +117,9 @@ const NewProduction = () => {
     useCreateManufacturingOrderMutation();
   const [executeOrder, { isLoading: isExecuting }] =
     useExecuteManufacturingOrderMutation();
+
+  const [closeOrder, { isLoading: isClosing }] =
+    useCloseManufacturingOrderMutation();
 
   const products = productsData?.products || [];
   const recipes = activeRecipes || [];
@@ -141,6 +147,7 @@ const NewProduction = () => {
 
   const handleLoadRecipe = () => {
     const recipe = recipes.find((r) => r._id === values.selectedRecipeId);
+    console.log(recipe);
     if (!recipe) {
       Swal.fire("Aviso", "Seleccione una receta primero", "info");
       return;
@@ -150,25 +157,28 @@ const NewProduction = () => {
       "inputs",
       recipe.inputs.map((input, idx) => ({
         id: (idx + 1).toString(),
-        productId: input.product._id, // Backend returns populated product object
-        quantity: input.quantity,
+        productId: input.product, // Backend returns populated product object
+        quantity: input?.quantity || 1,
       }))
     );
 
-    setFieldValue("outputs", [
-      {
-        id: "1",
-        productId: recipe.product._id,
-        quantity: recipe.yieldQuantity || 1,
-      },
-    ]);
+    setFieldValue(
+      "outputs",
+      recipe.outputs.map((output, idx) => ({
+        id: (idx + 1).toString(),
+        productId: output.product?._id || output.product, // Ensure we get the ID if populated
+        quantity: output.expectedQuantity || output.quantity || 1, // Fallback to expectedQuantity from standard BOM
+        costPercent: output.costPercent || 0, // Capture cost percentage
+      }))
+    );
 
     Swal.fire({
       icon: "success",
       title: "Receta Cargada",
-      text: "Se han cargado los insumos y productos base",
-      timer: 1500,
+      toast: true,
+      position: "bottom-end",
       showConfirmButton: false,
+      timer: 3000,
     });
   };
 
@@ -181,7 +191,7 @@ const NewProduction = () => {
       product: productId,
       quantity,
     })),
-    outputs: values.outputs.map(({ productId, quantity }) => ({
+    outputs: values.outputs.map(({ productId, quantity, costPercent }) => ({
       product: productId, // Note: Backend createOrder handles outputs only if NO bomId is passed OR if we override?
       // Backend logic: if (bomId) { calculate from BOM } else { use inputs/outputs }
       // If we want to allow modification of BOM derived values, we should probably NOT send bomId if we changed them, OR backend should support overrides.
@@ -193,6 +203,7 @@ const NewProduction = () => {
       // Let's send NO bomId to ensure exact quantities from form are used, creating a "Manual/Custom" order based on a recipe.
       // TODO: Backend improvement to allow BOM reference + overrides.
       quantity,
+      costPercent,
     })),
     // We force using the form values by NOT sending bomId, or we assume backend prefers manual data if present?
     // Backend service says: if (bomId) { ignore manual } else { use manual }.
@@ -252,14 +263,13 @@ const NewProduction = () => {
 
           const order = await createOrder(payload).unwrap();
 
-          // 2. Execute
+          // 2. Execute (Consume insumos)
           await executeOrder(order._id).unwrap();
 
-          Swal.fire(
-            "Éxito",
-            "Producción ejecutada e inventario actualizado",
-            "success"
-          );
+          // 3. Close (Calcular costos e ingresar productos)
+          await closeOrder(order._id).unwrap();
+
+          Swal.fire("Éxito", "Producción finalizada correctamente", "success");
           navigate("/manufactura/ordenes");
         } catch (error) {
           console.error(error);
@@ -462,11 +472,39 @@ const NewProduction = () => {
       },
     },
     {
+      field: "unitPrice",
+      headerName: "Precio Venta Unit.",
+      flex: 1,
+      align: "right",
+      headerAlign: "right",
+      renderCell: ({ row }) => {
+        const p = products.find((p) => p._id === row.productId);
+        // Use price (selling price) if available, otherwise 0
+        const price = p?.price || 0;
+        return (
+          <MDTypography variant="button" fontWeight="regular" color="text">
+            {formatPrice(price)}
+          </MDTypography>
+        );
+      },
+    },
+    {
       field: "estimatedValue",
       headerName: "Valor Est.",
       flex: 1,
       align: "right",
       headerAlign: "right",
+      renderHeader: () => (
+        <Tooltip
+          title="Valor proyectado = Cantidad * (Costo o Precio actual del Producto en el sistema)"
+          placement="top"
+          arrow
+        >
+          <MDBox display="flex" alignItems="center" gap={0.5}>
+            Valor Est. <Icon fontSize="small">info</Icon>
+          </MDBox>
+        </Tooltip>
+      ),
       renderCell: ({ row }) => {
         const p = products.find((p) => p._id === row.productId);
         const cost = p?.cost || p?.price || 0;
@@ -478,25 +516,100 @@ const NewProduction = () => {
       },
     },
     {
+      field: "unitCost",
+      headerName: "Costo Unit. Est.",
+      flex: 1.2,
+      align: "right",
+      headerAlign: "right",
+      renderHeader: () => (
+        <Tooltip
+          title="Costo de producción estimado. Si la receta tiene % asignado: (Insumos * %) / Cantidad. Si no: Prorrateo simple (Insumos / Total Unidades)."
+          placement="top"
+          arrow
+        >
+          <MDBox display="flex" alignItems="center" gap={0.5}>
+            Costo Unit. Est. <Icon fontSize="small">info</Icon>
+          </MDBox>
+        </Tooltip>
+      ),
+      renderCell: ({ row }) => {
+        const totalInputCost = simulation.totalInsumos || 0;
+        let unitCost = 0;
+
+        if (row.quantity > 0) {
+          if (row.costPercent && row.costPercent > 0) {
+            // Escenario 1: Receta con Distribución Porcentual
+            unitCost =
+              (totalInputCost * (row.costPercent / 100)) / row.quantity;
+          } else {
+            // Escenario 2: Sin Porcentaje (Cálculo Directo / Promedio Ponderado)
+            const totalOutputQty = values.outputs.reduce(
+              (sum, o) => sum + (o.quantity || 0),
+              0
+            );
+            if (totalOutputQty > 0) {
+              unitCost = totalInputCost / totalOutputQty;
+            }
+          }
+        }
+
+        return (
+          <MDTypography variant="button" fontWeight="bold" color="info">
+            {formatPrice(unitCost)}
+            {row.costPercent && row.costPercent > 0 && (
+              <span style={{ fontSize: "0.8em", opacity: 0.8, marginLeft: 4 }}>
+                ({row.costPercent}%)
+              </span>
+            )}
+          </MDTypography>
+        );
+      },
+    },
+    {
       field: "actions",
       headerName: "",
       width: 50,
-      renderCell: ({ id }) => (
-        <Icon
-          sx={{ cursor: "pointer", color: "error.main" }}
-          onClick={() => {
-            const list = values.outputs.filter((o) => o.id !== id);
-            setFieldValue(
-              "outputs",
-              list.length
-                ? list
-                : [{ id: Date.now().toString(), productId: "", quantity: 0 }]
-            );
-          }}
-        >
-          delete
-        </Icon>
-      ),
+      renderCell: ({ row, id }) => {
+        // Disable delete if row has costPercent defined (to maintain cost integrity)
+        const isLocked = row.costPercent && row.costPercent > 0;
+
+        return (
+          <Tooltip
+            title={
+              isLocked
+                ? "No se puede eliminar porque tiene asignación de costo porcentual"
+                : "Eliminar"
+            }
+          >
+            <span>
+              <Icon
+                sx={{
+                  cursor: isLocked ? "not-allowed" : "pointer",
+                  color: isLocked ? "text.disabled" : "error.main",
+                }}
+                onClick={() => {
+                  if (isLocked) return;
+                  const list = values.outputs.filter((o) => o.id !== id);
+                  setFieldValue(
+                    "outputs",
+                    list.length
+                      ? list
+                      : [
+                          {
+                            id: Date.now().toString(),
+                            productId: "",
+                            quantity: 0,
+                          },
+                        ]
+                  );
+                }}
+              >
+                delete
+              </Icon>
+            </span>
+          </Tooltip>
+        );
+      },
     },
   ];
 
@@ -590,8 +703,8 @@ const NewProduction = () => {
                           getOptionLabel={(option) => {
                             // Handle cases where option might be undefined while loading
                             if (!option) return "";
-                            return `${option.product?.name || "Unknown"} (${
-                              option.product?.code || "-"
+                            return `${option?.name || "Unknown"} (${
+                              option?.code || "-"
                             })`;
                           }}
                           value={
@@ -813,7 +926,14 @@ const NewProduction = () => {
                         simulation.margenEstimado >= 0 ? "success" : "error"
                       }
                     >
-                      {formatPrice(simulation.margenEstimado)}
+                      {formatPrice(simulation.margenEstimado) +
+                        " (" +
+                        (
+                          (simulation.margenEstimado /
+                            simulation.valorProduccion) *
+                          100
+                        ).toFixed(2) +
+                        "%)"}
                     </MDTypography>
                   </MDBox>
 
@@ -839,8 +959,14 @@ const NewProduction = () => {
                     sx={{ mb: 2 }}
                     disabled={isLoading || !isValid}
                   >
-                    <Icon sx={{ mr: 1 }}>rocket_launch</Icon> EJECUTAR
-                    PRODUCCIÓN
+                    {isExecuting || isClosing || isCreating ? (
+                      <CircularProgress size={20} color="inherit" />
+                    ) : (
+                      <>
+                        <Icon sx={{ mr: 1 }}>rocket_launch</Icon> EJECUTAR
+                        PRODUCCIÓN
+                      </>
+                    )}
                   </MDButton>
 
                   <MDButton
@@ -850,7 +976,13 @@ const NewProduction = () => {
                     onClick={handleSaveDraft}
                     disabled={isLoading || !isValid}
                   >
-                    <Icon sx={{ mr: 1 }}>save</Icon> GUARDAR BORRADOR
+                    {isCreating ? (
+                      <CircularProgress size={20} color="inherit" />
+                    ) : (
+                      <>
+                        <Icon sx={{ mr: 1 }}>save</Icon> GUARDAR BORRADOR
+                      </>
+                    )}
                   </MDButton>
                 </Card>
 

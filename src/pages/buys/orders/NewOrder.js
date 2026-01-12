@@ -166,7 +166,7 @@ const NewOrder = () => {
     data: productsData,
     isLoading: l2,
     error: e2,
-  } = useGetProductsQuery();
+  } = useGetProductsQuery({ includeCost: true });
 
   const loading = l1 || l2;
   const isError = e1 || e2;
@@ -293,9 +293,16 @@ const NewOrder = () => {
                             <Autocomplete
                               options={products}
                               value={item.product}
-                              onChange={(_, newValue) =>
-                                updateItem(item.id, "product", newValue)
-                              }
+                              onChange={(_, newValue) => {
+                                updateItem(item.id, "product", newValue);
+                                if (newValue) {
+                                  updateItem(
+                                    item.id,
+                                    "unitPrice",
+                                    newValue.cost || 0
+                                  );
+                                }
+                              }}
                               getOptionLabel={(option) =>
                                 option ? `${option.name}` : ""
                               }

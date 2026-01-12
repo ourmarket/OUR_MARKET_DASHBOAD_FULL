@@ -14,6 +14,7 @@ import Card from "@mui/material/Card";
 // Utils
 import { formatPrice } from "utils/formaPrice";
 import { dateToLocalDate, formatDateMonthFull } from "utils/dateFormat";
+import CustomNoRowsOverlay from "components/OUTables/CustomNoRowsOverlay";
 
 export function PurchasesTable({ buys: buysData, isLoading }) {
   const navigate = useNavigate();
@@ -244,6 +245,16 @@ export function PurchasesTable({ buys: buysData, isLoading }) {
             pageSizeOptions={[5, 10, 20]}
             checkboxSelection={false}
             disableRowSelectionOnClick
+            slots={{
+              noRowsOverlay: CustomNoRowsOverlay,
+            }}
+            slotProps={{
+              noRowsOverlay: {
+                title: "No se encontraron compras",
+                message: "No hay registros de compras realizadas",
+                icon: "shopping_cart",
+              },
+            }}
             sx={{
               border: 0,
               "& .MuiDataGrid-cell": {

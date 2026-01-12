@@ -20,6 +20,7 @@ import Divider from "@mui/material/Divider";
 import { DataGrid } from "@mui/x-data-grid";
 import Alert from "@mui/material/Alert";
 import LinearProgress from "@mui/material/LinearProgress";
+import Tooltip from "@mui/material/Tooltip";
 
 // API
 import {
@@ -88,25 +89,30 @@ const ManufacturingDetail = () => {
   // For Drafts, we might need to estimate based on current product cost or send it from backend.
   // Let's assume for DRAFT we calculate specific to this view for estimation.
   const estimatedCosts = useMemo(() => {
-    if (!order) return { input: 0, output: 0 };
-    if (order.status === "EXECUTED") {
-      return {
-        input: order.totalInputCost || 0,
-        output: order.totalOutputCost || 0,
-      };
-    }
-    // Draft estimation
-    const input = order.inputs.reduce(
-      (acc, item) =>
-        acc + (item.product?.cost || item.product?.price || 0) * item.quantity,
+    // Input: Costo real de producción (histórico)
+    // Output: Valor de Venta Estimado (a precios actuales)
+    const inputTotal =
+      order?.totalInputCost ||
+      order?.inputs.reduce(
+        (acc, item) => acc + (item.unitCost || 0) * item.quantity,
+        0
+      ) ||
+      order?.inputs.reduce(
+        (acc, item) =>
+          acc +
+          (item.product?.cost || item.product?.price || 0) * item.quantity,
+        0
+      );
+
+    const outputTotal = order?.outputs.reduce(
+      (acc, item) => acc + (item.product?.price || 0) * item.quantity,
       0
     );
-    const output = order.outputs.reduce(
-      (acc, item) =>
-        acc + (item.product?.cost || item.product?.price || 0) * item.quantity,
-      0
-    );
-    return { input, output };
+
+    return {
+      input: inputTotal,
+      output: outputTotal,
+    };
   }, [order]);
 
   const handleExecute = () => {
@@ -220,9 +226,9 @@ const ManufacturingDetail = () => {
       align: "right",
       headerAlign: "right",
       renderCell: ({ row }) => {
-        const val = isReadOnly
-          ? row.unitCost
-          : row.product?.cost || row.product?.price || 0;
+        // Fix for inputs: Use stored unitCost first
+        const val =
+          row.unitCost ?? (row.product?.cost || row.product?.price || 0);
         return formatPrice(val);
       },
     },
@@ -232,15 +238,15 @@ const ManufacturingDetail = () => {
     {
       field: "name",
       headerName: "Producto",
-      flex: 2,
+      flex: 1.2,
       valueGetter: (params) => params.row.product?.name || "Desconocido",
     },
-    {
+    /* {
       field: "code",
       headerName: "Código",
       flex: 1,
       valueGetter: (params) => params.row.product?.code || "-",
-    },
+    }, */
     {
       field: "quantity",
       headerName: "Cantidad",
@@ -254,31 +260,87 @@ const ManufacturingDetail = () => {
       ),
     },
     {
+      field: "costPercent",
+      headerName: "Distribución Costo (%)",
+      flex: 1,
+      align: "center",
+      headerAlign: "center",
+      renderHeader: () => (
+        <Tooltip
+          title="Porcentaje del costo total de producción asignado a este producto."
+          arrow
+        >
+          <MDBox display="flex" alignItems="center">
+            Dist. Costo (%)
+            <Icon fontSize="small" sx={{ ml: 0.5 }}>
+              info
+            </Icon>
+          </MDBox>
+        </Tooltip>
+      ),
+      renderCell: ({ row }) => {
+        if (!row.costPercent) return "-";
+        return (
+          <MDBadge
+            badgeContent={`${row.costPercent}%`}
+            color="info"
+            variant="gradient"
+            size="xs"
+            container
+          />
+        );
+      },
+    },
+    {
       field: "unitCost",
-      headerName: isReadOnly ? "Costo Unit. Real" : "Valor Est.",
+      headerName: "Precio Venta Unit.",
       flex: 1,
       align: "right",
       headerAlign: "right",
+      renderHeader: () => (
+        <Tooltip
+          title="Precio de venta actual del producto en el sistema (no es el costo)."
+          arrow
+        >
+          <MDBox display="flex" alignItems="center">
+            Precio Venta Unit.
+            <Icon fontSize="small" sx={{ ml: 0.5 }}>
+              info
+            </Icon>
+          </MDBox>
+        </Tooltip>
+      ),
       renderCell: ({ row }) => {
-        const val = isReadOnly
-          ? row.unitCost
-          : row.product?.cost || row.product?.price || 0;
+        // Show current selling price
+        const val = row.product?.price || 0;
         return formatPrice(val);
       },
     },
     {
       field: "total",
-      headerName: "Total",
+      headerName: "Total Venta Est.",
       flex: 1,
       align: "right",
       headerAlign: "right",
+      renderHeader: () => (
+        <Tooltip
+          title="Valor total de venta proyectado (Cantidad * Precio Actual)."
+          arrow
+        >
+          <MDBox display="flex" alignItems="center">
+            Total Venta Est.
+            <Icon fontSize="small" sx={{ ml: 0.5 }}>
+              info
+            </Icon>
+          </MDBox>
+        </Tooltip>
+      ),
       renderCell: ({ row }) => {
-        const cost = isReadOnly
-          ? row.unitCost
-          : row.product?.cost || row.product?.price || 0;
+        // Calculate total potentially gained sales value
+        const price = row.product?.price || 0;
         return (
           <MDTypography variant="button" fontWeight="bold">
-            {formatPrice(cost * row.quantity)}
+            {formatPrice(price * row.quantity)}
           </MDTypography>
         );
       },
@@ -402,7 +464,7 @@ const ManufacturingDetail = () => {
                 <MDBox p={2} display="flex" justifyContent="flex-end">
                   <MDBox textAlign="right">
                     <MDTypography variant="caption" color="text">
-                      Valor Total Producido
+                      Valor Venta Estimado (Total)
                     </MDTypography>
                     <MDTypography
                       variant="h5"
@@ -468,9 +530,19 @@ const ManufacturingDetail = () => {
                     </MDTypography>
                   </MDBox>
                   <MDBox display="flex" justifyContent="space-between" mb={1}>
-                    <MDTypography variant="button" color="text">
-                      Valor Producción
-                    </MDTypography>
+                    <Tooltip
+                      title="Suma del valor de venta de todos los productos generados a precios actuales."
+                      arrow
+                    >
+                      <MDBox display="flex" alignItems="center" gap={0.5}>
+                        <MDTypography variant="button" color="text">
+                          Valor Venta Est.
+                        </MDTypography>
+                        <Icon fontSize="small" color="text">
+                          info
+                        </Icon>
+                      </MDBox>
+                    </Tooltip>
                     <MDTypography
                       variant="button"
                       fontWeight="medium"
@@ -481,9 +553,19 @@ const ManufacturingDetail = () => {
                   </MDBox>
                   <Divider />
                   <MDBox display="flex" justifyContent="space-between" mt={1}>
-                    <MDTypography variant="button" fontWeight="bold">
-                      Margen Estimado
-                    </MDTypography>
+                    <Tooltip
+                      title="Diferencia estimada entre el Valor de Venta y el Costo de Insumos. No incluye otros gastos operativos."
+                      arrow
+                    >
+                      <MDBox display="flex" alignItems="center" gap={0.5}>
+                        <MDTypography variant="button" fontWeight="bold">
+                          Ganancia Potencial (Est.)
+                        </MDTypography>
+                        <Icon fontSize="small" color="text">
+                          info
+                        </Icon>
+                      </MDBox>
+                    </Tooltip>
                     <MDTypography
                       variant="h6"
                       fontWeight="bold"
@@ -495,7 +577,16 @@ const ManufacturingDetail = () => {
                     >
                       {formatPrice(
                         estimatedCosts.output - estimatedCosts.input
-                      )}
+                      ) +
+                        " (" +
+                        (estimatedCosts.output > 0
+                          ? (
+                              ((estimatedCosts.output - estimatedCosts.input) /
+                                estimatedCosts.output) *
+                              100
+                            ).toFixed(2)
+                          : "0.00") +
+                        "%)"}
                     </MDTypography>
                   </MDBox>
                 </MDBox>
@@ -574,7 +665,7 @@ const ManufacturingDetail = () => {
                       size="small"
                       fullWidth
                       component={Link}
-                      to="/stock/movimientos"
+                      to="/productos/stock/movimientos"
                       sx={{ justifyContent: "flex-start", gap: 1 }}
                     >
                       <Icon>inventory_2</Icon> Ver Movimientos de Stock

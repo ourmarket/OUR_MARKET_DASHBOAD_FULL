@@ -41,6 +41,14 @@ export const manufacturingOrderApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["ManufacturingOrders", "Stock", "StockMovement"],
     }),
+
+    closeManufacturingOrder: builder.mutation({
+      query: (id) => ({
+        url: `/manufacturing-orders/${id}/close`,
+        method: "post",
+      }),
+      invalidatesTags: ["ManufacturingOrders", "Stock", "StockMovement"],
+    }),
   }),
 });
 
@@ -50,4 +58,5 @@ export const {
   useGetCostSnapshotQuery,
   useCreateManufacturingOrderMutation,
   useExecuteManufacturingOrderMutation,
+  useCloseManufacturingOrderMutation,
 } = manufacturingOrderApi;

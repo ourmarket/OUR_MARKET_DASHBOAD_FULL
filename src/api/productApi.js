@@ -9,8 +9,10 @@ export const productApi = apiSlice.injectEndpoints({
 
   endpoints: (builder) => ({
     getProducts: builder.query({
-      query: () => `/products`,
-      // keepUnusedDataFor: 3,
+      query: (params) => {
+        const { includeCost } = params || {};
+        return `/products${includeCost ? "?includeCost=true" : ""}`;
+      },
       extraOptions: { maxRetries: 5 },
       providesTags: ["products"],
     }),

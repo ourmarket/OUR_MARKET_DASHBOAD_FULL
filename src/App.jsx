@@ -22,6 +22,7 @@ import Login from "pages/auth/Login";
 import { useSelector } from "react-redux";
 import RequireAuth from "router/RequireAuth";
 import PublicRoute from "router/PublicRoute";
+import Loading from "components/DRLoading";
 
 export default function App() {
   const [controller, dispatch] = useMaterialUIController();
@@ -38,7 +39,7 @@ export default function App() {
 
   const { pathname } = useLocation();
 
-  const { version } = useSelector((store) => store.auth);
+  const { version, loaded } = useSelector((store) => store.auth);
 
   // Open sidenav when mouse enter on mini sidenav
   const handleOnMouseEnter = () => {
@@ -110,9 +111,9 @@ export default function App() {
     </MDBox>
   );
 
- /*  if (!loaded) {
+  if (!loaded) {
     return <Loading />;
-  } */
+  }
 
   return (
     <ThemeProvider theme={darkMode ? themeDark : theme}>
@@ -176,10 +177,12 @@ export default function App() {
           ))}
 
         {/* ================= FALLBACK ================= */}
-        <Route
-          path="*"
-          element={<Navigate to="/authentication/sign-in" replace />}
-        />
+        {loaded && (
+          <Route
+            path="*"
+            element={<Navigate to="/authentication/sign-in" replace />}
+          />
+        )}
       </Routes>
     </ThemeProvider>
   );

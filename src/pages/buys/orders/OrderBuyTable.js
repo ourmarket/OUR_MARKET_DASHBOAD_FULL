@@ -13,8 +13,9 @@ import Card from "@mui/material/Card";
 
 // Helpers
 import { formatPrice } from "utils/formaPrice";
-import { formatDate } from "./mockData";
 import { ORDER_STATUS } from "../../../data/orderStatus";
+import CustomNoRowsOverlay from "components/OUTables/CustomNoRowsOverlay";
+import { formatDateOnly } from "utils/dateFormat";
 
 export function OrderBuyTable({ orders: orderData, isLoading }) {
   const orders = orderData?.data || [];
@@ -73,7 +74,7 @@ export function OrderBuyTable({ orders: orderData, isLoading }) {
       flex: 1.5,
       renderCell: (params) => (
         <MDTypography variant="button">
-          {params.value ? formatDate(params.value) : "-"}
+          {formatDateOnly(params.value)}
         </MDTypography>
       ),
     },
@@ -163,6 +164,16 @@ export function OrderBuyTable({ orders: orderData, isLoading }) {
             pageSizeOptions={[5, 10, 20]}
             checkboxSelection={false}
             disableRowSelectionOnClick
+            slots={{
+              noRowsOverlay: CustomNoRowsOverlay,
+            }}
+            slotProps={{
+              noRowsOverlay: {
+                title: "No se encontraron órdenes de compra",
+                message: "No hay órdenes pendientes de ejecución",
+                icon: "shopping_basket",
+              },
+            }}
             sx={{
               border: 0,
               "& .MuiDataGrid-cell": {

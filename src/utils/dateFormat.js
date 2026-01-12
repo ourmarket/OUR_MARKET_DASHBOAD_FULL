@@ -28,3 +28,7 @@ export const formatDateMonthFull = (date) => {
 
   return localDate.format(dateFormat);
 };
+export const formatDateOnly = (date) => {
+  if (!date) return "-";
+  return moment.utc(date).format("DD/MM/YYYY");
+};

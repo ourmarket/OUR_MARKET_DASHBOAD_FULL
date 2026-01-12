@@ -7,8 +7,8 @@ export const bomApi = apiSlice.injectEndpoints({
 
   endpoints: (builder) => ({
     getBoms: builder.query({
-      query: ({ page = 1, limit = 20, search = "" } = {}) =>
-        `/bom?page=${page}&limit=${limit}&search=${search}`,
+      query: ({ page = 1, limit = 20, search = "", isActive = "" } = {}) =>
+        `/bom?page=${page}&limit=${limit}&search=${search}&isActive=${isActive}`,
       providesTags: ["BOM"],
       extraOptions: { maxRetries: 3 },
     }),
@@ -46,7 +46,14 @@ export const bomApi = apiSlice.injectEndpoints({
     toggleBomActive: builder.mutation({
       query: (id) => ({
         url: `/bom/${id}/toggle-active`,
-        method: "patch",
+        method: "PATCH",
+      }),
+      invalidatesTags: ["BOM"],
+    }),
+    deleteBom: builder.mutation({
+      query: (id) => ({
+        url: `/bom/${id}`,
+        method: "DELETE",
       }),
       invalidatesTags: ["BOM"],
     }),
@@ -60,4 +67,5 @@ export const {
   useCreateBomMutation,
   useUpdateBomMutation,
   useToggleBomActiveMutation,
+  useDeleteBomMutation,
 } = bomApi;

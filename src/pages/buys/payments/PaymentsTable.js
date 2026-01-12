@@ -13,6 +13,8 @@ import Card from "@mui/material/Card";
 
 // Utils
 import { formatPrice } from "utils/formaPrice";
+
+import CustomNoRowsOverlay from "components/OUTables/CustomNoRowsOverlay";
 import { dateToLocalDate } from "utils/dateFormat";
 
 export function PaymentsTable({ payments, isLoading }) {
@@ -181,6 +183,16 @@ export function PaymentsTable({ payments, isLoading }) {
             pageSizeOptions={[5, 10, 20]}
             checkboxSelection={false}
             disableRowSelectionOnClick
+            slots={{
+              noRowsOverlay: CustomNoRowsOverlay,
+            }}
+            slotProps={{
+              noRowsOverlay: {
+                title: "No se encontraron pagos",
+                message: "No hay registros de pagos realizados",
+                icon: "payments",
+              },
+            }}
             sx={{
               border: 0,
               "& .MuiDataGrid-cell": {

@@ -74,6 +74,8 @@ const getReasonLabel = (reason) => {
       return "Ajuste";
     case "RETURN":
       return "Devolución";
+    case "MANUFACTURING":
+      return "Producción";
     case "purchase": // Mantengo por si acaso quedan datos viejos
       return "Compra";
     case "receipt":
@@ -103,6 +105,8 @@ const getDocumentLink = (reason, reference) => {
       return `/compras/compras/${reference}`;
     case "adjustment":
       return `/compras/ajustes/${reference}`;
+    case "MANUFACTURING":
+      return `/manufactura/detalle/${reference}`;
     default:
       return undefined;
   }
@@ -280,15 +284,25 @@ const StockMovements = () => {
       flex: 0.8,
       align: "center",
       headerAlign: "center",
-      renderCell: ({ row }) => (
-        <MDTypography
-          variant="button"
-          fontWeight="bold"
-          color={row.quantity > 0 ? "success" : "error"}
-        >
-          {row.quantity > 0 ? `+${row.quantity}` : row.quantity}
-        </MDTypography>
-      ),
+      renderCell: ({ row }) => {
+        const isOut =
+          row.type === "OUT" ||
+          row.type === "RESERVED" ||
+          row.type === "sale" || // Legacy fallback
+          row.type === "SALIDA";
+
+        const isPositive = !isOut && row.quantity > 0;
+        const displayQty = isOut
+          ? `-${Math.abs(row.quantity)}`
+          : `+${row.quantity}`;
+        const color = isPositive ? "success" : "error";
+
+        return (
+          <MDTypography variant="button" fontWeight="bold" color={color}>
+            {displayQty}
+          </MDTypography>
+        );
+      },
     },
 
     {
@@ -488,7 +502,9 @@ const StockMovements = () => {
                     <MenuItem value="SALE">Venta</MenuItem>
                     <MenuItem value="ORDER">Pedido</MenuItem>
                     <MenuItem value="ADJUST">Ajuste</MenuItem>
+                    <MenuItem value="ADJUST">Ajuste</MenuItem>
                     <MenuItem value="RETURN">Devolución</MenuItem>
+                    <MenuItem value="MANUFACTURING">Producción</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
