@@ -26,14 +26,14 @@ function Address({ clientAddresses, setPage, zones, deliveryTrucks }) {
   const handlerSearch = () => {
     const result = clientAddresses.filter((clientAddr) => {
       if (
-        clientAddr.user.name
-          .toString()
-          .toLowerCase()
-          .includes(search.toLowerCase()) ||
-        clientAddr.user.lastName
-          .toString()
-          .toLowerCase()
-          .includes(search.toLowerCase())
+        clientAddr.user?.name
+          ?.toString()
+          ?.toLowerCase()
+          ?.includes(search.toLowerCase()) ||
+        clientAddr.user?.lastName
+          ?.toString()
+          ?.toLowerCase()
+          ?.includes(search.toLowerCase())
       ) {
         return clientAddr;
       }

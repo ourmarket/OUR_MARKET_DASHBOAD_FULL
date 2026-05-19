@@ -22,15 +22,14 @@ function Address({ clients, setPage }) {
   const handlerSearch = () => {
     const result = clients.filter((clientAddr) => {
       if (
-        clientAddr.user.phone.toString().includes(search) ||
-        clientAddr.user.name
-          .toString()
-          .toLowerCase()
-          .includes(search.toLowerCase()) ||
-        clientAddr.user.lastName
-          .toString()
-          .toLowerCase()
-          .includes(search.toLowerCase())
+        clientAddr.user?.name
+          ?.toString()
+          ?.toLowerCase()
+          ?.includes(search.toLowerCase()) ||
+        clientAddr.user?.lastName
+          ?.toString()
+          ?.toLowerCase()
+          ?.includes(search.toLowerCase())
       ) {
         return clientAddr;
       }
