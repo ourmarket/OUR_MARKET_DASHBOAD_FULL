@@ -54,6 +54,10 @@ function ReportProductsByRange() {
     0
   );
   const totalDebt = payments.reduce((acc, curr) => curr.debtTotal + acc, 0);
+  const totalPointsDiscount = payments.reduce(
+    (acc, curr) => (curr.pointsDiscountTotal || 0) + acc,
+    0
+  );
   const totals = payments.reduce((acc, curr) => curr.total + acc, 0);
 
   useEffect(() => {
@@ -184,7 +188,7 @@ function ReportProductsByRange() {
           </Box>
           <Box mt={4}>
             <Grid container spacing={3}>
-              <Grid item xs={12} md={3} lg={3}>
+              <Grid item xs={12} md={4} lg={4}>
                 <MDBox mb={1.5}>
                   <ComplexStatisticsCard
                     icon="attach_money_icon"
@@ -192,14 +196,14 @@ function ReportProductsByRange() {
                     title="Total pagos cargados en sistema"
                     count={formatPrice(totals)}
                     percentage={{
-                      color: "success",
+                      color: totals - totalSell >= 0 ? "success" : "error",
                       amount: "",
                       label: `Diferencia $${totals - totalSell}`,
                     }}
                   />
                 </MDBox>
               </Grid>
-              <Grid item xs={12} md={3} lg={3}>
+              <Grid item xs={12} sm={6} md={4} lg={2}>
                 <MDBox mb={1.5}>
                   <ComplexStatisticsCard
                     icon="attach_money_icon"
@@ -214,7 +218,7 @@ function ReportProductsByRange() {
                   />
                 </MDBox>
               </Grid>
-              <Grid item xs={12} md={3} lg={3}>
+              <Grid item xs={12} sm={6} md={4} lg={2}>
                 <MDBox mb={1.5}>
                   <ComplexStatisticsCard
                     color="success"
@@ -229,7 +233,22 @@ function ReportProductsByRange() {
                   />
                 </MDBox>
               </Grid>
-              <Grid item xs={12} md={3} lg={3}>
+              <Grid item xs={12} sm={6} md={4} lg={2}>
+                <MDBox mb={1.5}>
+                  <ComplexStatisticsCard
+                    color="warning"
+                    icon="loyalty"
+                    title="Descuento Puntos"
+                    count={formatPrice(totalPointsDiscount)}
+                    percentage={{
+                      color: "success",
+                      amount: "",
+                      label: `Ultima actualización ${updateDate}hs`,
+                    }}
+                  />
+                </MDBox>
+              </Grid>
+              <Grid item xs={12} sm={6} md={4} lg={2}>
                 <MDBox mb={1.5}>
                   <ComplexStatisticsCard
                     color="error"

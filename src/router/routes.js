@@ -27,6 +27,7 @@ import DetailClientProduct from "pages/clients/details-clients-products";
 import ListClientAddress from "pages/clientsAddress";
 import CreateNewClientAddress from "pages/clientsAddress/create-clientAddress";
 import EditClientAddress from "pages/clientsAddress/edit-clientAddress";
+import LoyaltyPointsConfig from "pages/clients/puntos";
 import ListOrders from "pages/orders/order-list";
 import OrderDetails from "pages/orders/order-datails";
 import OrderCreate from "pages/orders/order-create-all/order-delivery";
@@ -239,6 +240,14 @@ export const routes_dr = [
 
   /* Clientes */
 
+  {
+    route: "/clientes/puntos",
+    component: (
+      <RequireAuth>
+        <LoyaltyPointsConfig />
+      </RequireAuth>
+    ),
+  },
   {
     route: "/clientes/lista",
     component: (
@@ -769,6 +778,14 @@ export const routes_full = [
   /* Clientes */
 
   {
+    route: "/clientes/puntos",
+    component: (
+      <RequireAuth>
+        <LoyaltyPointsConfig />
+      </RequireAuth>
+    ),
+  },
+  {
     route: "/clientes/lista",
     component: (
       <RequireAuth>
@@ -1246,6 +1263,14 @@ export const routes_lite = [
 
   /* Clientes */
 
+  {
+    route: "/clientes/puntos",
+    component: (
+      <RequireAuth>
+        <LoyaltyPointsConfig />
+      </RequireAuth>
+    ),
+  },
   {
     route: "/clientes/lista",
     component: (

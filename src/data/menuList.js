@@ -75,6 +75,11 @@ export const menuList_dr = [
         icon: "holiday_village_icon",
         url: "/clientes/direcciones/lista",
       },
+      {
+        name: "Configuración de puntos",
+        icon: "loyalty",
+        url: "/clientes/puntos",
+      },
     ],
   },
   {
@@ -270,6 +275,11 @@ export const menuList_full = [
         icon: "holiday_village_icon",
         url: "/clientes/direcciones/lista",
       },
+      {
+        name: "Configuración de puntos",
+        icon: "loyalty",
+        url: "/clientes/puntos",
+      },
     ],
   },
 
@@ -441,6 +451,11 @@ export const menuList_lite = [
         name: "Direcciones",
         icon: "holiday_village_icon",
         url: "/clientes/direcciones/lista",
+      },
+      {
+        name: "Configuración de puntos",
+        icon: "loyalty",
+        url: "/clientes/puntos",
       },
     ],
   },

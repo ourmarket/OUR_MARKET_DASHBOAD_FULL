@@ -156,6 +156,17 @@ function TableListClients({ clients }) {
       flex: 1,
       headerClassName: "super-app-theme--header",
     },
+    {
+      field: "points",
+      headerName: "Puntos",
+      flex: 0.8,
+      headerClassName: "super-app-theme--header",
+      renderCell: (params) => (
+        <div style={{ fontWeight: "bold" }}>
+          {params.row.points}
+        </div>
+      ),
+    },
 
     {
       field: "accessLevel",
