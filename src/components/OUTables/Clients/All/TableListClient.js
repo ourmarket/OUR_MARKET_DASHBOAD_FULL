@@ -14,7 +14,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import MenuClients from "../Menu/MenuClients";
 
 function TableListClients({ clients }) {
-  console.log(clients)
+  console.log(clients);
   const [controller] = useMaterialUIController();
   const { darkMode } = controller;
 
@@ -26,13 +26,13 @@ function TableListClients({ clients }) {
   const handleOpenMenu = (id, userId, event) => {
     setOpen(event.currentTarget);
     setMenuId(id);
-    setMenuUserId(userId)
+    setMenuUserId(userId);
   };
 
   const handleCloseMenu = () => {
     setOpen(null);
     setMenuId(null);
-     setMenuUserId(null)
+    setMenuUserId(null);
   };
 
   const columns = [
@@ -51,6 +51,44 @@ function TableListClients({ clients }) {
       headerClassName: "super-app-theme--header",
       renderCell: (params) =>
         params.row.active ? (
+          <div
+            style={{
+              height: "30px",
+              width: "30px",
+              borderRadius: "50%",
+              backgroundColor: "green",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "white",
+            }}
+          >
+            <CheckIcon />
+          </div>
+        ) : (
+          <div
+            style={{
+              height: "30px",
+              width: "30px",
+              borderRadius: "50%",
+              backgroundColor: "red",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "white",
+            }}
+          >
+            <CloseIcon />
+          </div>
+        ),
+    },
+    {
+      field: "validado",
+      headerName: "Validado",
+      flex: 0.6,
+      headerClassName: "super-app-theme--header",
+      renderCell: (params) =>
+        params.row.validado ? (
           <div
             style={{
               height: "30px",
@@ -128,7 +166,7 @@ function TableListClients({ clients }) {
         <IconButton
           size="large"
           color="inherit"
-          onClick={(e) => handleOpenMenu(_id,userId, e)}
+          onClick={(e) => handleOpenMenu(_id, userId, e)}
         >
           <MoreVertIcon />
         </IconButton>
@@ -158,11 +196,12 @@ function TableListClients({ clients }) {
               name: `${client.user.name} ${client.user.lastName}`,
               email: client.user?.email || "No cargado",
               cuit: client.user?.cuit || "No cargado",
+              validado: client.user?.google,
               phone: client.user.phone,
               type: client.clientType.clientType,
               category: client.clientCategory.clientCategory,
               points: client.points || 0,
-              userId: client.user?._id
+              userId: client.user?._id,
             }))}
             columns={columns}
             getRowId={(row) => row._id}
